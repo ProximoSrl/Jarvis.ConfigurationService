@@ -25,16 +25,25 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         [Route("{appName}/{moduleName}/config.json")]
         public Object GetConfiguration(String appName, String moduleName)
         {
+            var baseDirectory = GetBaseDirectory();
+            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName);
+        }
+
+        static string GetBaseDirectory()
+        {
             var baseDirectory = ConfigurationManager.AppSettings["baseConfigDirectory"];
             if (String.IsNullOrEmpty(baseDirectory))
             {
-                baseDirectory = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+                baseDirectory = Path.Combine(
+                    AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                    "ConfigurationStore"
+                );
             }
             if (!Directory.Exists(baseDirectory))
             {
                 throw new ConfigurationErrorsException("Base directory " + baseDirectory + " does not exists");
             }
-            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName);
+            return baseDirectory;
         }
     }
 }

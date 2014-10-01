@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.30626.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.ConfigurationService.Host", "Jarvis.ConfigurationService.Host\Jarvis.ConfigurationService.Host.csproj", "{7FA94D62-7CE7-4D77-B362-E77D2EDC9722}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.ConfigurationService.Tests", "Jarvis.ConfigurationService.Tests\Jarvis.ConfigurationService.Tests.csproj", "{BD86873A-3BD0-4953-8ABC-40B7EE0FEDB6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1798B9E6-386D-48DA-86FA-B9C33A5C82BE}"
+	ProjectSection(SolutionItems) = preProject
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

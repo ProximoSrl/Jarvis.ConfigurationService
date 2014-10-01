@@ -1,0 +1,6 @@
+﻿{
+    "connectionStrings": {
+        "log": "mongodb://localhost/log-app2"
+    },
+    "workers": "5"
+}

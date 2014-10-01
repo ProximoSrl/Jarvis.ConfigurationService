@@ -1,0 +1,7 @@
+﻿{
+    "connectionStrings": {
+        "log": "mongodb://localhost/log-app1"
+    },
+    "workers": "5",
+    "message" : "hello from ApplicationRoot"
+}

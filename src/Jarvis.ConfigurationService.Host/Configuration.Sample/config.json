@@ -1,0 +1,7 @@
+﻿{
+    "connectionStrings": {
+        "bl": "mongodb://localhost/bl",
+        "log": "mongodb://localhost/log"
+    },
+    "message" : "hello from Configuration Server"
+}

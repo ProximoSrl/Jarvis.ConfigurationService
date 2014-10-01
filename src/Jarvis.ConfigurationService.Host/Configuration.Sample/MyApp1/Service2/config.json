@@ -1,0 +1,8 @@
+﻿{
+    "connectionStrings": {
+        "log": "mongodb://localhost/log-service1"
+    },
+    "workers": "1",
+    "enableApi": "false",
+    "message" : "hello from service 2"
+}
