@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
+using Jarvis.ConfigurationService.Host.Support;
+using Microsoft.SqlServer.Server;
 
 namespace Jarvis.ConfigurationService.Host.Controllers
 {
@@ -19,9 +23,18 @@ namespace Jarvis.ConfigurationService.Host.Controllers
 
         [HttpGet]
         [Route("{appName}/{moduleName}/config.json")]
-        public Object GetConfiguration()
+        public Object GetConfiguration(String appName, String moduleName)
         {
-            return new { Status = "Config" };
+            var baseDirectory = ConfigurationManager.AppSettings["baseConfigDirectory"];
+            if (String.IsNullOrEmpty(baseDirectory))
+            {
+                baseDirectory = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            }
+            if (!Directory.Exists(baseDirectory))
+            {
+                throw new ConfigurationErrorsException("Base directory " + baseDirectory + " does not exists");
+            }
+            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName);
         }
     }
 }

@@ -14,6 +14,12 @@ namespace Jarvis.ConfigurationService.Tests.Support
     public class ConfigFileLocatorTests
     {
         [Test]
+        public void Compose_empty_return_empty()
+        {
+            var composed = ConfigFileLocator.ComposeJsonContent();
+            Assert.That(composed, Is.EqualTo(""));
+        }
+        [Test]
         public void verify_basic_composition_of_unrelated_properties()
         {
             var json1 = "{prop : 'test'}";

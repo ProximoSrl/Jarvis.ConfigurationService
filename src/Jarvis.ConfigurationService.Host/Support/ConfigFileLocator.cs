@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,18 @@ namespace Jarvis.ConfigurationService.Host.Support
             String serviceName
             )
         {
-            throw new NotImplementedException();
+            List<DirectoryInfo> hierarchy = new List<DirectoryInfo>();
+            hierarchy.Add(new DirectoryInfo(baseDirectory));
+            hierarchy.Add(new DirectoryInfo(Path.Combine(hierarchy.Last().FullName, applicationName)));
+            hierarchy.Add(new DirectoryInfo(Path.Combine(hierarchy.Last().FullName, serviceName)));
+            List<String> configFiles = new List<string>();
+            foreach (var directoryInfo in hierarchy)
+            {
+                if (!directoryInfo.Exists) break;
+                var configFile = directoryInfo.GetFiles("config.json").SingleOrDefault();
+                if (configFile != null) configFiles.Add(File.ReadAllText(configFile.FullName));
+            }
+            return ComposeJsonContent(configFiles.ToArray());
         }
 
         public static String ComposeJsonContent
@@ -27,6 +39,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             params String[] jsonContent
             )
         {
+            if (jsonContent.Length == 0) return String.Empty;
             JObject result = new JObject();
             foreach (string json in jsonContent)
             {
