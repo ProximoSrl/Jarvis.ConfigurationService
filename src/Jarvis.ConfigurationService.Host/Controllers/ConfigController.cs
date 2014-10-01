@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -30,7 +31,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             return new ServerStatusModel
             {
                 BaseFolder = baseDirectory,
-                Applications = applications
+                Applications = applications,
+                Version = Assembly.GetEntryAssembly().GetName().Version.ToString()
             };
         }
 

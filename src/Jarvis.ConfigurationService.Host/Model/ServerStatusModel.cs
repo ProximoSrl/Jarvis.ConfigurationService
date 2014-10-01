@@ -10,5 +10,6 @@ namespace Jarvis.ConfigurationService.Host.Model
     {
         public string BaseFolder { get; set; }
         public string[] Applications { get; set; }
+        public string Version { get; set; }
     }
 }
