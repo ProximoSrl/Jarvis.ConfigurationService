@@ -13,7 +13,7 @@ namespace Jarvis.ConfigurationService.Host.Support
     /// </summary>
     public static class ConfigFileLocator
     {
-        public static String GetConfig
+        public static Object GetConfig
             (
             String baseDirectory,
             String applicationName,
@@ -34,19 +34,19 @@ namespace Jarvis.ConfigurationService.Host.Support
             return ComposeJsonContent(configFiles.ToArray());
         }
 
-        public static String ComposeJsonContent
+        public static JObject ComposeJsonContent
             (
             params String[] jsonContent
             )
         {
-            if (jsonContent.Length == 0) return String.Empty;
+            if (jsonContent.Length == 0) return null;
             JObject result = new JObject();
             foreach (string json in jsonContent)
             {
                 JObject parsed = JObject.Parse(json);
                 ComposeObject(parsed, result);
             }
-            return result.ToString();
+            return result;
         }
 
         private static void ComposeObject(JObject parsed, JObject result)
