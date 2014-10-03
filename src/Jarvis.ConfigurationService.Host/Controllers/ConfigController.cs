@@ -26,7 +26,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         public ServerStatusModel Status()
         {
             string baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            string[] applications = Directory
+            string[] applications = FileSystem.Instance
                 .GetDirectories(baseDirectory)
                 .Select(Path.GetFileName)
                 .ToArray();
@@ -45,10 +45,10 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var appFolder = Path.Combine(baseDirectory, appName);
-            if (!Directory.Exists(appFolder))
+            if (!FileSystem.Instance.DirectoryExists(appFolder))
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "App not found");
 
-            string[] modules = Directory
+            string[] modules = FileSystem.Instance
                 .GetDirectories(appFolder)
                 .Select(Path.GetFileName)
                 .ToArray();
