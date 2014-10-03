@@ -35,7 +35,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             {
                 BaseFolder = baseDirectory,
                 Applications = applications,
-                Version = Assembly.GetEntryAssembly().GetName().Version.ToString()
+                Version = Assembly.GetExecutingAssembly().GetName().Version.ToString()
             };
         }
 
