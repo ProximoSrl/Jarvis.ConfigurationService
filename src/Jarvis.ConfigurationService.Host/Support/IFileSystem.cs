@@ -9,15 +9,18 @@ using System.Threading.Tasks;
 namespace Jarvis.ConfigurationService.Host.Support
 {
     /// <summary>
-    /// Abstract the file system
+    /// Abstract the file system usage of Config Controller.
     /// </summary>
     interface IFileSystem
     {
-        string GetBaseDirectory();
+
+        String GetBaseDirectory();
+
+        String RedirectDirectory(String folderName);
 
         IEnumerable<String> GetDirectories(string baseDirectory);
 
-        Boolean DirectoryExists(string folderName);
+        Boolean DirectoryExists(string folderName, Boolean followRedirects);
     }
 
     /// <summary>
@@ -55,9 +58,39 @@ namespace Jarvis.ConfigurationService.Host.Support
         }
 
 
-        public Boolean DirectoryExists(string folderName)
+        public Boolean DirectoryExists(string folderName, Boolean followRedirects)
         {
-            return Directory.Exists(folderName);
+            var realDirExists = Directory.Exists(folderName);
+            if (!realDirExists && followRedirects)
+            {
+                //directory does not exists, needs to find if there is a redirect file in one
+                //of the previous folder
+                String redirectedDir = RedirectDirectory(folderName);
+                return !String.IsNullOrEmpty(redirectedDir) && Directory.Exists(redirectedDir);
+            }
+
+            return realDirExists;
+        }
+
+        public String RedirectDirectory(String folderName) 
+        {
+            String actualFolderName = folderName;
+            Int32 lastSeparatorPathPosition = folderName.Length - 1;
+            do
+            {
+                var redirectFileName = actualFolderName + ".redirect";
+                if (File.Exists(redirectFileName)) 
+                {
+                    var redirectContent = File.ReadAllText(redirectFileName);
+                    return Path.Combine(redirectContent, folderName.Substring(lastSeparatorPathPosition + 1));
+                };
+                lastSeparatorPathPosition = actualFolderName.LastIndexOf(Path.DirectorySeparatorChar);
+                if (lastSeparatorPathPosition > 0)
+                {
+                    actualFolderName = actualFolderName.Substring(0, lastSeparatorPathPosition);
+                }
+            } while (lastSeparatorPathPosition > 0);
+            return folderName;
         }
     }
 

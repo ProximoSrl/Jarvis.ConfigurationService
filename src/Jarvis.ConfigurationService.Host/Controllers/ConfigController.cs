@@ -45,7 +45,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var appFolder = Path.Combine(baseDirectory, appName);
-            if (!FileSystem.Instance.DirectoryExists(appFolder))
+            
+            if (!FileSystem.Instance.DirectoryExists(appFolder, false))
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "App not found");
 
             string[] modules = FileSystem.Instance

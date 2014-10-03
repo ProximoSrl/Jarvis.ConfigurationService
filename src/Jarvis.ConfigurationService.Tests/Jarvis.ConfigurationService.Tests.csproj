@@ -77,9 +77,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Support\ConfigFileLocatorTests.cs" />
     <Compile Include="Support\ConfigFileLocatorTestWithHosts.cs" />
+    <Compile Include="Support\StandardFileSystemTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="AnotherTestConfiguration\ApplicationX\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="AnotherTestConfiguration\ApplicationX\ServiceY\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

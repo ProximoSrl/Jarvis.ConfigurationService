@@ -22,8 +22,12 @@ namespace Jarvis.ConfigurationService.Host.Support
         {
             List<DirectoryInfo> hierarchy = new List<DirectoryInfo>();
             hierarchy.Add(new DirectoryInfo(baseDirectory));
-            hierarchy.Add(new DirectoryInfo(Path.Combine(hierarchy.Last().FullName, applicationName)));
-            hierarchy.Add(new DirectoryInfo(Path.Combine(hierarchy.Last().FullName, serviceName)));
+
+            var appDirectory = Path.Combine(hierarchy.Last().FullName, applicationName);
+            hierarchy.Add(new DirectoryInfo(FileSystem.Instance.RedirectDirectory(appDirectory)));
+            var serviceDirectory = Path.Combine(hierarchy.Last().FullName, serviceName);
+            hierarchy.Add(new DirectoryInfo(FileSystem.Instance.RedirectDirectory(serviceDirectory)));
+
             List<String> configFiles = new List<string>();
             foreach (var directoryInfo in hierarchy)
             {
