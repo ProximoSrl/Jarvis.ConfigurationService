@@ -18,6 +18,7 @@ namespace Jarvis.ConfigurationService.Host
         {
             LogManager.GetLogger(this.GetType()).DebugFormat("Starting on {0}", _uri.AbsoluteUri);
             _app = WebApp.Start<Startup>(_uri.AbsoluteUri);
+            
         }
 
         public void Stop()

@@ -89,6 +89,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Support\ConfigFileLocator.cs" />
+    <Compile Include="Support\DisposableAction.cs" />
+    <Compile Include="Support\IFileSystem.cs" />
     <Compile Include="Support\Startup.cs" />
   </ItemGroup>
   <ItemGroup>

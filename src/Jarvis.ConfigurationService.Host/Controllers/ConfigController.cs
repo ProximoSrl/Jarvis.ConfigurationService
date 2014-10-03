@@ -13,16 +13,19 @@ using System.Web.Http.Routing;
 using Jarvis.ConfigurationService.Host.Model;
 using Jarvis.ConfigurationService.Host.Support;
 using Microsoft.SqlServer.Server;
+using log4net;
 
 namespace Jarvis.ConfigurationService.Host.Controllers
 {
     public class ConfigController : ApiController
     {
+        private static ILog _logger = LogManager.GetLogger(typeof(ConfigController));
+
         [HttpGet]
         [Route("")]
         public ServerStatusModel Status()
         {
-            string baseDirectory = GetBaseDirectory();
+            string baseDirectory = FileSystem.Instance.GetBaseDirectory();
             string[] applications = Directory
                 .GetDirectories(baseDirectory)
                 .Select(Path.GetFileName)
@@ -40,7 +43,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         [Route("{appName}")]
         public HttpResponseMessage GetConfiguration(String appName)
         {
-            var baseDirectory = GetBaseDirectory();
+            var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var appFolder = Path.Combine(baseDirectory, appName);
             if (!Directory.Exists(appFolder))
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "App not found");
@@ -57,25 +60,10 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         [Route("{appName}/{moduleName}/config.json")]
         public Object GetConfiguration(String appName, String moduleName)
         {
-            var baseDirectory = GetBaseDirectory();
+            var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName);
         }
 
-        static string GetBaseDirectory()
-        {
-            var baseDirectory = ConfigurationManager.AppSettings["baseConfigDirectory"];
-            if (String.IsNullOrEmpty(baseDirectory))
-            {
-                baseDirectory = Path.Combine(
-                    AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
-                    "ConfigurationStore"
-                );
-            }
-            if (!Directory.Exists(baseDirectory))
-            {
-                throw new ConfigurationErrorsException("Base directory " + baseDirectory + " does not exists");
-            }
-            return baseDirectory;
-        }
+       
     }
 }
