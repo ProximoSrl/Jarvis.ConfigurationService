@@ -80,6 +80,9 @@
     <Compile Include="Support\StandardFileSystemTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AnotherTestConfiguration\ApplicationX\HostA\ServiceY.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="app.config" />
     <None Include="AnotherTestConfiguration\ApplicationX\base.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

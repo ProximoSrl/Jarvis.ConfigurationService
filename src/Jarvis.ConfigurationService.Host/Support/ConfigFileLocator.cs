@@ -17,7 +17,8 @@ namespace Jarvis.ConfigurationService.Host.Support
             (
                 String baseDirectory,
                 String applicationName,
-                String serviceName
+                String serviceName,
+                String hostName
             )
         {
 
@@ -38,6 +39,13 @@ namespace Jarvis.ConfigurationService.Host.Support
                 configFiles.Add(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName));
             if (FileSystem.Instance.FileExists(serviceConfigFileName))
                 configFiles.Add(FileSystem.Instance.GetFileContent(serviceConfigFileName));
+
+            if (!String.IsNullOrEmpty(hostName)) 
+            {
+                String hostConfigFileName = Path.Combine(appDirectory, hostName, serviceName + ".config");
+                if (FileSystem.Instance.FileExists(hostConfigFileName))
+                    configFiles.Add(FileSystem.Instance.GetFileContent(hostConfigFileName));
+            }
             return ComposeJsonContent(configFiles.ToArray());
         }
 

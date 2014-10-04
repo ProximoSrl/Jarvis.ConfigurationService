@@ -70,6 +70,32 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void override_configuration_for_specific_host()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["enableApi"], Is.EqualTo("true"), "Override for host failed");
+        }
+
+
+
+        [Test]
+        public void not_exsisting_specific_host_should_return_correct_configuration()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/NonExistingHost");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["enableApi"], Is.EqualTo("false"), "Non existing host should not give error");
+        }
+
+        [Test]
+        public void specific_host_use_default_configuration()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["workers"], Is.EqualTo("1"), "If host does not override setting, is should be taken from Default");
+        }
+
+        [Test]
         public void redirect_of_folder_is_working_app_and_service()
         {
             String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
@@ -79,6 +105,20 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY.config");
             JObject setting = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)setting["ServiceName"], Is.EqualTo("Y")); //specific configuration
+
+            Assert.That((String)setting["workers"], Is.EqualTo("42")); //applicationX configuration   
+        }
+
+        [Test]
+        public void redirect_of_folder_is_working_with_specific_hosts()
+        {
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
+            Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
+            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
+            File.WriteAllText(redirectFile, anotherTestconfigurationDir);
+            var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY.config/HostA");
+            JObject setting = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)setting["ServiceName"], Is.EqualTo("Y for HostA")); //specific configuration
 
             Assert.That((String)setting["workers"], Is.EqualTo("42")); //applicationX configuration   
         }

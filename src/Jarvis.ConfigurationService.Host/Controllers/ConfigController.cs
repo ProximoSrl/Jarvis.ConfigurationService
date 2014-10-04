@@ -59,11 +59,11 @@ namespace Jarvis.ConfigurationService.Host.Controllers
 
         [HttpGet]
         [Route("{appName}/{moduleName}/config.json")]
-        [Route("{appName}/{moduleName}.config")]
-        public Object GetConfiguration(String appName, String moduleName)
+        [Route("{appName}/{moduleName}.config/{hostName=''}")]
+        public Object GetConfiguration(String appName, String moduleName, String hostName = "")
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName);
+            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
         }
 
        
