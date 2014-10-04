@@ -58,8 +58,15 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void correct_configuration_of_single_service()
         {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service2.config");
+            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""enableApi"":""false""}"));
+        }
+
+        [Test]
+        public void correct_configuration_of_single_service_with_old_route()
+        {
             var result = client.DownloadString(baseUri + "/MyApp1/Service2/config.json");
-            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""workers"":""1"",""enableApi"":""false""}"));
+            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""enableApi"":""false""}"));
         }
 
         [Test]
@@ -69,7 +76,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
             String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
             File.WriteAllText(redirectFile, anotherTestconfigurationDir);
-            var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY/config.json");
+            var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY.config");
             JObject setting = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)setting["ServiceName"], Is.EqualTo("Y")); //specific configuration
 
@@ -83,7 +90,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
             String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
             File.WriteAllText(redirectFile, anotherTestconfigurationDir);
-            var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY/config.json");
+            var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY.config");
             JObject setting = (JObject)JsonConvert.DeserializeObject(result);
 
             Assert.That(

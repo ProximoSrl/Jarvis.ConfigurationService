@@ -15,26 +15,29 @@ namespace Jarvis.ConfigurationService.Host.Support
     {
         public static Object GetConfig
             (
-            String baseDirectory,
-            String applicationName,
-            String serviceName
+                String baseDirectory,
+                String applicationName,
+                String serviceName
             )
         {
-            List<DirectoryInfo> hierarchy = new List<DirectoryInfo>();
-            hierarchy.Add(new DirectoryInfo(baseDirectory));
 
-            var appDirectory = Path.Combine(hierarchy.Last().FullName, applicationName);
-            hierarchy.Add(new DirectoryInfo(FileSystem.Instance.RedirectDirectory(appDirectory)));
-            var serviceDirectory = Path.Combine(hierarchy.Last().FullName, serviceName);
-            hierarchy.Add(new DirectoryInfo(FileSystem.Instance.RedirectDirectory(serviceDirectory)));
+            DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
+            var appDirectory = FileSystem.Instance.RedirectDirectory(
+                Path.Combine(baseDir.FullName, applicationName)
+            );
+
+
+            String baseConfigFileName = Path.Combine(baseDir.FullName, "base.config");
+            String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
+            String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
 
             List<String> configFiles = new List<string>();
-            foreach (var directoryInfo in hierarchy)
-            {
-                if (!directoryInfo.Exists) break;
-                var configFile = directoryInfo.GetFiles("config.json").SingleOrDefault();
-                if (configFile != null) configFiles.Add(File.ReadAllText(configFile.FullName));
-            }
+            if (FileSystem.Instance.FileExists(baseConfigFileName)) 
+                configFiles.Add(FileSystem.Instance.GetFileContent(baseConfigFileName));
+            if (FileSystem.Instance.FileExists(applicationBaseConfigFileName)) 
+                configFiles.Add(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName));
+            if (FileSystem.Instance.FileExists(serviceConfigFileName))
+                configFiles.Add(FileSystem.Instance.GetFileContent(serviceConfigFileName));
             return ComposeJsonContent(configFiles.ToArray());
         }
 

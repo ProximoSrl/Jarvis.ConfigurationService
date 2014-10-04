@@ -44,14 +44,14 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         public HttpResponseMessage GetConfiguration(String appName)
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            var appFolder = Path.Combine(baseDirectory, appName);
+            var appFolder = Path.Combine(baseDirectory, appName, "Default");
             
             if (!FileSystem.Instance.DirectoryExists(appFolder, false))
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "App not found");
 
             string[] modules = FileSystem.Instance
-                .GetDirectories(appFolder)
-                .Select(Path.GetFileName)
+                .GetFiles(appFolder, "*.config")
+                .Select(Path.GetFileNameWithoutExtension)
                 .ToArray();
 
             return Request.CreateResponse(HttpStatusCode.OK, modules);
@@ -59,6 +59,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
 
         [HttpGet]
         [Route("{appName}/{moduleName}/config.json")]
+        [Route("{appName}/{moduleName}.config")]
         public Object GetConfiguration(String appName, String moduleName)
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();

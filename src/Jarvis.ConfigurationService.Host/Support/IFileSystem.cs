@@ -21,6 +21,12 @@ namespace Jarvis.ConfigurationService.Host.Support
         IEnumerable<String> GetDirectories(string baseDirectory);
 
         Boolean DirectoryExists(string folderName, Boolean followRedirects);
+
+        IEnumerable<String> GetFiles(string appFolder, string filter);
+
+        bool FileExists(string fileName);
+
+        string GetFileContent(string fileName);
     }
 
     /// <summary>
@@ -57,6 +63,20 @@ namespace Jarvis.ConfigurationService.Host.Support
             return Directory.GetDirectories(baseDirectory);
         }
 
+        public IEnumerable<String> GetFiles(string appFolder, string filter) 
+        {
+            return Directory.GetFiles(appFolder, filter);
+        }
+
+        public bool FileExists(string fileName)
+        {
+            return File.Exists(fileName);
+        }
+
+        public string GetFileContent(string fileName)
+        {
+            return File.ReadAllText(fileName);
+        }
 
         public Boolean DirectoryExists(string folderName, Boolean followRedirects)
         {
@@ -92,6 +112,9 @@ namespace Jarvis.ConfigurationService.Host.Support
             } while (lastSeparatorPathPosition > 0);
             return folderName;
         }
+
+
+
     }
 
     public static class FileSystem

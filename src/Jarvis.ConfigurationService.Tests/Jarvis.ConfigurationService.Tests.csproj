@@ -81,10 +81,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="AnotherTestConfiguration\ApplicationX\config.json">
+    <None Include="AnotherTestConfiguration\ApplicationX\base.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="AnotherTestConfiguration\ApplicationX\ServiceY\config.json">
+    <None Include="AnotherTestConfiguration\ApplicationX\Default\ServiceY.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
