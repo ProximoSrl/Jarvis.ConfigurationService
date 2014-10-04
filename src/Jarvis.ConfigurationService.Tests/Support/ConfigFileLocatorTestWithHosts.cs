@@ -78,6 +78,13 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
 
+        [Test]
+        public void override_configuration_for_specific_host_old_routing()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["enableApi"], Is.EqualTo("true"), "Override for host failed");
+        }
 
         [Test]
         public void not_exsisting_specific_host_should_return_correct_configuration()

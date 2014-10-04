@@ -58,7 +58,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         }
 
         [HttpGet]
-        [Route("{appName}/{moduleName}/config.json")]
+        [Route("{appName}/{moduleName}/config.json/{hostName=''}")]
         [Route("{appName}/{moduleName}.config/{hostName=''}")]
         public Object GetConfiguration(String appName, String moduleName, String hostName = "")
         {
