@@ -47,12 +47,12 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var appFolder = Path.Combine(baseDirectory, appName, "Default");
-            
-            if (!FileSystem.Instance.DirectoryExists(appFolder, false))
+            var redirected = FileSystem.Instance.RedirectDirectory(appFolder);
+            if (!FileSystem.Instance.DirectoryExists(redirected, false)) 
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "App not found");
 
             string[] modules = FileSystem.Instance
-                .GetFiles(appFolder, "*.config")
+                .GetFiles(redirected, "*.config")
                 .Select(Path.GetFileNameWithoutExtension)
                 .ToArray();
 

@@ -123,6 +123,18 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void redirect_of_folder_is_working_when_listing_services()
+        {
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
+            Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
+            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
+            File.WriteAllText(redirectFile, anotherTestconfigurationDir);
+            var result = client.DownloadString(baseUri + "/ApplicationX");
+            JArray setting = (JArray)JsonConvert.DeserializeObject(result);
+            Assert.That(setting.Count, Is.EqualTo(1));
+        }
+
+        [Test]
         public void redirect_of_folder_is_working_with_specific_hosts()
         {
             String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
