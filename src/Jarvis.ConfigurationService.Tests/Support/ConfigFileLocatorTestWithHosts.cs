@@ -44,8 +44,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void correct_listing_of_all_applications()
         {
+            var redirectFiles = Directory.GetFiles(FileSystem.Instance.GetBaseDirectory(), "*.redirect");
+            foreach (var file in redirectFiles)
+            {
+                File.Delete(file);
+            }
+            File.WriteAllText(Path.Combine(FileSystem.Instance.GetBaseDirectory(), "myapp3.redirect"), @"c:\temp\myapp3");
             var result = client.DownloadString(baseUri);
-            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2""]"));
+            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""myapp3""]"));
         }
 
         [Test]

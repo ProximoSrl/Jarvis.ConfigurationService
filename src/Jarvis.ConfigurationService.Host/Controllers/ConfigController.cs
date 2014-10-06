@@ -26,15 +26,17 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         public ServerStatusModel Status()
         {
             string baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            string[] applications = FileSystem.Instance
+            var applicationsDir = FileSystem.Instance
                 .GetDirectories(baseDirectory)
-                .Select(Path.GetFileName)
-                .ToArray();
+                .Select(Path.GetFileName);
+            var redirectedApps = FileSystem.Instance
+                .GetFiles(baseDirectory, "*.redirect")
+                .Select(f => Path.GetFileNameWithoutExtension(f));
 
             return new ServerStatusModel
             {
                 BaseFolder = baseDirectory,
-                Applications = applications,
+                Applications = applicationsDir.Union(redirectedApps).ToArray(),
                 Version = Assembly.GetExecutingAssembly().GetName().Version.ToString()
             };
         }
