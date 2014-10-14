@@ -38,7 +38,20 @@ namespace Jarvis.ConfigurationService.Host.Support
 
         public StandardFileSystem(String baseDirectory)
         {
-            BaseDirectory = baseDirectory;
+            if (!String.IsNullOrEmpty(baseDirectory))
+            {
+                if (System.IO.Path.IsPathRooted(baseDirectory))
+                {
+                    BaseDirectory = baseDirectory;
+                }
+                else
+                {
+                    BaseDirectory = Path.Combine(
+                        AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                        baseDirectory
+                    );
+                }
+            }
         }
 
         public string GetBaseDirectory()
