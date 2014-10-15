@@ -79,7 +79,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                     {
                         var propertyName = property.Key.Trim('$');
                         String errorMessage;
-                        var key = EncryptionUtils.GetDefaultEncryptionKey(out errorMessage);
+                        var key = EncryptionUtils.GetDefaultEncryptionKey("", out errorMessage);
                         if (String.IsNullOrEmpty(errorMessage))
                         {
                             result[propertyName] = EncryptionUtils.Decrypt(key.Key, key.IV, (String)property.Value);

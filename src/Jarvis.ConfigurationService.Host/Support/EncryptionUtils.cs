@@ -102,9 +102,14 @@ namespace Jarvis.ConfigurationService.Host.Support
 
         }
 
-        public static EncryptionUtils.EncryptionKey GetDefaultEncryptionKey(out String errorMessage)
+        public static EncryptionUtils.EncryptionKey GetDefaultEncryptionKey(String hostName, out String errorMessage)
         {
             EncryptionUtils.EncryptionKey retValue = null;
+            var fileName = "encryption.key";
+            if (!String.IsNullOrEmpty(hostName)) 
+            {
+                fileName = "encryption." + hostName + ".key";
+            }
             errorMessage = null;
             var keyFileName = Path.Combine(
                    FileSystem.Instance.GetBaseDirectory(),

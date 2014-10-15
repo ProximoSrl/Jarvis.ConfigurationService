@@ -35,7 +35,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                 };
             }
             String errMessage;
-            var key = EncryptionUtils.GetDefaultEncryptionKey(out errMessage);
+            var key = EncryptionUtils.GetDefaultEncryptionKey(request.HostName, out errMessage);
             if (!String.IsNullOrEmpty(errMessage)) 
             {
                 return new
@@ -56,5 +56,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
     public class EncryptionRequest 
     {
         public String StringToEncrypt { get; set; }
+
+        public String HostName { get; set; }
     }
 }
