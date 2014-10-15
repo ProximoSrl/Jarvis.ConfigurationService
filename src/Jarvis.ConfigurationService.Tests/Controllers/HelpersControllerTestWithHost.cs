@@ -18,14 +18,12 @@ namespace Jarvis.ConfigurationService.Tests.Support
     public class HelpersControllerTestWithHost
     {
         IDisposable _app;
-        WebClient client;
         String baseUri = "http://localhost:53642";
 
         [TestFixtureSetUp]
         public void FixtureSetup() 
         {
             _app = WebApp.Start<Startup>(baseUri);
-            client = new WebClient();
         }
 
         [TestFixtureTearDown]
@@ -37,18 +35,39 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void Verify_generation_of_new_encryption_key()
         {
-            JObject parsed = CallController("/support/encryption/generatekey");
+            JObject parsed = CallControllerJsonResult("/support/encryption/generatekey");
             Assert.That(parsed["IV"], Is.Not.Null);
             Assert.That(parsed["Key"], Is.Not.Null);
         }
 
-        private JObject CallController(String path)
+
+        [Test]
+        public void Verify_encryption_utils()
         {
-            var result = client.DownloadString(baseUri + path);
-            JObject parsed = (JObject)JsonConvert.DeserializeObject(result);
-            return parsed;
+            JObject parsed = CallControllerPostJsonResult("/support/encryption/encrypt", "{StringToEncrypt : 'pippo'}");
+            Assert.That((Boolean) parsed["success"], Is.EqualTo(true));
+            Assert.That((String) parsed["encrypted"], Is.Not.Null);
         }
 
-       
+        private JObject CallControllerJsonResult(String path)
+        {
+            using (WebClient client = new WebClient())
+            {
+                var result = client.DownloadString(baseUri + path);
+                JObject parsed = (JObject)JsonConvert.DeserializeObject(result);
+                return parsed;
+            }
+        }
+
+        private JObject CallControllerPostJsonResult(String path, String jsonPayload)
+        {
+            using (WebClient client = new WebClient())
+            {
+                client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                string result = client.UploadString(baseUri + path, jsonPayload);
+                JObject parsed = (JObject)JsonConvert.DeserializeObject(result);
+                return parsed;
+            }
+        }
     }
 }
