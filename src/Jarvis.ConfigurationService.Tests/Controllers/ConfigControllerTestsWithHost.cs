@@ -15,7 +15,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
 {
     [TestFixture]
     [Category("HostOn")]
-    public class ConfigFileLocatorTestWithHosts
+    public class ConfigControllerTestsWithHost
     {
         IDisposable _app;
         WebClient client;
