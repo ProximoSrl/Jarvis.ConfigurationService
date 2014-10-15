@@ -43,6 +43,6 @@ namespace Jarvis.ConfigurationService.Host.Support
             return newByte;
         }
 
-
+  
     }
 }

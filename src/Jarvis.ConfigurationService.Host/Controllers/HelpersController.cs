@@ -34,31 +34,14 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                     error = "Expecting a request in the form: {StringToEncrypt : 'the string you want to encrypt'}",
                 };
             }
-            var keyFileName = Path.Combine(
-                    FileSystem.Instance.GetBaseDirectory(),
-                    "encryption.key"
-               );
-            var keyFileContent = FileSystem.Instance.GetFileContent(keyFileName);
-            if (String.IsNullOrEmpty(keyFileContent)) 
+            String errMessage;
+            var key = EncryptionUtils.GetDefaultEncryptionKey(out errMessage);
+            if (!String.IsNullOrEmpty(errMessage)) 
             {
                 return new
                 {
                     success = false,
-                    error = "Missing key file 'encryption.key' in configuration storage root path: " + keyFileName,
-                };
-            }
-
-            EncryptionUtils.EncryptionKey key;
-            try
-            {
-                key = JsonConvert.DeserializeObject<EncryptionUtils.EncryptionKey>(keyFileContent);
-            }
-            catch (Exception)
-            {
-                return new
-                {
-                    success = false,
-                    error = "Malformed encryption key file: " + keyFileName,
+                    error = errMessage,
                 };
             }
             String encrypted = EncryptionUtils.Encrypt(key.Key, key.IV, request.StringToEncrypt);

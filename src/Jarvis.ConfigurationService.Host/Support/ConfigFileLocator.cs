@@ -33,14 +33,14 @@ namespace Jarvis.ConfigurationService.Host.Support
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
 
             List<String> configFiles = new List<string>();
-            if (FileSystem.Instance.FileExists(baseConfigFileName)) 
+            if (FileSystem.Instance.FileExists(baseConfigFileName))
                 configFiles.Add(FileSystem.Instance.GetFileContent(baseConfigFileName));
-            if (FileSystem.Instance.FileExists(applicationBaseConfigFileName)) 
+            if (FileSystem.Instance.FileExists(applicationBaseConfigFileName))
                 configFiles.Add(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName));
             if (FileSystem.Instance.FileExists(serviceConfigFileName))
                 configFiles.Add(FileSystem.Instance.GetFileContent(serviceConfigFileName));
 
-            if (!String.IsNullOrEmpty(hostName)) 
+            if (!String.IsNullOrEmpty(hostName))
             {
                 String hostConfigFileName = Path.Combine(appDirectory, hostName, serviceName + ".config");
                 if (FileSystem.Instance.FileExists(hostConfigFileName))
@@ -71,11 +71,29 @@ namespace Jarvis.ConfigurationService.Host.Support
                 if (property.Value is JObject &&
                     result[property.Key] is JObject)
                 {
-                    ComposeObject((JObject) property.Value, (JObject) result[property.Key]);
+                    ComposeObject((JObject)property.Value, (JObject)result[property.Key]);
                 }
                 else
                 {
-                      result[property.Key] = property.Value;
+                    if (property.Key.StartsWith("$") && property.Key.EndsWith("$"))
+                    {
+                        var propertyName = property.Key.Trim('$');
+                        String errorMessage;
+                        var key = EncryptionUtils.GetDefaultEncryptionKey(out errorMessage);
+                        if (String.IsNullOrEmpty(errorMessage))
+                        {
+                            result[propertyName] = EncryptionUtils.Decrypt(key.Key, key.IV, (String)property.Value);
+                        } 
+                        else
+                        {
+                            result[propertyName] = "Unable to decrypt. Error: " + errorMessage;
+                        }
+                    }
+                    else
+                    {
+                        result[property.Key] = property.Value;
+                    }
+
                 }
             }
         }

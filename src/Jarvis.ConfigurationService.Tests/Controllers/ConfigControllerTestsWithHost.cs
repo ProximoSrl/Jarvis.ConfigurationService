@@ -109,6 +109,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void verify_encrypted_settings()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/");
+            JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String) resultObject["encryptedSetting"], Is.EqualTo("my password"));
+        }
+
+        [Test]
         public void redirect_of_folder_is_working_app_and_service()
         {
             String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,11 +17,12 @@ namespace Jarvis.ConfigurationService.Host.Support
             public Byte[] Key { get; set; }
 
             public Byte[] IV { get; set; }
+
         }
 
-        public static EncryptionKey GenerateKey() 
+        public static EncryptionKey GenerateKey()
         {
-            using (var rm = new RijndaelManaged()) 
+            using (var rm = new RijndaelManaged())
             {
                 rm.GenerateKey();
                 rm.GenerateIV();
@@ -98,6 +100,33 @@ namespace Jarvis.ConfigurationService.Host.Support
                 return ms.ToArray();
             }
 
+        }
+
+        public static EncryptionUtils.EncryptionKey GetDefaultEncryptionKey(out String errorMessage)
+        {
+            EncryptionUtils.EncryptionKey retValue = null;
+            errorMessage = null;
+            var keyFileName = Path.Combine(
+                   FileSystem.Instance.GetBaseDirectory(),
+                   "encryption.key"
+              );
+            var keyFileContent = FileSystem.Instance.GetFileContent(keyFileName);
+            if (String.IsNullOrEmpty(keyFileContent))
+            {
+                errorMessage = "Missing key file 'encryption.key' in configuration storage root path: " + keyFileName;
+                return retValue;
+            }
+
+            EncryptionUtils.EncryptionKey key;
+            try
+            {
+                retValue = JsonConvert.DeserializeObject<EncryptionUtils.EncryptionKey>(keyFileContent);
+            }
+            catch (Exception)
+            {
+                errorMessage = "Malformed encryption key file: " + keyFileName;
+            }
+            return retValue;
         }
     }
 }
