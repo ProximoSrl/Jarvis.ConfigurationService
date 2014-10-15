@@ -113,10 +113,11 @@ namespace Jarvis.ConfigurationService.Host.Support
             errorMessage = null;
             var keyFileName = Path.Combine(
                    FileSystem.Instance.GetBaseDirectory(),
-                   "encryption.key"
+                   fileName
               );
-            var keyFileContent = FileSystem.Instance.GetFileContent(keyFileName);
-            if (String.IsNullOrEmpty(keyFileContent))
+            String keyFileContent;
+            if (!FileSystem.Instance.FileExists(keyFileName) ||
+                (String.IsNullOrEmpty((keyFileContent = FileSystem.Instance.GetFileContent(keyFileName)))))
             {
                 errorMessage = "Missing key file 'encryption.key' in configuration storage root path: " + keyFileName;
                 return retValue;

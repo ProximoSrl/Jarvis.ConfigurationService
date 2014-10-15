@@ -116,13 +116,29 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That((String) resultObject["encryptedSetting"], Is.EqualTo("my password"));
         }
 
-        [Test]
+        [Test] 
         public void verify_encrypted_settings_for_specific_host()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
             JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)resultObject["encryptedSetting"], Is.EqualTo("password for host1"));
         }
+
+       [Test]
+        public void verify_encrypted_settings_for_not_overridden_property()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
+            JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)resultObject["otherEncryptedSetting"], Is.EqualTo("secured"));
+        }
+
+       [Test]
+       public void verify_invalid_encryption_return_unencrypted()
+       {
+           var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host2");
+           JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
+           Assert.That((String)resultObject["Host2Specific"], Is.EqualTo("test"));
+       }
 
         [Test]
         public void redirect_of_folder_is_working_app_and_service()

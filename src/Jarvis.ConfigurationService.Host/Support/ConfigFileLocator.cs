@@ -32,46 +32,46 @@ namespace Jarvis.ConfigurationService.Host.Support
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
 
-            List<String> configFiles = new List<string>();
+            List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseConfigFileName))
-                configFiles.Add(FileSystem.Instance.GetFileContent(baseConfigFileName));
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseConfigFileName)));
             if (FileSystem.Instance.FileExists(applicationBaseConfigFileName))
-                configFiles.Add(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName));
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName)));
             if (FileSystem.Instance.FileExists(serviceConfigFileName))
-                configFiles.Add(FileSystem.Instance.GetFileContent(serviceConfigFileName));
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceConfigFileName)));
 
             if (!String.IsNullOrEmpty(hostName))
             {
                 String hostConfigFileName = Path.Combine(appDirectory, hostName, serviceName + ".config");
                 if (FileSystem.Instance.FileExists(hostConfigFileName))
-                    configFiles.Add(FileSystem.Instance.GetFileContent(hostConfigFileName));
+                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostConfigFileName), hostName));
             }
             return ComposeJsonContent(configFiles.ToArray());
         }
 
-        public static JObject ComposeJsonContent
+        internal static JObject ComposeJsonContent
             (
-            params String[] jsonContent
+            params ConfigFileInfo[] jsonContent
             )
         {
             if (jsonContent.Length == 0) return null;
             JObject result = new JObject();
-            foreach (string json in jsonContent)
+            foreach (ConfigFileInfo fileInfo in jsonContent)
             {
-                JObject parsed = JObject.Parse(json);
-                ComposeObject(parsed, result);
+                JObject parsed = JObject.Parse(fileInfo.FileContent);
+                ComposeObject(parsed, fileInfo.Host, result);
             }
             return result;
         }
 
-        private static void ComposeObject(JObject parsed, JObject result)
+        private static void ComposeObject(JObject parsed, String host, JObject result)
         {
             foreach (var property in parsed)
             {
                 if (property.Value is JObject &&
                     result[property.Key] is JObject)
                 {
-                    ComposeObject((JObject)property.Value, (JObject)result[property.Key]);
+                    ComposeObject((JObject)property.Value, host, (JObject)result[property.Key]);
                 }
                 else
                 {
@@ -79,10 +79,17 @@ namespace Jarvis.ConfigurationService.Host.Support
                     {
                         var propertyName = property.Key.Trim('$');
                         String errorMessage;
-                        var key = EncryptionUtils.GetDefaultEncryptionKey("", out errorMessage);
+                        var key = EncryptionUtils.GetDefaultEncryptionKey(host, out errorMessage);
                         if (String.IsNullOrEmpty(errorMessage))
                         {
-                            result[propertyName] = EncryptionUtils.Decrypt(key.Key, key.IV, (String)property.Value);
+                            try
+                            {
+                                result[propertyName] = EncryptionUtils.Decrypt(key.Key, key.IV, (String)property.Value);
+                            }
+                            catch (Exception ex)
+                            {
+                                result[propertyName] = "Unable to decrypt";
+                            }
                         } 
                         else
                         {
@@ -96,6 +103,28 @@ namespace Jarvis.ConfigurationService.Host.Support
 
                 }
             }
+        }
+
+        internal class ConfigFileInfo 
+        {
+            public static ConfigFileInfo ForBase(String content)
+            {
+                return new ConfigFileInfo() { FileContent = content };
+            }
+
+            public static ConfigFileInfo ForHostSpecific(String content, String host)
+            {
+                return new ConfigFileInfo() { FileContent = content, Host = host };
+            }
+
+            public static implicit operator ConfigFileInfo(String content) 
+            {
+                return ConfigFileInfo.ForBase(content);
+            }
+
+            public String FileContent { get; set; }
+
+            public String Host { get; set; }
         }
     }
 }
