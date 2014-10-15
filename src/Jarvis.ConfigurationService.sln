@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30626.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.ConfigurationService.Host", "Jarvis.ConfigurationService.Host\Jarvis.ConfigurationService.Host.csproj", "{7FA94D62-7CE7-4D77-B362-E77D2EDC9722}"
 EndProject
@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.ConfigurationService.Client", "Jarvis.ConfigurationService.Client\Jarvis.ConfigurationService.Client.csproj", "{F6D73D37-1BA2-4CB5-A58C-0B54BF9C3822}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{BD86873A-3BD0-4953-8ABC-40B7EE0FEDB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD86873A-3BD0-4953-8ABC-40B7EE0FEDB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD86873A-3BD0-4953-8ABC-40B7EE0FEDB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D73D37-1BA2-4CB5-A58C-0B54BF9C3822}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6D73D37-1BA2-4CB5-A58C-0B54BF9C3822}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D73D37-1BA2-4CB5-A58C-0B54BF9C3822}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6D73D37-1BA2-4CB5-A58C-0B54BF9C3822}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
