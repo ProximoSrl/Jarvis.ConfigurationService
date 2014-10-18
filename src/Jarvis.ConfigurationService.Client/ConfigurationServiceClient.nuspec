@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ConfigurationServiceClient</id>
+    <version>1.0.0.0</version>
+    <authors>Ricci Gian Maria - Proximo S.r.L.</authors>
+    <owners>Ricci Gian Maria</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Client library for Jarvis.ConfigurationService</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2014 - Ricci Gian Maria</copyright>
+    <tags>Configuration,Jarvis</tags>
+  </metadata>
+
+  <files>
+    <file src="bin\release\Jarvis.ConfigurationService.Client.dll" target="lib\NET40" />
+  </files>
+</package>
