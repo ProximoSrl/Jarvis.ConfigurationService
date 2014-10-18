@@ -77,7 +77,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         public void exception_for_no_configuration_file_found_should_tell_where_the_file_is_expected()
         {
             ConfigurationServiceClient.DownloadFile = s => String.Empty;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             try
             {
                 CreateSut();
@@ -85,7 +85,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             }
             catch (ConfigurationErrorsException expectedException)
             {
-                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/release/config.json"));
+                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/myapp.config"));
             }
 
         }
@@ -128,7 +128,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         public void exception_if_settings_not_present_and_no_default_value_specified_should_return_config_file_name()
         {
             ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             try
             {
                 var sut = CreateSut();
@@ -137,7 +137,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             }
             catch (ConfigurationErrorsException expectedException)
             {
-                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/release/config.json"));
+                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/myapp.config"));
             }
 
         }
@@ -159,7 +159,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         public void configuration_manager_is_able_to_accept_testing_configuration()
         {
             ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             try
             {
                 var sut = CreateSut();
@@ -170,7 +170,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             }
             catch (ConfigurationErrorsException expectedException)
             {
-                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/release/config.json"));
+                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/myapp.config"));
                 Assert.That(expectedException.Message, Contains.Substring("TEST EXCEPTION"));
                 Assert.That(expectedException.Message, Contains.Substring("goodSetting"));
             }
@@ -181,7 +181,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         public void configuration_manager_is_able_to_accept_testing_configuration_with_custom_error()
         {
             ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             try
             {
                 var sut = CreateSut();
@@ -189,7 +189,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             }
             catch (ConfigurationErrorsException expectedException)
             {
-                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/release/config.json"));
+                Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/myapp.config"));
                 Assert.That(expectedException.Message, Contains.Substring("error XXX"));
                 Assert.That(expectedException.Message, Contains.Substring("goodSetting"));
             }
@@ -200,7 +200,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         public void configuration_manager_does_not_duplicate_error_message_for_invalid_configuration()
         {
             ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             try
             {
                 var sut = CreateSut();
@@ -209,7 +209,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             catch (ConfigurationErrorsException expectedException)
             {
                 var matchCount =
-                    Regex.Matches(expectedException.Message, "http://localhost/TESTAPPLICATION/release/config.json").Count;
+                    Regex.Matches(expectedException.Message, "http://localhost/TESTAPPLICATION/myapp.config").Count;
                 Assert.That(matchCount, Is.EqualTo(1));
             }
 
@@ -242,10 +242,10 @@ namespace Jarvis.ConfigurationService.Tests.Client
                 pathCalled = s;
                 return a_valid_configuration_file;
             };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\service1\";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/release/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config"));
         }
 
         [Test]
@@ -258,10 +258,10 @@ namespace Jarvis.ConfigurationService.Tests.Client
                 pathCalled = s;
                 return a_valid_configuration_file;
             };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/release/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config"));
         }
 
         [Test]
@@ -288,10 +288,10 @@ namespace Jarvis.ConfigurationService.Tests.Client
                 pathCalled = s;
                 return a_valid_configuration_file;
             };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/release/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config"));
         }
 
         [Test]
@@ -328,20 +328,20 @@ namespace Jarvis.ConfigurationService.Tests.Client
             };
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service1\bin\debug";
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config"));
 
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service2\bin\release";
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service2/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service2.config"));
 
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service3\bin\x86";
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service3/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service3.config"));
 
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service4\bin\anyfolder";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service4/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service4.config"));
         }
 
         [Test]
@@ -356,7 +356,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\myprogram\src\myapplication.web";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/myapplication.web/config.json"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/myapplication.web.config"));
 
 
         }

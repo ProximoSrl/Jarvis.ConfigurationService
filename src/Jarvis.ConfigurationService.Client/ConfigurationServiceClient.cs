@@ -85,7 +85,7 @@ namespace Jarvis.ConfigurationService.Client
                     );
                 throw new ConfigurationErrorsException(errorString);
             }
-            _configFileLocation = String.Format("{0}/{1}/{2}/config.json", baseConfigurationServer.TrimEnd('/', '\\'), applicationName, moduleName);
+            _configFileLocation = String.Format("{0}/{1}/{2}.config", baseConfigurationServer.TrimEnd('/', '\\'), applicationName, moduleName);
             var configurationFullContent = DownloadFile(_configFileLocation);
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
