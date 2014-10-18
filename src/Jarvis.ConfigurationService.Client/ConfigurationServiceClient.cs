@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,26 +27,28 @@ namespace Jarvis.ConfigurationService.Client
         internal const String baseAddressConfigFileName = "baseConfigAddress.config";
         internal const String lastGoodConfigurationFileName = "lastGoodConfiguration.config";
 
-        private ILogger _logger;
+        private Action<String, Boolean, Exception> _logger;
         private static ConfigurationServiceClient _instance;
         private JObject _configurationObject;
         private String _configFileLocation;
 
         private String _baseServerAddressEnvironmentVariable;
 
-        internal ILogger Logger
+        internal Action<String, Boolean, Exception> Logger
         {
-            get { return _logger ?? NullLogger.Instance; }
+            get { return _logger ?? DebugDefaultLogger; }
             set { _logger = value; }
         }
 
+        internal Action<String, Boolean, Exception> DebugDefaultLogger = (message, isError, exception) => Debug.WriteLine("Log: " + message + " Iserror: " + isError);
+
         internal ConfigurationServiceClient
             (
-                ILogger logger,
+                Action<String, Boolean, Exception> loggerFunction,
                 String baseServerAddressEnvironmentVariable
             )
         {
-            _logger = logger;
+            _logger = loggerFunction;
             _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
             var currentPath = GetCurrentPath();
             var splittedPath = currentPath
@@ -90,7 +93,7 @@ namespace Jarvis.ConfigurationService.Client
                 configurationFullContent = GetFileContent(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName));
                 if (!String.IsNullOrEmpty(configurationFullContent))
                 {
-                    Logger.Warn("Configuration server " + _configFileLocation + "did not responded, last good configuration is used");
+                    Logger("Configuration server " + _configFileLocation + "did not responded, last good configuration is used", false, null);
                 }
             }
             if (String.IsNullOrEmpty(configurationFullContent))
@@ -106,7 +109,7 @@ namespace Jarvis.ConfigurationService.Client
             catch (Exception ex)
             {
                 String errorString = "Malformed json configuration file: " + ex.Message;
-                Logger.Error(errorString);
+                Logger(errorString, true, ex);
                 throw new ConfigurationErrorsException(errorString);
             }
         }
@@ -155,7 +158,7 @@ namespace Jarvis.ConfigurationService.Client
             if (setting == null)
             {
                 String errorString = "Required setting '" + settingName + "' not found in configuration: " + _configFileLocation;
-                Logger.Error(errorString);
+                Logger(errorString, true, null);
                 throw new ConfigurationErrorsException(errorString);
             }
 
@@ -186,13 +189,13 @@ namespace Jarvis.ConfigurationService.Client
             catch (Exception ex)
             {
                 String errorString = "Error during usage of configuration '" + settingName + "' - Config location: " + _configFileLocation + " - error: " + ex.Message;
-                Logger.Error(errorString, ex);
+                Logger(errorString, true, ex);
                 throw new ConfigurationErrorsException(errorString);
             }
             if (!String.IsNullOrEmpty(error))
             {
                 String errorString = "Error during usage of configuration '" + settingName + "' - Config location: " + _configFileLocation + " - error: " + error;
-                Logger.Error(errorString);
+                Logger(errorString, true, null);
                 throw new ConfigurationErrorsException(errorString);
             }
         }
@@ -315,31 +318,6 @@ namespace Jarvis.ConfigurationService.Client
 
         #endregion
 
-        public class CqrsConfigurationInstaller : IWindsorInstaller
-        {
-            private String _baseServerAddressEnvironmentVariable;
-            public CqrsConfigurationInstaller
-                (
-                    String baseServerAddressEnvironmentVariable
-                )
-            {
-                _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
-            }
-
-            public void Install(Castle.Windsor.IWindsorContainer container, Castle.MicroKernel.SubSystems.Configuration.IConfigurationStore store)
-            {
-                ILoggerFactory factory = container.Resolve<ILoggerFactory>();
-                var logger = factory.Create(typeof(CqrsConfigurationManager));
-                try
-                {
-                    CqrsConfigurationManager._instance = new CqrsConfigurationManager(logger, _baseServerAddressEnvironmentVariable);
-                }
-                catch (ConfigurationErrorsException ex)
-                {
-                    logger.Error(ex.Message, ex);
-                    throw;
-                }
-            }
-        }
+       
     }
 }
