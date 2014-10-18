@@ -85,7 +85,12 @@ namespace Jarvis.ConfigurationService.Client
                     );
                 throw new ConfigurationErrorsException(errorString);
             }
-            _configFileLocation = String.Format("{0}/{1}/{2}.config", baseConfigurationServer.TrimEnd('/', '\\'), applicationName, moduleName);
+            _configFileLocation = String.Format(
+                "{0}/{1}/{2}.config/{3}", 
+                    baseConfigurationServer.TrimEnd('/', '\\'), 
+                    applicationName, 
+                    moduleName,
+                    GetMachineName());
             var configurationFullContent = DownloadFile(_configFileLocation);
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
@@ -269,6 +274,8 @@ namespace Jarvis.ConfigurationService.Client
         /// Access environment variable.
         /// </summary>
         internal static Func<String, String> GetEnvironmentVariable = Environment.GetEnvironmentVariable;
+
+        internal static Func<String> GetMachineName = () => Environment.MachineName;
 
         #endregion
 

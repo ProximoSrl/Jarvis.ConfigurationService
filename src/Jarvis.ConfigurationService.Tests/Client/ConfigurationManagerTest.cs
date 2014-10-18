@@ -63,6 +63,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             ConfigurationServiceClient.GetEnvironmentVariable = variableName => "http://localhost";
             ConfigurationServiceClient.SaveFile = (fn, cnt) => Console.WriteLine("Saving " + fn);
             ConfigurationServiceClient.GetApplicationName = () => "TESTAPPLICATION";
+            ConfigurationServiceClient.GetMachineName = () => "TestMachine";
         }
 
         [Test]
@@ -245,7 +246,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\service1\";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config/TestMachine"));
         }
 
         [Test]
@@ -261,7 +262,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config/TestMachine"));
         }
 
         [Test]
@@ -291,7 +292,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config/TestMachine"));
         }
 
         [Test]
@@ -328,20 +329,20 @@ namespace Jarvis.ConfigurationService.Tests.Client
             };
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service1\bin\debug";
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config/TestMachine"));
 
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service2\bin\release";
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service2.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service2.config/TestMachine"));
 
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service3\bin\x86";
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service3.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service3.config/TestMachine"));
 
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service4\bin\anyfolder";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service4.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service4.config/TestMachine"));
         }
 
         [Test]
@@ -356,7 +357,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\myprogram\src\myapplication.web";
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/myapplication.web.config"));
+            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/myapplication.web.config/TestMachine"));
 
 
         }
