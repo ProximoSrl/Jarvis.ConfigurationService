@@ -42,6 +42,16 @@ namespace Jarvis.ConfigurationService.Client
 
         internal Action<String, Boolean, Exception> DebugDefaultLogger = (message, isError, exception) => Debug.WriteLine("Log: " + message + " Iserror: " + isError);
 
+        public static void AppDomainInitializer
+             (
+                Action<String, Boolean, Exception> loggerFunction,
+                String baseServerAddressEnvironmentVariable
+            )
+        {
+            _instance = new ConfigurationServiceClient(loggerFunction, baseServerAddressEnvironmentVariable);
+        }
+
+
         internal ConfigurationServiceClient
             (
                 Action<String, Boolean, Exception> loggerFunction,
