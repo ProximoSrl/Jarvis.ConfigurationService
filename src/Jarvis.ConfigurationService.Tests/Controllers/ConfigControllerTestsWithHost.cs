@@ -24,7 +24,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [TestFixtureSetUp]
         public void FixtureSetup() 
         {
-            _app = WebApp.Start<Startup>(baseUri);
+            _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
             client = new WebClient();
         }
 

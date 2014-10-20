@@ -5,11 +5,11 @@ using Microsoft.Owin;
 using Owin;
 using System.Net.Http.Headers;
 
-[assembly: OwinStartup(typeof(Jarvis.ConfigurationService.Host.Support.Startup))]
+[assembly: OwinStartup(typeof(Jarvis.ConfigurationService.Host.Support.ConfigurationServiceApplication))]
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
-    public class Startup
+    public class ConfigurationServiceApplication
     {
         public void Configuration(IAppBuilder app)
         {

@@ -5,11 +5,11 @@ using Microsoft.Owin.Hosting;
 
 namespace Jarvis.ConfigurationService.Host
 {
-    internal class Bootstrapper
+    internal class ConfigurationServiceBootstrapper
     {
         readonly Uri _uri;
         IDisposable _app;
-        public Bootstrapper(Uri uri)
+        public ConfigurationServiceBootstrapper(Uri uri)
         {
             _uri = uri;
         }
@@ -17,7 +17,7 @@ namespace Jarvis.ConfigurationService.Host
         public void Start()
         {
             LogManager.GetLogger(this.GetType()).DebugFormat("Starting on {0}", _uri.AbsoluteUri);
-            _app = WebApp.Start<Startup>(_uri.AbsoluteUri);
+            _app = WebApp.Start<ConfigurationServiceApplication>(_uri.AbsoluteUri);
             
         }
 

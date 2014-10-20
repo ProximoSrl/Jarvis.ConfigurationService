@@ -16,12 +16,12 @@ namespace Jarvis.ConfigurationService.Host
             {
                 host.UseOldLog4Net("log4net.config");
 
-                host.Service<Bootstrapper>(service =>
+                host.Service<ConfigurationServiceBootstrapper>(service =>
                 {
                     var uri = new Uri(ConfigurationManager.AppSettings["uri"]);
 
 
-                    service.ConstructUsing(() => new Bootstrapper(uri));
+                    service.ConstructUsing(() => new ConfigurationServiceBootstrapper(uri));
                     service.WhenStarted(s => s.Start());
                     service.WhenStopped(s => s.Stop());
                 });

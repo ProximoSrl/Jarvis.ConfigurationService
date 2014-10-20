@@ -83,7 +83,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Support\ConfigurationServiceBootstrapper.cs" />
     <Compile Include="Controllers\ConfigController.cs" />
     <Compile Include="Controllers\HelpersController.cs" />
     <Compile Include="Model\ServerStatusModel.cs" />
@@ -94,7 +94,7 @@
     <Compile Include="Support\EncryptionUtils.cs" />
     <Compile Include="Support\HexEncoding.cs" />
     <Compile Include="Support\IFileSystem.cs" />
-    <Compile Include="Support\Startup.cs" />
+    <Compile Include="Support\ConfigurationServiceApplication.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
