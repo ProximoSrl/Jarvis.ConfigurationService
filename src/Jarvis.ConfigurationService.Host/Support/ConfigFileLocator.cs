@@ -30,6 +30,7 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             String baseConfigFileName = Path.Combine(baseDir.FullName, "base.config");
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
+            String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
 
             List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
@@ -37,6 +38,8 @@ namespace Jarvis.ConfigurationService.Host.Support
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseConfigFileName)));
             if (FileSystem.Instance.FileExists(applicationBaseConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName)));
+            if (FileSystem.Instance.FileExists(defaultDirectoryBaseConfigFileName))
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultDirectoryBaseConfigFileName)));
             if (FileSystem.Instance.FileExists(serviceConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceConfigFileName)));
 

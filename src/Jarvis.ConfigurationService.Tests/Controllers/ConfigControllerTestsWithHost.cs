@@ -65,14 +65,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
         public void correct_configuration_of_single_service()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service2.config");
-            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""enableApi"":""false""}"));
+            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world"",""enableApi"":""false""}"));
         }
 
         [Test]
         public void correct_configuration_of_single_service_with_old_route()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service2/config.json");
-            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""enableApi"":""false""}"));
+            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world"",""enableApi"":""false""}"));
         }
 
         [Test]
@@ -131,6 +131,15 @@ namespace Jarvis.ConfigurationService.Tests.Support
             JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)resultObject["otherEncryptedSetting"], Is.EqualTo("secured"));
         }
+
+
+       [Test]
+       public void verify_base_config_in_default_folder()
+       {
+           var result = client.DownloadString(baseUri + "/MyApp1/service1.config");
+           JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+           Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world"), "Base.config not used in default directory");
+       }
 
        [Test]
        public void verify_invalid_encryption_return_unencrypted()

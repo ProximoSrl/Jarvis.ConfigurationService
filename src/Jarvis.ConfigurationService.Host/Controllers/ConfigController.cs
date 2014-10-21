@@ -54,6 +54,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             string[] modules = FileSystem.Instance
                 .GetFiles(redirected, "*.config")
                 .Select(Path.GetFileNameWithoutExtension)
+                .Where(p => !"base".Equals(p, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
             return Request.CreateResponse(HttpStatusCode.OK, modules);
