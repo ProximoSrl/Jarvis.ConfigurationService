@@ -45,6 +45,9 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             if (!String.IsNullOrEmpty(hostName))
             {
+                String hostBaseConfigFileName = Path.Combine(appDirectory, hostName, "base.config");
+                if (FileSystem.Instance.FileExists(hostBaseConfigFileName))
+                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostBaseConfigFileName), hostName));
                 String hostConfigFileName = Path.Combine(appDirectory, hostName, serviceName + ".config");
                 if (FileSystem.Instance.FileExists(hostConfigFileName))
                     configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostConfigFileName), hostName));

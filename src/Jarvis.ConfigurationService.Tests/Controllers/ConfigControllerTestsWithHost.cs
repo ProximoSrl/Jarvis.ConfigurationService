@@ -65,14 +65,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
         public void correct_configuration_of_single_service()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service2.config");
-            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world"",""enableApi"":""false""}"));
+            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world from service 2"",""enableApi"":""false""}"));
         }
 
         [Test]
         public void correct_configuration_of_single_service_with_old_route()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service2/config.json");
-            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world"",""enableApi"":""false""}"));
+            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world from service 2"",""enableApi"":""false""}"));
         }
 
         [Test]
@@ -139,6 +139,22 @@ namespace Jarvis.ConfigurationService.Tests.Support
            var result = client.DownloadString(baseUri + "/MyApp1/service1.config");
            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
            Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world"), "Base.config not used in default directory");
+       }
+
+       [Test]
+       public void verify_base_config_in_host_specific_folder()
+       {
+           var result = client.DownloadString(baseUri + "/MyApp1/service1.config/host1");
+           JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+           Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world host 1"), "Base.config specific host not correctly used");
+       }
+
+       [Test]
+       public void verify_base_config_in_default_folder_has_less_precedence_than_specific()
+       {
+           var result = client.DownloadString(baseUri + "/MyApp1/service2.config");
+           JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+           Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world from service 2"), "Base.config has less precedence than specific settings");
        }
 
        [Test]
