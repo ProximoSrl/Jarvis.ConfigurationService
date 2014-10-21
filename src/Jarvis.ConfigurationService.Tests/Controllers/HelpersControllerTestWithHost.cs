@@ -49,6 +49,27 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That((String) parsed["encrypted"], Is.Not.Null);
         }
 
+        [Test]
+        public void Verify_encryption_utils_with_host()
+        {
+            JObject parsed = CallControllerPostJsonResult("/support/encryption/encrypt", "{StringToEncrypt : 'pippo'}");
+            Assert.That((Boolean)parsed["success"], Is.EqualTo(true));
+            Assert.That((String)parsed["encrypted"], Is.Not.Null);
+
+            JObject parsed2 = CallControllerPostJsonResult("/support/encryption/encrypt", "{StringToEncrypt : 'pippo', HostName : 'host1'}");
+            Assert.That((Boolean)parsed2["success"], Is.EqualTo(true));
+            Assert.That((String)parsed2["encrypted"], Is.Not.Null);
+
+            Assert.That((String)parsed2["encrypted"], Is.Not.EqualTo((String)parsed["encrypted"]));
+        }
+
+        [Test]
+        public void Verify_encryption_utils_with_host_that_has_no_specific_encryption()
+        {
+            JObject parsed2 = CallControllerPostJsonResult("/support/encryption/encrypt", "{StringToEncrypt : 'pippo', HostName : 'hostwithoutkey'}");
+            Assert.That((Boolean)parsed2["success"], Is.EqualTo(false));
+        }
+
         private JObject CallControllerJsonResult(String path)
         {
             using (WebClient client = new WebClient())
