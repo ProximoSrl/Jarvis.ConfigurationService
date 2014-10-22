@@ -75,7 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Client\ConfigurationManagerTest.cs" />
+    <Compile Include="Client\ConfigurationServiceClientTests.cs" />
     <Compile Include="Controllers\HelpersControllerTestWithHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Support\ConfigFileLocatorTests.cs" />
