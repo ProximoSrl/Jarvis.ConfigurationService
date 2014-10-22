@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Configuration;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
@@ -51,6 +52,10 @@ namespace Jarvis.ConfigurationService.Host.Support
                 String hostConfigFileName = Path.Combine(appDirectory, hostName, serviceName + ".config");
                 if (FileSystem.Instance.FileExists(hostConfigFileName))
                     configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostConfigFileName), hostName));
+            }
+            if (configFiles.Count == 0) 
+            {
+                throw new ConfigurationErrorsException("There are no valid config at directory: " + baseDirectory);
             }
             return ComposeJsonContent(configFiles.ToArray());
         }

@@ -10,6 +10,8 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using NSubstitute;
+using System.Configuration;
 
 namespace Jarvis.ConfigurationService.Tests.Support
 {
@@ -137,6 +139,27 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
             JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)resultObject["encryptedSetting"], Is.EqualTo("password for host1"));
+        }
+
+        [Test]
+        public void empty_config_return_exception()
+        {
+            IFileSystem substitute = NSubstitute.Substitute.For<IFileSystem>();
+            using (FileSystem.Override(substitute))
+            {
+                substitute.GetFileContent(null).ReturnsForAnyArgs("");
+                substitute.GetBaseDirectory().ReturnsForAnyArgs(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location));
+                try
+                {
+                    //now there is no file returned by file system
+                    var result = client.DownloadString(baseUri + "/MyApp1/Service1.config");
+                    Assert.Fail("This call should raise Configuration Exception");
+                }
+                catch (WebException cex)
+                {
+                    //system shoudl throw exception
+                }
+            }
         }
 
        [Test]
