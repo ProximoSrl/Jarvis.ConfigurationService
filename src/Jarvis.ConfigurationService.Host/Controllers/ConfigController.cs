@@ -61,8 +61,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         }
 
         [HttpGet]
-        [Route("{appName}/{moduleName}/config.json/{hostName=''}")]
-        [Route("{appName}/{moduleName}.config/{hostName=''}")]
+        [Route("{appName}/{moduleName}/config.json/{hostName=}")]
+        [Route("{appName}/{moduleName}.config/{hostName=}")]
         public Object GetConfiguration(String appName, String moduleName, String hostName = "")
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();

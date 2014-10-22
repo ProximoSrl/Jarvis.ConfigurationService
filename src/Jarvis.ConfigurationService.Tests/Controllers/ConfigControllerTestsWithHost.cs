@@ -51,7 +51,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }
             File.WriteAllText(Path.Combine(FileSystem.Instance.GetBaseDirectory(), "myapp3.redirect"), @"c:\temp\myapp3");
             var result = client.DownloadString(baseUri);
-            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""myapp3""]"));
+            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppTest"",""myapp3""]"));
         }
 
         [Test]
@@ -98,6 +98,21 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/NonExistingHost");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["enableApi"], Is.EqualTo("false"), "Non existing host should not give error");
+        }
+
+        [Test]
+        public void client_is_informed_when_malformed_json_is_entered()
+        {
+            try
+            {
+                var result = client.DownloadString(baseUri + "/MyAppTest/ServiceMalformed.config");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return;
+            }
+            Assert.Fail("An exception should be generated");
         }
 
         [Test]

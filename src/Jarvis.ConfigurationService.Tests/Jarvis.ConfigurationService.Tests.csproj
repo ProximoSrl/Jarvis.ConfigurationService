@@ -93,6 +93,9 @@
     <None Include="AnotherTestConfiguration\ApplicationX\Default\ServiceY.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration.Sample\MyAppTest\Default\ServiceMalformed.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
