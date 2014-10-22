@@ -14,7 +14,6 @@ namespace Jarvis.ConfigurationService.Client
 {
     public class ConfigurationServiceClient
     {
-
         public static ConfigurationServiceClient Instance
         {
             get
@@ -38,6 +37,11 @@ namespace Jarvis.ConfigurationService.Client
         {
             get { return _logger ?? DebugDefaultLogger; }
             set { _logger = value; }
+        }
+
+        public string ConfigFileLocation
+        {
+            get { return _configFileLocation; }
         }
 
         internal Action<String, Boolean, Exception> DebugDefaultLogger = (message, isError, exception) => Debug.WriteLine("Log: " + message + " Iserror: " + isError);
@@ -101,32 +105,46 @@ namespace Jarvis.ConfigurationService.Client
                     applicationName, 
                     moduleName,
                     GetMachineName());
-            var configurationFullContent = DownloadFile(_configFileLocation);
+
+            LogDebug("Loading configuration from " + ConfigFileLocation);
+
+            var configurationFullContent = DownloadFile(ConfigFileLocation);
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
             {
                 configurationFullContent = GetFileContent(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName));
                 if (!String.IsNullOrEmpty(configurationFullContent))
                 {
-                    Logger("Configuration server " + _configFileLocation + "did not responded, last good configuration is used", false, null);
+                    LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");
                 }
             }
             if (String.IsNullOrEmpty(configurationFullContent))
             {
-                String errorString = "Cannot Find configuration value at url: " + _configFileLocation;
+                String errorString = "Cannot Find configuration value at url: " + ConfigFileLocation;
                 throw new ConfigurationErrorsException(errorString);
             }
             try
             {
+                LogDebug(String.Format("Configuration is:\n{0}\n-------------", configurationFullContent));
                 _configurationObject = (JObject)JsonConvert.DeserializeObject(configurationFullContent);
                 SaveFile(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName), configurationFullContent);
             }
             catch (Exception ex)
             {
                 String errorString = "Malformed json configuration file: " + ex.Message;
-                Logger(errorString, true, ex);
+                LogError(errorString, ex);
                 throw new ConfigurationErrorsException(errorString);
             }
+        }
+
+        void LogError(string message, Exception ex)
+        {
+            Logger(message, true, ex);
+        }
+
+        void LogDebug(string message)
+        {
+            Logger(message, false, null);
         }
 
         public void WithSetting(string settingName, string settingDefaultValue, Action<String> useConfigurationFunction)
@@ -172,8 +190,8 @@ namespace Jarvis.ConfigurationService.Client
 
             if (setting == null)
             {
-                String errorString = "Required setting '" + settingName + "' not found in configuration: " + _configFileLocation;
-                Logger(errorString, true, null);
+                String errorString = "Required setting '" + settingName + "' not found in configuration: " + ConfigFileLocation;
+                LogError(errorString, null);
                 throw new ConfigurationErrorsException(errorString);
             }
 
@@ -203,14 +221,14 @@ namespace Jarvis.ConfigurationService.Client
             }
             catch (Exception ex)
             {
-                String errorString = "Error during usage of configuration '" + settingName + "' - Config location: " + _configFileLocation + " - error: " + ex.Message;
-                Logger(errorString, true, ex);
+                String errorString = "Error during usage of configuration '" + settingName + "' - Config location: " + ConfigFileLocation + " - error: " + ex.Message;
+                LogError(errorString, ex);
                 throw new ConfigurationErrorsException(errorString);
             }
             if (!String.IsNullOrEmpty(error))
             {
-                String errorString = "Error during usage of configuration '" + settingName + "' - Config location: " + _configFileLocation + " - error: " + error;
-                Logger(errorString, true, null);
+                String errorString = "Error during usage of configuration '" + settingName + "' - Config location: " + ConfigFileLocation + " - error: " + error;
+                LogError(errorString, null);
                 throw new ConfigurationErrorsException(errorString);
             }
         }
