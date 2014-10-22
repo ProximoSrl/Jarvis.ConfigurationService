@@ -64,6 +64,51 @@ namespace Jarvis.ConfigurationService.Client
         {
             _logger = loggerFunction;
             _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
+            
+            AutoConfigure();
+            LoadSettings();
+        }
+
+        void LoadSettings()
+        {
+            var configurationFullContent = DownloadFile(ConfigFileLocation);
+            //If server did not responded we can use last good configuration
+            if (String.IsNullOrEmpty(configurationFullContent))
+            {
+                configurationFullContent = GetFileContent(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName));
+                if (!String.IsNullOrEmpty(configurationFullContent))
+                {
+                    LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");
+                }
+            }
+            if (String.IsNullOrEmpty(configurationFullContent))
+            {
+                String errorString = "Cannot Find configuration value at url: " + ConfigFileLocation;
+                throw new ConfigurationErrorsException(errorString);
+            }
+            try
+            {
+                LogDebug(String.Format("Configuration is:\n{0}\n-------------", configurationFullContent));
+                _configurationObject = (JObject) JsonConvert.DeserializeObject(configurationFullContent);
+                if (_configurationObject == null)
+                {
+                    throw new Exception("Configuration is null");
+                }
+                SaveFile(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName), configurationFullContent);
+            }
+            catch (Exception ex)
+            {
+                var errorString = String.Format("Malformed json configuration: {0}\n{1}",
+                    ex.Message,
+                    configurationFullContent
+                    );
+                LogError(errorString, ex);
+                throw new ConfigurationErrorsException(errorString);
+            }
+        }
+
+        void AutoConfigure()
+        {
             var currentPath = GetCurrentPath();
             var splittedPath = currentPath
                 .TrimEnd('/', '\\')
@@ -96,45 +141,17 @@ namespace Jarvis.ConfigurationService.Client
                         "You need to specify base address for configuration server in environment variable: {0} or in config file {1}",
                         _baseServerAddressEnvironmentVariable,
                         Path.Combine(GetCurrentPath(), baseAddressConfigFileName)
-                    );
+                        );
                 throw new ConfigurationErrorsException(errorString);
             }
             _configFileLocation = String.Format(
-                "{0}/{1}/{2}.config/{3}", 
-                    baseConfigurationServer.TrimEnd('/', '\\'), 
-                    applicationName, 
-                    moduleName,
-                    GetMachineName());
+                "{0}/{1}/{2}.config/{3}",
+                baseConfigurationServer.TrimEnd('/', '\\'),
+                applicationName,
+                moduleName,
+                GetMachineName());
 
-            LogDebug("Loading configuration from " + ConfigFileLocation);
-
-            var configurationFullContent = DownloadFile(ConfigFileLocation);
-            //If server did not responded we can use last good configuration
-            if (String.IsNullOrEmpty(configurationFullContent))
-            {
-                configurationFullContent = GetFileContent(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName));
-                if (!String.IsNullOrEmpty(configurationFullContent))
-                {
-                    LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");
-                }
-            }
-            if (String.IsNullOrEmpty(configurationFullContent))
-            {
-                String errorString = "Cannot Find configuration value at url: " + ConfigFileLocation;
-                throw new ConfigurationErrorsException(errorString);
-            }
-            try
-            {
-                LogDebug(String.Format("Configuration is:\n{0}\n-------------", configurationFullContent));
-                _configurationObject = (JObject)JsonConvert.DeserializeObject(configurationFullContent);
-                SaveFile(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName), configurationFullContent);
-            }
-            catch (Exception ex)
-            {
-                String errorString = "Malformed json configuration file: " + ex.Message;
-                LogError(errorString, ex);
-                throw new ConfigurationErrorsException(errorString);
-            }
+            LogDebug("Loading configuration from " + _configFileLocation);
         }
 
         void LogError(string message, Exception ex)
