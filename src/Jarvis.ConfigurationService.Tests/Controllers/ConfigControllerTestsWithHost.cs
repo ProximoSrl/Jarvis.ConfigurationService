@@ -118,6 +118,34 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void verify_exception_with_malformed_json_is_entered()
+        {
+            try
+            {
+                var result = client.DownloadString(baseUri + "/MyAppTest/ServiceMalformed.config");
+                Assert.Fail("An exception should be generated");
+            }
+            catch (WebException ex)
+            {
+                if (ex.Response != null)
+                {
+                    var responseStream = ex.Response.GetResponseStream();
+
+                    if (responseStream != null)
+                    {
+                        using (var reader = new StreamReader(responseStream))
+                        {
+                            var responseText = reader.ReadToEnd();
+                            Assert.That(responseText, Contains.Substring("ServiceMalformed.config"));
+                            Assert.That(responseText, Contains.Substring("MyAppTest"));
+                        }
+                    }
+                }
+                return;
+            }
+        }
+
+        [Test]
         public void specific_host_use_default_configuration()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
