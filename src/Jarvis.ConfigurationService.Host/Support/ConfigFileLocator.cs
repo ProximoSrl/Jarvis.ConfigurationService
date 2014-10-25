@@ -28,7 +28,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                 Path.Combine(baseDir.FullName, applicationName)
             );
 
-            var BaseDirLen = baseDir.FullName.Length;
+            var baseDirLen = appDirectory.Length;
             String baseConfigFileName = Path.Combine(baseDir.FullName, "base.config");
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
@@ -36,22 +36,22 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseConfigFileName))
-                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseConfigFileName), baseConfigFileName.Substring(BaseDirLen)));
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseConfigFileName), baseConfigFileName.Substring(baseDirLen)));
             if (FileSystem.Instance.FileExists(applicationBaseConfigFileName))
-                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName), applicationBaseConfigFileName.Substring(BaseDirLen)));
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName), applicationBaseConfigFileName.Substring(baseDirLen)));
             if (FileSystem.Instance.FileExists(defaultDirectoryBaseConfigFileName))
-                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultDirectoryBaseConfigFileName), defaultDirectoryBaseConfigFileName.Substring(BaseDirLen)));
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultDirectoryBaseConfigFileName), defaultDirectoryBaseConfigFileName.Substring(baseDirLen)));
             if (FileSystem.Instance.FileExists(serviceConfigFileName))
-                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceConfigFileName), serviceConfigFileName.Substring(BaseDirLen)));
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceConfigFileName), serviceConfigFileName.Substring(baseDirLen)));
 
             if (!String.IsNullOrEmpty(hostName))
             {
                 String hostBaseConfigFileName = Path.Combine(appDirectory, hostName, "base.config");
                 if (FileSystem.Instance.FileExists(hostBaseConfigFileName))
-                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostBaseConfigFileName),hostBaseConfigFileName.Substring(BaseDirLen) , hostName));
+                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostBaseConfigFileName),hostBaseConfigFileName.Substring(baseDirLen) , hostName));
                 String hostConfigFileName = Path.Combine(appDirectory, hostName, serviceName + ".config");
                 if (FileSystem.Instance.FileExists(hostConfigFileName))
-                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostConfigFileName), hostBaseConfigFileName.Substring(BaseDirLen), hostName));
+                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostConfigFileName), hostBaseConfigFileName.Substring(baseDirLen), hostName));
             }
             if (configFiles.Count == 0) 
             {
