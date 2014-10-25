@@ -65,8 +65,17 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         [Route("{appName}/{moduleName}.config/{hostName=}")]
         public Object GetConfiguration(String appName, String moduleName, String hostName = "")
         {
-            var baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
+            try
+            {
+                var baseDirectory = FileSystem.Instance.GetBaseDirectory();
+                return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
+            }
+            catch (Exception ex)
+            {
+                    
+                throw;
+            }
+           
         }
 
        

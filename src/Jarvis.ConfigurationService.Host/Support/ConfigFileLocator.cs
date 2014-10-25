@@ -28,7 +28,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                 Path.Combine(baseDir.FullName, applicationName)
             );
 
-            var baseDirLen = appDirectory.Length;
+            var baseDirLen = Directory.GetParent(appDirectory).FullName.Length;
             String baseConfigFileName = Path.Combine(baseDir.FullName, "base.config");
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
