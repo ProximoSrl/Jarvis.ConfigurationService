@@ -24,8 +24,8 @@ namespace Jarvis.ConfigurationService.Client
             }
         }
 
-        internal const String baseAddressConfigFileName = "baseConfigAddress.config";
-        internal const String lastGoodConfigurationFileName = "lastGoodConfiguration.config";
+        internal const String BaseAddressConfigFileName = "baseConfigAddress.config";
+        internal const String LastGoodConfigurationFileName = "lastGoodConfiguration.config";
 
         private Action<String, Boolean, Exception> _logger;
         private static ConfigurationServiceClient _instance;
@@ -74,11 +74,20 @@ namespace Jarvis.ConfigurationService.Client
 
         void LoadSettings()
         {
-            var configurationFullContent = _environment.DownloadFile(ConfigFileLocation);
+            String configurationFullContent;
+            try
+            {
+                configurationFullContent = _environment.DownloadFile(ConfigFileLocation);
+            }
+            catch (ConfigurationErrorsException ex)
+            {
+                throw new ConfigurationErrorsException(ex.Message);
+            }
+
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
             {
-                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), lastGoodConfigurationFileName));
+                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName));
                 if (!String.IsNullOrEmpty(configurationFullContent))
                 {
                     LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");
@@ -97,7 +106,7 @@ namespace Jarvis.ConfigurationService.Client
                 {
                     throw new Exception("Configuration is null");
                 }
-                _environment.SaveFile(Path.Combine(_environment.GetCurrentPath(), lastGoodConfigurationFileName), configurationFullContent);
+                _environment.SaveFile(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), configurationFullContent);
             }
             catch (Exception ex)
             {
@@ -132,7 +141,7 @@ namespace Jarvis.ConfigurationService.Client
             }
             //Try grab base address from a local config file then from env variable
 
-            var baseConfigurationServer = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), baseAddressConfigFileName));
+            var baseConfigurationServer = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), BaseAddressConfigFileName));
             if (String.IsNullOrEmpty(baseConfigurationServer))
             {
                 baseConfigurationServer = _environment.GetEnvironmentVariable(_baseServerAddressEnvironmentVariable);
@@ -143,7 +152,7 @@ namespace Jarvis.ConfigurationService.Client
                     string.Format(
                         "You need to specify base address for configuration server in environment variable: {0} or in config file {1}",
                         _baseServerAddressEnvironmentVariable,
-                        Path.Combine(_environment.GetCurrentPath(), baseAddressConfigFileName)
+                        Path.Combine(_environment.GetCurrentPath(), BaseAddressConfigFileName)
                         );
                 throw new ConfigurationErrorsException(errorString);
             }

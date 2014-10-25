@@ -3,6 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using Jarvis.ConfigurationService.Client.Support;
+using NSubstitute;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -36,6 +38,6 @@ namespace Jarvis.ConfigurationService.Tests.Client
             _app.Dispose();
         }
 
-
+      
     }
 }

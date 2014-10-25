@@ -113,6 +113,23 @@ namespace Jarvis.ConfigurationService.Tests.Client
         }
 
         [Test]
+        public void verify_correct_exception_handling()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(x => { throw new ConfigurationErrorsException("Malformed Json"); });
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
+            try
+            {
+                CreateSut();
+                Assert.Fail("ConfigurationErrorsException is expected");
+            }
+            catch (ConfigurationErrorsException expectedException)
+            {
+                Assert.That(expectedException.Message, Contains.Substring("Malformed Json"));
+            }
+
+        }
+
+        [Test]
         public void exception_if_settings_not_present_and_no_default_value_specified()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
@@ -264,7 +281,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             //Configuration returns standard file 
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("");
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
-            stubEnvironment.GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.baseAddressConfigFileName)))
+            stubEnvironment.GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.BaseAddressConfigFileName)))
                 .Returns("http://configuration.test.com/baseDirectory");
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
@@ -287,7 +304,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             catch (ConfigurationErrorsException ex)
             {
                 Assert.That(ex.Message, Contains.Substring("CQRS_TEST_CONFIGURATION_MANAGER"));
-                Assert.That(ex.Message, Contains.Substring(@"c:\testpath\myprogram\release\" + ConfigurationServiceClient.baseAddressConfigFileName));
+                Assert.That(ex.Message, Contains.Substring(@"c:\testpath\myprogram\release\" + ConfigurationServiceClient.BaseAddressConfigFileName));
             }
         }
 
@@ -504,7 +521,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
 
             var configuration = sut.GetSetting("goodSetting");
             Assert.That(configuration, Is.EqualTo("hello setting"));
-            stubEnvironment.Received().GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.lastGoodConfigurationFileName)));
+            stubEnvironment.Received().GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.LastGoodConfigurationFileName)));
             var received = stubEnvironment.ReceivedCalls().ToList();
             Assert.That(currentTestLogger.Logs.Any(l => l.Contains("last good configuration is used")), "verify warning of last good configuration is used");
         }
