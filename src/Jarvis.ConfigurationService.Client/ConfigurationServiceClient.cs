@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Jarvis.ConfigurationService.Client.Support;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -30,8 +31,9 @@ namespace Jarvis.ConfigurationService.Client
         private static ConfigurationServiceClient _instance;
         private JObject _configurationObject;
         private String _configFileLocation;
-
         private String _baseServerAddressEnvironmentVariable;
+
+        private IEnvironment _environment;
 
         internal Action<String, Boolean, Exception> Logger
         {
@@ -52,30 +54,31 @@ namespace Jarvis.ConfigurationService.Client
                 String baseServerAddressEnvironmentVariable
             )
         {
-            _instance = new ConfigurationServiceClient(loggerFunction, baseServerAddressEnvironmentVariable);
+            _instance = new ConfigurationServiceClient(loggerFunction, baseServerAddressEnvironmentVariable, new StandardEnvironment());
         }
 
 
         internal ConfigurationServiceClient
             (
                 Action<String, Boolean, Exception> loggerFunction,
-                String baseServerAddressEnvironmentVariable
+                String baseServerAddressEnvironmentVariable,
+                IEnvironment environment
             )
         {
             _logger = loggerFunction;
             _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
-            
+            _environment = environment;
             AutoConfigure();
             LoadSettings();
         }
 
         void LoadSettings()
         {
-            var configurationFullContent = DownloadFile(ConfigFileLocation);
+            var configurationFullContent = _environment.DownloadFile(ConfigFileLocation);
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
             {
-                configurationFullContent = GetFileContent(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName));
+                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), lastGoodConfigurationFileName));
                 if (!String.IsNullOrEmpty(configurationFullContent))
                 {
                     LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");
@@ -94,7 +97,7 @@ namespace Jarvis.ConfigurationService.Client
                 {
                     throw new Exception("Configuration is null");
                 }
-                SaveFile(Path.Combine(GetCurrentPath(), lastGoodConfigurationFileName), configurationFullContent);
+                _environment.SaveFile(Path.Combine(_environment.GetCurrentPath(), lastGoodConfigurationFileName), configurationFullContent);
             }
             catch (Exception ex)
             {
@@ -109,12 +112,12 @@ namespace Jarvis.ConfigurationService.Client
 
         void AutoConfigure()
         {
-            var currentPath = GetCurrentPath();
+            var currentPath = _environment.GetCurrentPath();
             var splittedPath = currentPath
                 .TrimEnd('/', '\\')
                 .Split('/', '\\');
             var moduleName = splittedPath[splittedPath.Length - 1];
-            var applicationName = GetApplicationName();
+            var applicationName = _environment.GetApplicationName();
             //if a bin folder is present we are in "developer mode" module name is name of the folder before /bin/
             //and not the previous folder
             if (splittedPath.Contains("bin"))
@@ -129,10 +132,10 @@ namespace Jarvis.ConfigurationService.Client
             }
             //Try grab base address from a local config file then from env variable
 
-            var baseConfigurationServer = GetFileContent(Path.Combine(GetCurrentPath(), baseAddressConfigFileName));
+            var baseConfigurationServer = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), baseAddressConfigFileName));
             if (String.IsNullOrEmpty(baseConfigurationServer))
             {
-                baseConfigurationServer = GetEnvironmentVariable(_baseServerAddressEnvironmentVariable);
+                baseConfigurationServer = _environment.GetEnvironmentVariable(_baseServerAddressEnvironmentVariable);
             }
             if (String.IsNullOrEmpty(baseConfigurationServer))
             {
@@ -140,7 +143,7 @@ namespace Jarvis.ConfigurationService.Client
                     string.Format(
                         "You need to specify base address for configuration server in environment variable: {0} or in config file {1}",
                         _baseServerAddressEnvironmentVariable,
-                        Path.Combine(GetCurrentPath(), baseAddressConfigFileName)
+                        Path.Combine(_environment.GetCurrentPath(), baseAddressConfigFileName)
                         );
                 throw new ConfigurationErrorsException(errorString);
             }
@@ -149,7 +152,7 @@ namespace Jarvis.ConfigurationService.Client
                 baseConfigurationServer.TrimEnd('/', '\\'),
                 applicationName,
                 moduleName,
-                GetMachineName());
+                _environment.GetMachineName());
 
             LogDebug("Loading configuration from " + _configFileLocation);
         }
@@ -249,80 +252,6 @@ namespace Jarvis.ConfigurationService.Client
                 throw new ConfigurationErrorsException(errorString);
             }
         }
-
-
-        #region Manager class
-
-
-        #endregion
-
-        #region Access To Environment
-
-        /// <summary>
-        /// Used to access a file on the network or to call a service that answer with
-        /// a full json file.
-        /// </summary>
-        internal static Func<String, String> DownloadFile = address =>
-        {
-            try
-            {
-                using (var wc = new WebClient())
-                {
-                    wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-                    return wc.DownloadString(address);
-                }
-            }
-            catch (Exception ex)
-            {
-                return String.Empty;
-            }
-        };
-
-        internal static Func<String, String> GetFileContent = fileName =>
-        {
-            if (!File.Exists(fileName))
-            {
-                return null;
-            }
-            return File.ReadAllText(fileName);
-        };
-
-        internal static Func<String> GetApplicationName = _GetApplicationName;
-
-        internal static String _GetApplicationName()
-        {
-            var actualFolder = GetCurrentPath();
-            DirectoryInfo currentDirectory = new DirectoryInfo(actualFolder);
-            do
-            {
-                var applicationFile = currentDirectory
-                    .GetFiles("*.application")
-                    .FirstOrDefault();
-                if (applicationFile != null)
-                {
-                    return Path.GetFileNameWithoutExtension(applicationFile.FullName);
-                }
-                currentDirectory = currentDirectory.Parent;
-            } while (currentDirectory != null);
-            throw new ConfigurationErrorsException(
-                "Unable to find file with extension .application to find application name");
-        }
-
-        internal static Action<String, String> SaveFile = File.WriteAllText;
-
-        /// <summary>
-        /// Used to access current path of the application
-        /// </summary>
-        internal static Func<String> GetCurrentPath = () => AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
-
-        /// <summary>
-        /// Access environment variable.
-        /// </summary>
-        internal static Func<String, String> GetEnvironmentVariable = Environment.GetEnvironmentVariable;
-
-        internal static Func<String> GetMachineName = () => Environment.MachineName;
-
-        #endregion
 
         #region Complex parameter handling
 

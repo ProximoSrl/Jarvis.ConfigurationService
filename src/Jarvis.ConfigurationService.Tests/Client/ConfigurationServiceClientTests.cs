@@ -3,6 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using Jarvis.ConfigurationService.Client.Support;
+using NSubstitute;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -53,32 +55,34 @@ namespace Jarvis.ConfigurationService.Tests.Client
         }]
 }}";
 
+        private IEnvironment stubEnvironment;
+
         [SetUp]
         public void SetUp()
         {
+            stubEnvironment = NSubstitute.Substitute.For<IEnvironment>();
+
             //valid directory as base test execution path.
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\develop\blabla\nameofsoftware\src\blabla\bin\debug";
-            ConfigurationServiceClient.DownloadFile = s => String.Empty;
-            ConfigurationServiceClient.GetFileContent = fileName => String.Empty; //base situation, no last good configuration.
-            ConfigurationServiceClient.GetEnvironmentVariable = variableName => "http://localhost";
-            ConfigurationServiceClient.SaveFile = (fn, cnt) => Console.WriteLine("Saving " + fn);
-            ConfigurationServiceClient.GetApplicationName = () => "TESTAPPLICATION";
-            ConfigurationServiceClient.GetMachineName = () => "TestMachine";
+            stubEnvironment.GetCurrentPath().Returns(@"c:\develop\blabla\nameofsoftware\src\blabla\bin\debug");
+
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(String.Empty);
+            stubEnvironment.GetFileContent("").ReturnsForAnyArgs(String.Empty);
+            stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://localhost");
+  
+            stubEnvironment.GetApplicationName().ReturnsForAnyArgs("TESTAPPLICATION"); 
+            stubEnvironment.GetMachineName().ReturnsForAnyArgs("TestMachine");
         }
 
         [Test]
         public void should_throw_exception_if_no_configuration_file_is_provided()
         {
-            ConfigurationServiceClient.DownloadFile = s => String.Empty;
-
             Assert.Throws<ConfigurationErrorsException>(() => CreateSut());
         }
 
         [Test]
         public void exception_for_no_configuration_file_found_should_tell_where_the_file_is_expected()
         {
-            ConfigurationServiceClient.DownloadFile = s => String.Empty;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             try
             {
                 CreateSut();
@@ -94,8 +98,8 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void exception_if_no_valid_json_is_returned()
         {
-            ConfigurationServiceClient.DownloadFile = s => an_invalid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(an_invalid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
             try
             {
                 CreateSut();
@@ -111,7 +115,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void exception_if_settings_not_present_and_no_default_value_specified()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             try
             {
                 var sut = CreateSut();
@@ -128,8 +132,8 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void exception_if_settings_not_present_and_no_default_value_specified_should_return_config_file_name()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             try
             {
                 var sut = CreateSut();
@@ -146,8 +150,8 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void configuration_manager_is_able_to_accept_testing_configuration_as_action()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
 
             var sut = CreateSut();
             sut.WithSetting("goodSetting", (setting) =>
@@ -159,8 +163,8 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void configuration_manager_is_able_to_accept_testing_configuration()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             try
             {
                 var sut = CreateSut();
@@ -181,8 +185,8 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void configuration_manager_is_able_to_accept_testing_configuration_with_custom_error()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             try
             {
                 var sut = CreateSut();
@@ -200,8 +204,8 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void configuration_manager_does_not_duplicate_error_message_for_invalid_configuration()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             try
             {
                 var sut = CreateSut();
@@ -219,7 +223,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void error_log_if_settings_not_present_and_no_default_value_specified()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             try
             {
                 var sut = CreateSut();
@@ -237,32 +241,20 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_correct_url_is_requested()
         {
-            String pathCalled = "";
-            ConfigurationServiceClient.DownloadFile = s =>
-            {
-                pathCalled = s;
-                return a_valid_configuration_file;
-            };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\service1\";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\service1\");
             CreateSut();
-
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config/TestMachine"));
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://localhost/TESTAPPLICATION/service1.config/TestMachine")));
         }
 
         [Test]
         public void verify_correct_url_is_requested_when_environment_variable_is_specified()
         {
-            String pathCalled = "";
-            ConfigurationServiceClient.GetEnvironmentVariable = v => "http://configuration.test.com/baseDirectory/";
-            ConfigurationServiceClient.DownloadFile = s =>
-            {
-                pathCalled = s;
-                return a_valid_configuration_file;
-            };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
+            stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://configuration.test.com/baseDirectory/");
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             CreateSut();
-
-            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config/TestMachine"));
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config/TestMachine")));
         }
 
         [Test]
@@ -270,44 +262,25 @@ namespace Jarvis.ConfigurationService.Tests.Client
         {
 
             //Configuration returns standard file 
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
-
-            //we have no environment variable
-            ConfigurationServiceClient.GetEnvironmentVariable = variableName => String.Empty;
-            //but we have local configuration file to specify base address.
-            ConfigurationServiceClient.GetFileContent = fileName =>
-            {
-                if (fileName.EndsWith(ConfigurationServiceClient.baseAddressConfigFileName))
-                {
-                    return "http://configuration.test.com/baseDirectory";
-                }
-                return "";
-            };
-            String pathCalled = "";
-            ConfigurationServiceClient.DownloadFile = s =>
-            {
-                pathCalled = s;
-                return a_valid_configuration_file;
-            };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\myapp\";
+            stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("");
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.baseAddressConfigFileName)))
+                .Returns("http://configuration.test.com/baseDirectory");
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             CreateSut();
 
-            Assert.That(pathCalled, Is.EqualTo("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config/TestMachine"));
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config/TestMachine")));
         }
 
         [Test]
         public void verify_exception_if_no_environment_is_configured()
         {
-            String pathCalled = "";
-            ConfigurationServiceClient.GetEnvironmentVariable = v => "";
             try
             {
-                ConfigurationServiceClient.DownloadFile = s =>
-                {
-                    pathCalled = s;
-                    return a_valid_configuration_file;
-                };
-                ConfigurationServiceClient.GetCurrentPath = () => @"c:\testpath\myprogram\release\";
+                stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("");
+                stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+                stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
                 CreateSut();
                 Assert.Fail("Exception is expected");
             }
@@ -321,51 +294,37 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_configuration_url_for_developers()
         {
-            String pathCalled = "";
-            ConfigurationServiceClient.DownloadFile = s =>
-            {
-                pathCalled = s;
-                return a_valid_configuration_file;
-            };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service1\bin\debug";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\developing\myfolder\TESTAPPLICATION\src\service1\bin\debug");
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service1.config/TestMachine"));
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://localhost/TESTAPPLICATION/service1.config/TestMachine")));
 
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service2\bin\release";
+            stubEnvironment.GetCurrentPath().Returns(@"c:\developing\myfolder\TESTAPPLICATION\src\service2\bin\release");
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service2.config/TestMachine"));
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://localhost/TESTAPPLICATION/service2.config/TestMachine")));
 
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service3\bin\x86";
+            stubEnvironment.GetCurrentPath().Returns(@"c:\developing\myfolder\TESTAPPLICATION\src\service3\bin\x86");
             CreateSut();
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service3.config/TestMachine"));
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://localhost/TESTAPPLICATION/service3.config/TestMachine")));
 
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\TESTAPPLICATION\src\service4\bin\anyfolder";
+            stubEnvironment.GetCurrentPath().Returns(@"c:\developing\myfolder\TESTAPPLICATION\src\service4\bin\anyfolder");
             CreateSut();
-
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/service4.config/TestMachine"));
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://localhost/TESTAPPLICATION/service4.config/TestMachine")));
         }
 
         [Test]
         public void verify_configuration_url_for_web_developers()
         {
-            String pathCalled = "";
-            ConfigurationServiceClient.DownloadFile = s =>
-            {
-                pathCalled = s;
-                return a_valid_configuration_file;
-            };
-            ConfigurationServiceClient.GetCurrentPath = () => @"c:\developing\myfolder\myprogram\src\myapplication.web";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\developing\myfolder\myprogram\src\myapplication.web");
             CreateSut();
-
-            Assert.That(pathCalled, Is.EqualTo("http://localhost/TESTAPPLICATION/myapplication.web.config/TestMachine"));
-
-
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://localhost/TESTAPPLICATION/myapplication.web.config/TestMachine")));
         }
 
         [Test]
         public void verify_basic_configuration_file_parsing()
         {
-            ConfigurationServiceClient.DownloadFile = s => "{ 'setting' : 'value' }";
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'setting' : 'value' }");
 
             var sut = CreateSut();
             var configuration = sut.GetSetting("setting", "");
@@ -375,7 +334,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_correct_handling_of_default_value()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
 
             var sut = CreateSut();
             var configuration = sut.GetSetting("setting_not_in_json_file", "defvalue");
@@ -385,8 +344,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_suboject_configuration_parsing()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file_with_suboject;
-
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file_with_suboject);
             var sut = CreateSut();
             var connection1 = sut.GetSetting("connections.conn1", "");
             Assert.That(connection1, Is.EqualTo("valueconn1"));
@@ -400,22 +358,21 @@ namespace Jarvis.ConfigurationService.Tests.Client
         {
             var baseDir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             var previousDir = new DirectoryInfo(baseDir + "/../../");
-            ConfigurationServiceClient.GetCurrentPath = () => baseDir;
+            stubEnvironment.GetCurrentPath().Returns(baseDir);
             var fileName = new FileInfo(Path.Combine(previousDir.FullName, "testappname.application"));
             if (!File.Exists(fileName.FullName))
             {
                 File.WriteAllText(fileName.FullName, "");
             }
-
-            var applicationName = ConfigurationServiceClient._GetApplicationName();
+            var sut = new StandardEnvironment();
+            var applicationName = sut.GetApplicationName();
             Assert.That(applicationName, Is.EqualTo("testappname"));
         }
 
         [Test]
         public void verify_nested_configuration_parsing()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file_with_nestedsuboject;
-
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file_with_nestedsuboject);
             var sut = CreateSut();
             var connection = sut.GetSetting("connections.mongo.conn1", "");
             Assert.That(connection, Is.EqualTo("mongo1"));
@@ -430,7 +387,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_correct_handling_of_default_value_dotted_settings()
         {
-            ConfigurationServiceClient.DownloadFile = s => a_valid_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
 
             var sut = CreateSut();
             var configuration = sut.GetSetting("setting_not_in_json_file", "defvalue1");
@@ -442,8 +399,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_complex_object_configuration_settings()
         {
-            ConfigurationServiceClient.DownloadFile = s => complex_object_configuration_file;
-
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(complex_object_configuration_file);
             var sut = CreateSut();
             dynamic configuration = sut.GetStructuredSetting("setting");
             Assert.That((String)configuration.propA, Is.EqualTo("valuea"));
@@ -453,7 +409,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_complex_object_in_nested_configuration_settings()
         {
-            ConfigurationServiceClient.DownloadFile = s => complex_object_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(complex_object_configuration_file);
 
             var sut = CreateSut();
             dynamic configuration = sut.GetStructuredSetting("complex.setting");
@@ -464,7 +420,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_array_configuration()
         {
-            ConfigurationServiceClient.DownloadFile = s => array_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
             var sut = CreateSut();
             IEnumerable<dynamic> configuration = sut.WithArraySetting("setting");
@@ -478,7 +434,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_array_configuration_with_usage()
         {
-            ConfigurationServiceClient.DownloadFile = s => array_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
             try
             {
@@ -500,7 +456,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_array_configuration_with_explicit_test()
         {
-            ConfigurationServiceClient.DownloadFile = s => array_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
             try
             {
@@ -523,7 +479,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_array_of_object_configuration()
         {
-            ConfigurationServiceClient.DownloadFile = s => array_configuration_file;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
             var sut = CreateSut();
             IEnumerable<dynamic> configuration = sut.WithArraySetting("complex.settings");
@@ -539,34 +495,29 @@ namespace Jarvis.ConfigurationService.Tests.Client
         {
 
             //Configuration server does not return anything
-            ConfigurationServiceClient.DownloadFile = s => String.Empty;
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(String.Empty);
 
             //Configuration will ask for last good configuration file and I return last configuration
-            String calledFileName = "";
-            ConfigurationServiceClient.GetFileContent = fileName =>
-            {
-                calledFileName = fileName;
-                return a_valid_configuration_file;
-            };
+            stubEnvironment.GetFileContent("").ReturnsForAnyArgs(a_valid_configuration_file);
 
             var sut = CreateSut();
 
             var configuration = sut.GetSetting("goodSetting");
             Assert.That(configuration, Is.EqualTo("hello setting"));
-            Assert.That(calledFileName, Is.StringEnding(ConfigurationServiceClient.lastGoodConfigurationFileName));
+            stubEnvironment.Received().GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.lastGoodConfigurationFileName)));
+            var received = stubEnvironment.ReceivedCalls().ToList();
             Assert.That(currentTestLogger.Logs.Any(l => l.Contains("last good configuration is used")), "verify warning of last good configuration is used");
         }
 
         [Test]
         public void verify_saving_last_good_configuration()
         {
-            //Configuration server does not return anything
-            ConfigurationServiceClient.DownloadFile = s => "{ 'Setting' : 'A sample string'}";
-            String contentFile = "";
-            ConfigurationServiceClient.SaveFile = (fn, content) => contentFile = content;
-            var sut = CreateSut();
-
-            Assert.That(contentFile, Is.EqualTo("{ 'Setting' : 'A sample string'}"));
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+            CreateSut();
+            stubEnvironment.Received().SaveFile(
+                Arg.Is<String>(s => s.EndsWith("lastGoodConfiguration.config", StringComparison.OrdinalIgnoreCase)), 
+                Arg.Is<String>(s => s.Equals("{ 'Setting' : 'A sample string'}")));
+           
         }
 
         private TestLogger currentTestLogger;
@@ -574,7 +525,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         private ConfigurationServiceClient CreateSut()
         {
             currentTestLogger = new TestLogger();
-            return new ConfigurationServiceClient(currentTestLogger.Log, "CQRS_TEST_CONFIGURATION_MANAGER");
+            return new ConfigurationServiceClient(currentTestLogger.Log, "CQRS_TEST_CONFIGURATION_MANAGER", stubEnvironment);
         }
 
         private class TestLogger 
