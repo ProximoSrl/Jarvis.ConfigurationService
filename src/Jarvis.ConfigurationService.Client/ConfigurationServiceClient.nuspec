@@ -10,13 +10,14 @@
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2014 - Ricci Gian Maria</copyright>
     <tags>Configuration,Jarvis</tags>
+	
+	<dependencies>
+      <dependency id="Json.NET" version="6.0.5" />
+    </dependencies>
   </metadata>
 
   <files>
     <file src="bin\release\Jarvis.ConfigurationService.Client.dll" target="lib\NET40" />
   </files>
-  
-  <dependencies>
-      <dependency id="Json.NET" version="6.0.5" />
-  </dependencies>
+
 </package>
