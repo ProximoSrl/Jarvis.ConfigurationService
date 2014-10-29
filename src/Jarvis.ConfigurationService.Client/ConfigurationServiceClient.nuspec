@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Jarvis.ConfigurationService.Client</id>
-    <version>1.0.0.0</version>
+    <version>1.0.0</version>
     <authors>Ricci Gian Maria - Proximo S.r.L.</authors>
     <owners>Ricci Gian Maria</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -15,4 +15,8 @@
   <files>
     <file src="bin\release\Jarvis.ConfigurationService.Client.dll" target="lib\NET40" />
   </files>
+  
+  <dependencies>
+      <dependency id="Json.NET" version="6.0.5" />
+  </dependencies>
 </package>
