@@ -24,7 +24,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         String baseUri = "http://localhost:53642";
 
         [TestFixtureSetUp]
-        public void FixtureSetup() 
+        public void FixtureSetup()
         {
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
             client = new WebClient();
@@ -118,6 +118,28 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void malformed_json_return_error_with_json_payload()
+        {
+            try
+            {
+                var result = client.DownloadString(baseUri + "/MyAppTest/ServiceMalformed.config");
+                Assert.Fail("An exception should be generated");
+            }
+            catch (WebException ex)
+            {
+
+                var responseStream = ex.Response.GetResponseStream();
+
+                using (var reader = new StreamReader(responseStream))
+                {
+                    var responseText = reader.ReadToEnd();
+                    JObject obj = (JObject) JsonConvert.DeserializeObject(responseText);
+                    Assert.That((String) obj["ExceptionMessage"], Contains.Substring("Unterminated string"));
+                }
+            }
+        }
+
+        [Test]
         public void verify_exception_with_malformed_json_is_entered()
         {
             try
@@ -158,10 +180,10 @@ namespace Jarvis.ConfigurationService.Tests.Support
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/");
             JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
-            Assert.That((String) resultObject["encryptedSetting"], Is.EqualTo("my password"));
+            Assert.That((String)resultObject["encryptedSetting"], Is.EqualTo("my password"));
         }
 
-        [Test] 
+        [Test]
         public void verify_encrypted_settings_for_specific_host()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
@@ -190,7 +212,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }
         }
 
-       [Test]
+        [Test]
         public void verify_encrypted_settings_for_not_overridden_property()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
@@ -199,37 +221,37 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
 
-       [Test]
-       public void verify_base_config_in_default_folder()
-       {
-           var result = client.DownloadString(baseUri + "/MyApp1/service1.config");
-           JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
-           Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world"), "Base.config not used in default directory");
-       }
+        [Test]
+        public void verify_base_config_in_default_folder()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/service1.config");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world"), "Base.config not used in default directory");
+        }
 
-       [Test]
-       public void verify_base_config_in_host_specific_folder()
-       {
-           var result = client.DownloadString(baseUri + "/MyApp1/service1.config/host1");
-           JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
-           Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world host 1"), "Base.config specific host not correctly used");
-       }
+        [Test]
+        public void verify_base_config_in_host_specific_folder()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/service1.config/host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world host 1"), "Base.config specific host not correctly used");
+        }
 
-       [Test]
-       public void verify_base_config_in_default_folder_has_less_precedence_than_specific()
-       {
-           var result = client.DownloadString(baseUri + "/MyApp1/service2.config");
-           JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
-           Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world from service 2"), "Base.config has less precedence than specific settings");
-       }
+        [Test]
+        public void verify_base_config_in_default_folder_has_less_precedence_than_specific()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/service2.config");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world from service 2"), "Base.config has less precedence than specific settings");
+        }
 
-       [Test]
-       public void verify_invalid_encryption_return_unencrypted()
-       {
-           var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host2");
-           JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
-           Assert.That((String)resultObject["Host2Specific"], Is.EqualTo("test"));
-       }
+        [Test]
+        public void verify_invalid_encryption_return_unencrypted()
+        {
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host2");
+            JObject resultObject = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)resultObject["Host2Specific"], Is.EqualTo("test"));
+        }
 
         [Test]
         public void redirect_of_folder_is_working_app_and_service()
@@ -285,7 +307,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
                     (String)setting["message"],
                     Is.EqualTo("hello from Configuration Server"),
                     "Even with redirectrion, base config.json is the one located in the root of the configuration server"
-                );  
+                );
         }
 
         [Test]

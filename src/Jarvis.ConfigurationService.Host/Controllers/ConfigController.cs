@@ -48,7 +48,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var appFolder = Path.Combine(baseDirectory, appName, "Default");
             var redirected = FileSystem.Instance.RedirectDirectory(appFolder);
-            if (!FileSystem.Instance.DirectoryExists(redirected, false)) 
+            if (!FileSystem.Instance.DirectoryExists(redirected, false))
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "App not found");
 
             string[] modules = FileSystem.Instance
@@ -65,16 +65,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         [Route("{appName}/{moduleName}.config/{hostName=}")]
         public Object GetConfiguration(String appName, String moduleName, String hostName = "")
         {
-            try
-            {
-                var baseDirectory = FileSystem.Instance.GetBaseDirectory();
-                return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
-            }
-            catch (Exception ex)
-            {
-                    
-                throw;
-            }
+            var baseDirectory = FileSystem.Instance.GetBaseDirectory();
+            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
         }
 
         [HttpGet]
@@ -83,8 +75,9 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var resourceContent = ConfigFileLocator.GetResourceFile(baseDirectory, appName, moduleName, hostName, fileName);
-            return 
-                new HttpResponseMessage() {
+            return
+                new HttpResponseMessage()
+                {
                     Content = new StringContent(resourceContent, Encoding.UTF8, "text/html")
                 };
         }

@@ -46,10 +46,24 @@ namespace Jarvis.ConfigurationService.Client.Support
                     return wc.DownloadString(address);
                 }
             }
-            catch (Exception ex)
+            catch (WebException ex)
             {
-                return String.Empty;
+                if (ex.Response != null)
+                {
+                    var responseStream = ex.Response.GetResponseStream();
+
+                    if (responseStream != null)
+                    {
+                        using (var reader = new StreamReader(responseStream))
+                        {
+                            var responseText = reader.ReadToEnd();
+                            throw new ConfigurationErrorsException(responseText);
+                        }
+                    }
+                }
+                throw new ConfigurationErrorsException("Error reading configuration File, server responded with exception: " + ex.Message);
             }
+
         }
 
         public String GetFileContent(String fileName)
@@ -103,6 +117,6 @@ namespace Jarvis.ConfigurationService.Client.Support
             return Environment.GetEnvironmentVariable(variableName);
         }
 
-      
+
     }
 }
