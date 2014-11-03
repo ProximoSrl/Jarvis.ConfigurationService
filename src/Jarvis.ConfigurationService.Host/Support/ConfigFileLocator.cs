@@ -60,6 +60,39 @@ namespace Jarvis.ConfigurationService.Host.Support
             return ComposeJsonContent(configFiles.ToArray());
         }
 
+        public static String GetResourceFile
+            (
+                String baseDirectory,
+                String applicationName,
+                String serviceName,
+                String hostName,
+                String resourceFileName
+            )
+        {
+
+            DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
+            var appDirectory = FileSystem.Instance.RedirectDirectory(
+                Path.Combine(baseDir.FullName, applicationName)
+            );
+
+            //Resource file are simply located in default director of the application or in the host override folder
+            String hostSpecificApplicationFileName = Path.Combine(appDirectory, hostName, resourceFileName);
+            String resourceApplicationFileName = Path.Combine(appDirectory, "Default", resourceFileName);
+            return GetContentOfFirstExistingFile(hostSpecificApplicationFileName, resourceApplicationFileName);
+        }
+
+        private static String GetContentOfFirstExistingFile(params String[] paths) 
+        {
+            foreach (var path in paths)
+            {
+                if (FileSystem.Instance.FileExists(path))
+                {
+                    return FileSystem.Instance.GetFileContent(path);
+                }
+            }
+            return null;
+        }
+
         internal static JObject ComposeJsonContent
             (
             params ConfigFileInfo[] jsonContent

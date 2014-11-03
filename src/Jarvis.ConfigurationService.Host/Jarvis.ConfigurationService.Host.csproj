@@ -97,6 +97,9 @@
     <Compile Include="Support\ConfigurationServiceApplication.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Configuration.Sample\MyApp1\Host1\resourceFile.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="App.config" />
     <None Include="Configuration.Sample\base.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -122,6 +125,9 @@
     <None Include="Configuration.Sample\MyApp2\base.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Configuration.Sample\MyApp1\Default\resourceFile.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Configuration.Sample\MyApp2\Default\Service1.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
