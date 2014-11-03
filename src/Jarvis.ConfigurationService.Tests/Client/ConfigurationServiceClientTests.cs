@@ -537,6 +537,20 @@ namespace Jarvis.ConfigurationService.Tests.Client
            
         }
 
+        [Test]
+        public void can_download_resource_file()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+
+            stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns("log4netconfiguration");
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
+
+            var sut = CreateSut();
+            var resource = sut.GetResource("log4net.config");
+            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine")));
+            Assert.That(resource, Is.EqualTo("log4netconfiguration"));
+        }
+
         private TestLogger currentTestLogger;
 
         private ConfigurationServiceClient CreateSut()
