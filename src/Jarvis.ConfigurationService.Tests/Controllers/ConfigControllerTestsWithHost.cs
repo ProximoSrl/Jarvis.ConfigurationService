@@ -287,5 +287,15 @@ namespace Jarvis.ConfigurationService.Tests.Support
                     "Even with redirectrion, base config.json is the one located in the root of the configuration server"
                 );  
         }
+
+        [Test]
+        public void verify_handling_of_simple_resource_for_entire_application()
+        {
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.Xml");
+            Assert.That(resFile, Is.EqualTo(
+@"<root>
+  <node value=""test"" />
+</root>"));
+        }
     }
 }

@@ -75,9 +75,18 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                     
                 throw;
             }
-           
         }
 
-       
+        [HttpGet]
+        [Route("{appName}/resources/{moduleName}/{filename}/{hostName=}")]
+        public HttpResponseMessage GetConfiguration(String appName, String moduleName, String fileName, String hostName = "")
+        {
+            var baseDirectory = FileSystem.Instance.GetBaseDirectory();
+            var resourceContent = ConfigFileLocator.GetResourceFile(baseDirectory, appName, moduleName, hostName, fileName);
+            return 
+                new HttpResponseMessage() {
+                    Content = new StringContent(resourceContent, Encoding.UTF8, "text/html")
+                };
+        }
     }
 }
