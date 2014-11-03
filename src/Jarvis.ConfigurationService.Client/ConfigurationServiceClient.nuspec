@@ -12,7 +12,7 @@
     <tags>Configuration,Jarvis</tags>
 	
 	<dependencies>
-      <dependency id="Json.NET" version="6.0.5" />
+      <dependency id="Newtonsoft.Json" version="6.0.5" />
     </dependencies>
   </metadata>
 
