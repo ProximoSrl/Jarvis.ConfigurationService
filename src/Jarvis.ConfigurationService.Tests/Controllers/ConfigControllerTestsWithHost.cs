@@ -289,12 +289,22 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
-        public void verify_handling_of_simple_resource_for_entire_application()
+        public void handling_of_simple_resource_for_entire_application()
         {
-            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.Xml");
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.Xml/hostnonexisting");
             Assert.That(resFile, Is.EqualTo(
 @"<root>
   <node value=""test"" />
+</root>"));
+        }
+
+        [Test]
+        public void host_override_for_simple_resource_for_entire_application()
+        {
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.Xml/Host1");
+            Assert.That(resFile, Is.EqualTo(
+@"<root>
+  <node value=""this is for host1"" />
 </root>"));
         }
     }
