@@ -551,6 +551,75 @@ namespace Jarvis.ConfigurationService.Tests.Client
             Assert.That(resource, Is.EqualTo("log4netconfiguration"));
         }
 
+        [Test]
+        public void can_download_resource_file_on_disk()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+            stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns("log4netconfiguration");
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
+            var sut = CreateSut();
+            var resource = sut.DownloadResource("log4net.config");
+            stubEnvironment.Received().SaveFile(
+                Arg.Is<String>(s => s.EndsWith("log4net.config")),
+                Arg.Is<String>(s => s.Equals("log4netconfiguration")));
+            Assert.That(resource, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void can_monitor_resource_file_on_disk()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+            String configContent = "resource content";
+            stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns(c => configContent);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
+            var sut = CreateSut();
+            var changedContent = "";
+            var resource = sut.DownloadResource("log4net.config", monitorForChange: true);
+
+            //now force polling
+            configContent = "modified content";
+            sut.CheckForMonitoredResourceChange();
+            stubEnvironment.Received().SaveFile(
+               Arg.Is<String>(s => s.EndsWith("log4net.config")),
+               Arg.Is<String>(s => s.Equals(configContent)));
+        }
+
+        [Test]
+        public void monitoring_is_disabled_by_default()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+            String configContent = "resource content";
+            stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns(c => configContent);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
+            var sut = CreateSut();
+            var changedContent = "";
+            var resource = sut.DownloadResource("log4net.config");
+
+            //now force polling
+            configContent = "modified content";
+            sut.CheckForMonitoredResourceChange();
+            stubEnvironment.Received().DidNotReceive().SaveFile(
+               Arg.Is<String>(s => s.EndsWith("log4net.config")),
+               Arg.Is<String>(s => s.Equals("modified content")));
+        }
+
+        [Test]
+        public void monitored_resources_does_not_change_files_if_content_not_changed()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+            String configContent = "resource content";
+            stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns(c => configContent);
+            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
+            var sut = CreateSut();
+            var resource = sut.DownloadResource("log4net.config", monitorForChange : true);
+
+            //now force polling
+            sut.CheckForMonitoredResourceChange();
+            stubEnvironment.Received().SaveFile(
+               Arg.Is<String>(s => s.EndsWith("log4net.config")),
+               Arg.Is<String>(s => s.Equals(configContent)));
+        }
+
         private TestLogger currentTestLogger;
 
         private ConfigurationServiceClient CreateSut()

@@ -2,14 +2,17 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Jarvis.ConfigurationService.Client
 {
@@ -37,6 +40,8 @@ namespace Jarvis.ConfigurationService.Client
         private String _applicationName;
 
         private IEnvironment _environment;
+
+        private Timer _configChangePollerTimer;
 
         internal Action<String, Boolean, Exception> Logger
         {
@@ -71,8 +76,11 @@ namespace Jarvis.ConfigurationService.Client
             _logger = loggerFunction;
             _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
             _environment = environment;
+            _resourceToMonitor = new ConcurrentDictionary<String, MonitoredFile>();
             AutoConfigure();
             LoadSettings();
+            _configChangePollerTimer = new Timer(60 * 1000);
+            _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
         }
 
         void LoadSettings()
@@ -312,7 +320,42 @@ namespace Jarvis.ConfigurationService.Client
         #endregion
 
         #region Resource Handling
-        internal object GetResource(string resourceName)
+
+        private ConcurrentDictionary<String, MonitoredFile> _resourceToMonitor;
+
+        private class MonitoredFile 
+        {
+            public String Content { get; set; }
+
+            public String LocalFileName { get; set; }
+
+            public Action<String> Callback { get; set; }
+        }
+
+        internal void PollServerForChangeInConfiguration(object sender, ElapsedEventArgs e)
+        {
+            CheckForMonitoredResourceChange();
+        }
+
+        public void CheckForMonitoredResourceChange() 
+        {
+            if (_resourceToMonitor.Count == 0) return;
+            foreach (var res in _resourceToMonitor)
+            {
+                var resourceValue = GetResource(res.Key);
+                if (!String.IsNullOrEmpty(resourceValue)) 
+                {
+                    if (!resourceValue.Equals(res.Value.Content)) 
+                    {
+                        //configuration is changed, we need to resave the file.
+                        res.Value.Content = resourceValue;
+                        _environment.SaveFile(res.Value.LocalFileName, resourceValue);
+                    }
+                }
+            }
+        }
+
+        internal String GetResource(string resourceName)
         {
             var resourceUri = String.Format(
                 "{0}/{1}/resources/{2}/{3}/{4}",
@@ -324,8 +367,49 @@ namespace Jarvis.ConfigurationService.Client
             return _environment.DownloadFile(resourceUri);
         }
 
+        /// <summary>
+        /// This function download a resource string, it also copy content on disk on a 
+        /// local copy of the resource file. If the configuration service is down or it 
+        /// does not answer correctly the client does not touch file. This imply that if
+        /// the client was able to download the file the first time, if the configuration
+        /// service went down the local version still remain the same.
+        /// </summary>
+        /// <param name="resourceName">Name of the resource you want to download</param>
+        /// <param name="localResourceFileName">Name of the local file, it can be omitted and the 
+        /// client will use the same value of <paramref name="resourceName"/></param>
+        /// <param name="monitorForChange">true if you want configuration client to poll configuration service
+        /// for change and update local file accordingly.</param>
+        /// <returns>true if the configuration service respond correctly, false otherwise.</returns>
+        public Boolean DownloadResource(
+            string resourceName, 
+            String localResourceFileName = null, 
+            Boolean monitorForChange = false)
+        {
+            String valueOfFile = GetResource(resourceName);
+            if (String.IsNullOrEmpty(valueOfFile)) 
+            {
+                this.LogError("Configuration server return null content for resource " + resourceName, null);
+                return false;
+            }
+            var savedFileName = Path.Combine(_environment.GetCurrentPath(), localResourceFileName ?? resourceName);
+            _environment.SaveFile(savedFileName, valueOfFile);
+            if (monitorForChange) 
+            {
+                var monitoredFile = new MonitoredFile()
+                {
+                    Content = valueOfFile,
+                    LocalFileName = savedFileName,
+                };
+                _resourceToMonitor.AddOrUpdate(resourceName, monitoredFile, (r, h) => monitoredFile);
+            }
+            return true;
+        }
+
+
         #endregion
 
 
+
+      
     }
 }
