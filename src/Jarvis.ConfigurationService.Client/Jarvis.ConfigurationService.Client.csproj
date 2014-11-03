@@ -50,6 +50,7 @@
     <Compile Include="Support\Environment.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ConfigurationServiceClient.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
