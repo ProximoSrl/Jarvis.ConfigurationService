@@ -30,6 +30,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core">
+      <HintPath>..\packages\Castle.Core.3.3.0\lib\net45\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Windsor">
+      <HintPath>..\packages\Castle.Windsor.3.3.0\lib\net45\Castle.Windsor.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Owin, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Owin.3.0.0\lib\net45\Microsoft.Owin.dll</HintPath>
@@ -79,6 +85,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.CastleIntegration\ConfigurationSubDependencyResolverTest.cs" />
     <Compile Include="Client\ConfigurationServiceClientWithHostTests.cs" />
     <Compile Include="Client\ConfigurationServiceClientTests.cs" />
     <Compile Include="Controllers\HelpersControllerTestWithHost.cs" />
@@ -86,6 +93,7 @@
     <Compile Include="Support\ConfigFileLocatorTests.cs" />
     <Compile Include="Controllers\ConfigControllerTestsWithHost.cs" />
     <Compile Include="Support\StandardFileSystemTests.cs" />
+    <Compile Include="Support\TestLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AnotherTestConfiguration\ApplicationX\HostA\ServiceY.config">
@@ -104,6 +112,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Jarvis.ConfigurationService.Client.CastleIntegration\Jarvis.ConfigurationService.Client.CastleIntegration.csproj">
+      <Project>{893ed554-3d86-47c8-b529-965329db32af}</Project>
+      <Name>Jarvis.ConfigurationService.Client.CastleIntegration</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Jarvis.ConfigurationService.Client\Jarvis.ConfigurationService.Client.csproj">
       <Project>{f6d73d37-1ba2-4cb5-a58c-0b54bf9c3822}</Project>
       <Name>Jarvis.ConfigurationService.Client</Name>

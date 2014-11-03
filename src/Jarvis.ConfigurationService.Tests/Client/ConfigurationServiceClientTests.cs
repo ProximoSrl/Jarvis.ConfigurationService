@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 using Jarvis.ConfigurationService.Client;
+using Jarvis.ConfigurationService.Tests.Support;
 
 namespace Jarvis.ConfigurationService.Tests.Client
 {
@@ -628,21 +629,6 @@ namespace Jarvis.ConfigurationService.Tests.Client
             return new ConfigurationServiceClient(currentTestLogger.Log, "CQRS_TEST_CONFIGURATION_MANAGER", stubEnvironment);
         }
 
-        private class TestLogger 
-        {
-            public Int32 ErrorCount { get; set; }
-
-            public List<String> Logs { get; set; }
-
-            public TestLogger()
-            {
-                Logs = new List<string>();
-            }
-            public void Log(String message, Boolean isError, Exception ex) 
-            {
-                if (isError) ErrorCount++;
-                Logs.Add(message);
-            }
-        }
+       
     }
 }

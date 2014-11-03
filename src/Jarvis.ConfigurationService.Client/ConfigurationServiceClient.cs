@@ -27,6 +27,13 @@ namespace Jarvis.ConfigurationService.Client
             }
         }
 
+        internal static IDisposable OverrideInstanceForUnitTesting(ConfigurationServiceClient overrideInstance) 
+        {
+            var actual = _instance;
+            _instance = overrideInstance;
+            return new DisposableAction(() => _instance = actual);
+        }
+
         internal const String BaseAddressConfigFileName = "baseConfigAddress.config";
         internal const String LastGoodConfigurationFileName = "lastGoodConfiguration.config";
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Jarvis.ConfigurationService.Client</id>
+    <id>Jarvis.ConfigurationService.Client.Beta</id>
     <version>1.0.0</version>
     <authors>Ricci Gian Maria - Proximo S.r.L.</authors>
     <owners>Ricci Gian Maria</owners>
