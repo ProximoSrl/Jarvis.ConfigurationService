@@ -13,7 +13,8 @@
 	
 	<dependencies>
       <dependency id="Castle.Windsor" version="3.3.0" />
-    </dependencies>
+      <dependency id="Jarvis.ConfigurationService.Client.CastleIntegration" version="1.0" />
+  </dependencies>
   </metadata>
 
   <files>
