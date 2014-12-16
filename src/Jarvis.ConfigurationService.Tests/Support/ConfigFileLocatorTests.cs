@@ -68,5 +68,6 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That((Int32)complexObjectNested["p1"], Is.EqualTo(0));
             Assert.That((Int32)complexObjectNested["p2"], Is.EqualTo(6));
         }
+
     }
 }

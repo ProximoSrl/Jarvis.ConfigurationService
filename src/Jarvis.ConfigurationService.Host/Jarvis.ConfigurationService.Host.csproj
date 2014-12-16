@@ -97,6 +97,9 @@
     <Compile Include="Support\ConfigurationServiceApplication.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Configuration.Sample\MyApp1\Default\Service1\resourceFile.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Configuration.Sample\MyApp1\Host1\resourceFile.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
