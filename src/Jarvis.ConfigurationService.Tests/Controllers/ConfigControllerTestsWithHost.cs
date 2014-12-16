@@ -339,5 +339,15 @@ namespace Jarvis.ConfigurationService.Tests.Support
   <node value=""testForService1"" />
 </root>"));
         }
+
+        [Test]
+        public void handling_of_simple_resource_for_specific_application_and_host()
+        {
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/Service1/resourceFile.Xml/Host1");
+            Assert.That(resFile, Is.EqualTo(
+@"<root>
+  <node value=""host 1 and service 1"" />
+</root>"));
+        }
     }
 }

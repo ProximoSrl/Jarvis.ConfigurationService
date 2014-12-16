@@ -77,9 +77,11 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             //Resource file are simply located in default director of the application or in the host override folder
             String hostSpecificApplicationFileName = Path.Combine(appDirectory, hostName, resourceFileName);
+            String hostSpecificServiceFileName = Path.Combine(appDirectory, hostName, serviceName, resourceFileName);
+
             String resourceApplicationFileName = Path.Combine(appDirectory, "Default", resourceFileName);
             String resourceServiceFileName = Path.Combine(appDirectory, "Default", serviceName, resourceFileName);
-            return GetContentOfFirstExistingFile(hostSpecificApplicationFileName, resourceServiceFileName, resourceApplicationFileName);
+            return GetContentOfFirstExistingFile(hostSpecificServiceFileName, hostSpecificApplicationFileName, resourceServiceFileName, resourceApplicationFileName);
         }
 
         private static String GetContentOfFirstExistingFile(params String[] paths) 
