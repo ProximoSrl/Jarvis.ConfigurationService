@@ -124,7 +124,7 @@ namespace Jarvis.ConfigurationService.Client
                 {
                     throw new Exception("Configuration is null");
                 }
-                _environment.SaveFile(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), configurationFullContent);
+                _environment.SaveFile(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), configurationFullContent, true);
             }
             catch (Exception ex)
             {
@@ -356,7 +356,7 @@ namespace Jarvis.ConfigurationService.Client
                     {
                         //configuration is changed, we need to resave the file.
                         res.Value.Content = resourceValue;
-                        _environment.SaveFile(res.Value.LocalFileName, resourceValue);
+                        _environment.SaveFile(res.Value.LocalFileName, resourceValue, false);
                     }
                 }
             }
@@ -399,7 +399,7 @@ namespace Jarvis.ConfigurationService.Client
                 return false;
             }
             var savedFileName = Path.Combine(_environment.GetCurrentPath(), localResourceFileName ?? resourceName);
-            _environment.SaveFile(savedFileName, valueOfFile);
+            _environment.SaveFile(savedFileName, valueOfFile, false);
             if (monitorForChange) 
             {
                 var monitoredFile = new MonitoredFile()

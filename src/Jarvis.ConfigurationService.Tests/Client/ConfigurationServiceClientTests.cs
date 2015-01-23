@@ -534,8 +534,18 @@ namespace Jarvis.ConfigurationService.Tests.Client
             CreateSut();
             stubEnvironment.Received().SaveFile(
                 Arg.Is<String>(s => s.EndsWith("lastGoodConfiguration.config", StringComparison.OrdinalIgnoreCase)), 
-                Arg.Is<String>(s => s.Equals("{ 'Setting' : 'A sample string'}")));
+                Arg.Is<String>(s => s.Equals("{ 'Setting' : 'A sample string'}")),
+                Arg.Any<Boolean>());
            
+        }
+
+        [Test]
+        public void verify_last_good_configuration_file_blocked_does_not_generate_errors()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+            stubEnvironment.When(s => s.SaveFile(Arg.Any<String>(), Arg.Any<String>(), false))
+                .Do(cinfo => { throw new IOException(); });
+            CreateSut();
         }
 
         [Test]
@@ -562,7 +572,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             var resource = sut.DownloadResource("log4net.config");
             stubEnvironment.Received().SaveFile(
                 Arg.Is<String>(s => s.EndsWith("log4net.config")),
-                Arg.Is<String>(s => s.Equals("log4netconfiguration")));
+                Arg.Is<String>(s => s.Equals("log4netconfiguration")), false);
             Assert.That(resource, Is.EqualTo(true));
         }
 
@@ -582,7 +592,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             sut.CheckForMonitoredResourceChange();
             stubEnvironment.Received().SaveFile(
                Arg.Is<String>(s => s.EndsWith("log4net.config")),
-               Arg.Is<String>(s => s.Equals(configContent)));
+               Arg.Is<String>(s => s.Equals(configContent)), false);
         }
 
         [Test]
@@ -601,7 +611,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             sut.CheckForMonitoredResourceChange();
             stubEnvironment.Received().DidNotReceive().SaveFile(
                Arg.Is<String>(s => s.EndsWith("log4net.config")),
-               Arg.Is<String>(s => s.Equals("modified content")));
+               Arg.Is<String>(s => s.Equals("modified content")), false);
         }
 
         [Test]
@@ -618,7 +628,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             sut.CheckForMonitoredResourceChange();
             stubEnvironment.Received().SaveFile(
                Arg.Is<String>(s => s.EndsWith("log4net.config")),
-               Arg.Is<String>(s => s.Equals(configContent)));
+               Arg.Is<String>(s => s.Equals(configContent)), false);
         }
 
         private TestLogger currentTestLogger;

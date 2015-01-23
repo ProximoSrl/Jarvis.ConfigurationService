@@ -19,7 +19,7 @@ namespace Jarvis.ConfigurationService.Client.Support
 
         String GetFileContent(String fileName);
         String GetApplicationName();
-        void SaveFile(String fileName, String content);
+        void SaveFile(string fileName, string content, bool ignoreErrors);
 
         /// <summary>
         /// Used to access current path of the application
@@ -94,9 +94,16 @@ namespace Jarvis.ConfigurationService.Client.Support
                 "Unable to find file with extension .application to find application name");
         }
 
-        public void SaveFile(String fileName, String content)
+        public void SaveFile(String fileName, String content, Boolean ignoreErrors)
         {
-            File.WriteAllText(fileName, content);
+            try
+            {
+                File.WriteAllText(fileName, content);
+            }
+            catch (IOException)
+            {
+                if (!ignoreErrors) throw;
+            }
         }
 
         /// <summary>
