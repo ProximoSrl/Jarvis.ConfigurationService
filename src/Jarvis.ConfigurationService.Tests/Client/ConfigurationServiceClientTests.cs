@@ -294,18 +294,20 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_exception_if_no_environment_is_configured()
         {
+			var currentPath = Path.Combine ("testpath","myprogram","release");
+			var expectedPath = Path.Combine (currentPath, ConfigurationServiceClient.BaseAddressConfigFileName);
             try
             {
                 stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("");
                 stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
-                stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
+				stubEnvironment.GetCurrentPath().Returns(currentPath);
                 CreateSut();
                 Assert.Fail("Exception is expected");
             }
             catch (ConfigurationErrorsException ex)
             {
                 Assert.That(ex.Message, Contains.Substring("CQRS_TEST_CONFIGURATION_MANAGER"));
-                Assert.That(ex.Message, Contains.Substring(@"c:\testpath\myprogram\release\" + ConfigurationServiceClient.BaseAddressConfigFileName));
+				Assert.That(ex.Message, Contains.Substring( expectedPath ));
             }
         }
 

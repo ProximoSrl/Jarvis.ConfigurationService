@@ -256,7 +256,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void redirect_of_folder_is_working_app_and_service()
         {
-            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration","ApplicationX");
             Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
             String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
             File.WriteAllText(redirectFile, anotherTestconfigurationDir);
@@ -270,9 +270,9 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void redirect_of_folder_is_working_when_listing_services()
         {
-            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration","ApplicationX");
             Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
-            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
+            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample","ApplicationX.redirect");
             File.WriteAllText(redirectFile, anotherTestconfigurationDir);
             var result = client.DownloadString(baseUri + "/ApplicationX");
             JArray setting = (JArray)JsonConvert.DeserializeObject(result);
@@ -282,9 +282,9 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void redirect_of_folder_is_working_with_specific_hosts()
         {
-            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration","ApplicationX");
             Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
-            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
+            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample","ApplicationX.redirect");
             File.WriteAllText(redirectFile, anotherTestconfigurationDir);
             var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY.config/HostA");
             JObject setting = (JObject)JsonConvert.DeserializeObject(result);
@@ -296,9 +296,9 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void redirect_of_folder_is_using_same_base_service_for_redirection()
         {
-            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration\\ApplicationX");
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration","ApplicationX");
             Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
-            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample\\ApplicationX.redirect");
+            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample","ApplicationX.redirect");
             File.WriteAllText(redirectFile, anotherTestconfigurationDir);
             var result = client.DownloadString(baseUri + "/ApplicationX/ServiceY.config");
             JObject setting = (JObject)JsonConvert.DeserializeObject(result);
