@@ -232,7 +232,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void verify_base_config_in_host_specific_folder()
         {
-            var result = client.DownloadString(baseUri + "/MyApp1/service1.config/host1");
+            var result = client.DownloadString(baseUri + "/MyApp1/Service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world host 1"), "Base.config specific host not correctly used");
         }
@@ -240,7 +240,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void verify_base_config_in_default_folder_has_less_precedence_than_specific()
         {
-            var result = client.DownloadString(baseUri + "/MyApp1/service2.config");
+            var result = client.DownloadString(baseUri + "/MyApp1/Service2.config");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["baseSetting"], Is.EqualTo("hello world from service 2"), "Base.config has less precedence than specific settings");
         }
@@ -313,7 +313,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void handling_of_simple_resource_for_entire_application()
         {
-            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.Xml/hostnonexisting");
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.xml/hostnonexisting");
             Assert.That(resFile, Is.EqualTo(
 @"<root>
   <node value=""test"" />
@@ -323,7 +323,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void host_override_for_simple_resource_for_entire_application()
         {
-            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.Xml/Host1");
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.xml/Host1");
             Assert.That(resFile, Is.EqualTo(
 @"<root>
   <node value=""this is for host1"" />
@@ -333,7 +333,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void handling_of_simple_resource_for_specific_application()
         {
-            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/Service1/resourceFile.Xml/hostnonexisting");
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/Service1/resourceFile.xml/hostnonexisting");
             Assert.That(resFile, Is.EqualTo(
 @"<root>
   <node value=""testForService1"" />
@@ -343,7 +343,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void handling_of_simple_resource_for_specific_application_and_host()
         {
-            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/Service1/resourceFile.Xml/Host1");
+            var resFile = client.DownloadString(baseUri + "/MyApp1/resources/Service1/resourceFile.xml/Host1");
             Assert.That(resFile, Is.EqualTo(
 @"<root>
   <node value=""host 1 and service 1"" />
