@@ -56,5 +56,22 @@ During development is natural to store a default configuration for each service 
 
 If you place a file called **ApplicationName.redirect** that contains a single line pointing to a physical directory, configuration server will follow that redirect. This de facto permits you to create a soft link from configuration store to the real directory where the files are. This is expecially useful during development to point to source controlled configuration files.
 
+###Encrypting credentials
 
+If you need to store some sensitive data inside file that will be included in source control you can use basic form of encryption. First you need to call a function to generate an encryption key
 
+	http://localhost:55555/support/encryption/generatekey
+
+This will return a json text with a fresh generated key, now you need to copy response inside a file called *encryption.machinename.key* inside the root of configuration folder. This will constitute the base encryption key for configuration for machine *machinename*
+
+When encryption.key file is stored, you can issue a post to
+
+	http://localhost:55555/support/encryption/encrypt
+
+with such payload
+
+	{StringToEncrypt : 'string you want to encrypt'}
+
+This will return encrypted string. Now if you want to include an encrypted string inside config you should simply enclose with Dollar Sign, ex
+
+	'$ldapPassword$' : '061FC47C86934D2B3311CE094CA61BB9'
