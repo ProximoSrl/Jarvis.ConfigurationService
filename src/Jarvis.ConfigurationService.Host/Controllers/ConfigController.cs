@@ -21,6 +21,23 @@ namespace Jarvis.ConfigurationService.Host.Controllers
     {
         private static ILog _logger = LogManager.GetLogger(typeof(ConfigController));
 
+        private static String version;
+
+        private static String informationalVersion;
+
+        static ConfigController()
+        {
+            version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            var informationalAttribute = Attribute
+                .GetCustomAttribute(
+                    Assembly.GetExecutingAssembly(),
+                    typeof(AssemblyInformationalVersionAttribute))
+                as AssemblyInformationalVersionAttribute;
+            if (informationalAttribute != null)
+                informationalVersion = informationalAttribute.InformationalVersion;
+        }
+
         [HttpGet]
         [Route("")]
         public ServerStatusModel Status()
@@ -37,7 +54,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             {
                 BaseFolder = baseDirectory,
                 Applications = applicationsDir.Union(redirectedApps).ToArray(),
-                Version = Assembly.GetExecutingAssembly().GetName().Version.ToString()
+                Version = version,
+                InformationalVersion = informationalVersion,
             };
         }
 

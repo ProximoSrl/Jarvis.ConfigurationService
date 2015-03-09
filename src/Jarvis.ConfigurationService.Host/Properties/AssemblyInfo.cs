@@ -35,5 +35,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: InternalsVisibleTo("Jarvis.ConfigurationService.Tests")]
-[assembly: AssemblyInformationalVersion("Jarvis.ConfigurationService")]
+[assembly: AssemblyInformationalVersion("LocalCompilation")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
