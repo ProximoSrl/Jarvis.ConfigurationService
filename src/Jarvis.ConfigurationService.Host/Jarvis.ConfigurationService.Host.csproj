@@ -1298,6 +1298,7 @@
     <None Include="Configuration.Sample\MyApp1\Default\Service1.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Jarvis.ConfigurationService.Host.nuspec" />
     <None Include="log4net.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
