@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Configuration;
+using System.Text.RegularExpressions;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
@@ -33,7 +34,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
-
+             
             //load standard config file
             List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseConfigFileName))
@@ -80,7 +81,6 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 var parameterObject = ComposeJsonContent(parametersFiles.ToArray());
                 //Do the substitution
-                String parameterObjectAsString = baseConfigObject.ToString();
                 while (ReplaceParameters(baseConfigObject, parameterObject)) 
                 {
                     //do nothing, everything is done by the replace parameters routine
@@ -218,10 +218,14 @@ namespace Jarvis.ConfigurationService.Host.Support
                 { 
                     hasReplaced = hasReplaced || ReplaceParameters((JObject) property.Value, parameterObject);
                 }
-                else if (property.Value is JToken && System.Text.RegularExpressions.Regex.IsMatch(property.Value.ToString(), "^%.*%$"))
+                else if (property.Value is JToken && Regex.IsMatch(property.Value.ToString(), "%.*%"))
                 {
                     JToken token = (JToken)property.Value;
-                    source[property.Name] = GetParameterValue(property.Value.ToString().Trim('%'), parameterObject);
+                    var replaced = Regex.Replace(
+                        property.Value.ToString(), 
+                        @"%(?<match>.*)%", 
+                        new MatchEvaluator(m => GetParameterValue(m.Groups["match"].Value, parameterObject)));
+                    source[property.Name] = replaced;
                     hasReplaced = true;
                 }
 	        }

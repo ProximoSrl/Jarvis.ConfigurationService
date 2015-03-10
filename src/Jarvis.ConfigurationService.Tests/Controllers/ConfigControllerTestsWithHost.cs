@@ -352,11 +352,35 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
-        public void override_parameters_for_service()
+        public void override_parameters_for_service_with_base_app_parameter()
         {
             var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
-            Assert.That((String)jobj["override-parameter-test"], Is.EqualTo("104"), "Override parameters with base paramters failed");
+            Assert.That((String)jobj["override-parameter-test"], Is.EqualTo("104"), "Override parameters with base parameters failed");
+        }
+
+        [Test]
+        public void override_parameters_for_service_with_service_parameter_file()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["override-parameter-complex"], Is.EqualTo("test"), "Override parameters with service parameters failed");
+        }
+
+        [Test] 
+        public void override_parameters_for_service_with_service_parameter_file_not_change_other_properteis()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["subparam2-parameter"], Is.EqualTo("43"), "overriding complex parameters leaves sibling unaltered");
+        }
+
+        [Test]
+        public void override_parameters_with_partial()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["partial-parameter"], Is.EqualTo("this is 104 partial"), "parameters supports partial substitution");
         }
     }
 }

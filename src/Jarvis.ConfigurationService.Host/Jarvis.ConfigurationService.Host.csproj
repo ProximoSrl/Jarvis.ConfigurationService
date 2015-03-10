@@ -104,6 +104,9 @@
     <None Include="Configuration.Sample\MyAppParam\base.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration.Sample\MyAppParam\Default\service1.parameters.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Configuration.Sample\MyAppParam\parameters.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
