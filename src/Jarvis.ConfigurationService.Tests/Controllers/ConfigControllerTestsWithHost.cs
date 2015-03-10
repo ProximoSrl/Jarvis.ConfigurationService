@@ -374,13 +374,21 @@ namespace Jarvis.ConfigurationService.Tests.Support
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["subparam2-parameter"], Is.EqualTo("43"), "overriding complex parameters leaves sibling unaltered");
         }
-
+         
         [Test]
         public void override_parameters_with_partial()
         {
             var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["partial-parameter"], Is.EqualTo("this is 104 partial"), "parameters supports partial substitution");
+        }
+
+        [Test]
+        public void nested_parameter_support()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["nested-settings"], Is.EqualTo("Composed with final nested value"), "parameter contains other parameter settings");
         }
     }
 }
