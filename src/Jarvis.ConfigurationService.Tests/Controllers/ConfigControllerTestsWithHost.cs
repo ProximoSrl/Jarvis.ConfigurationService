@@ -53,7 +53,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }
             File.WriteAllText(Path.Combine(FileSystem.Instance.GetBaseDirectory(), "myapp3.redirect"), @"c:\temp\myapp3");
             var result = client.DownloadString(baseUri);
-            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppTest"",""myapp3""]"));
+            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppParam"",""MyAppTest"",""myapp3""]"));
         }
 
         [Test]
@@ -63,18 +63,19 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That(result, Is.StringContaining(@"[""Service1"",""Service2""]"));
         }
 
+        String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false""}";
         [Test]
         public void correct_configuration_of_single_service()
-        {
+        { 
             var result = client.DownloadString(baseUri + "/MyApp1/Service2.config");
-            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world from service 2"",""enableApi"":""false""}"));
+            Assert.That(result, Is.EqualTo(expected));
         }
 
         [Test]
         public void correct_configuration_of_single_service_with_old_route()
         {
             var result = client.DownloadString(baseUri + "/MyApp1/Service2/config.json");
-            Assert.That(result, Is.EqualTo(@"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""baseSetting"":""hello world from service 2"",""enableApi"":""false""}"));
+            Assert.That(result, Is.EqualTo(expected));
         }
 
         [Test]
@@ -348,6 +349,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
 @"<root>
   <node value=""host 1 and service 1"" />
 </root>"));
+        }
+
+        [Test]
+        public void override_parameters_for_service()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["override-parameter-test"], Is.EqualTo("104"), "Override parameters with base paramters failed");
         }
     }
 }

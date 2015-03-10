@@ -34,6 +34,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
 
+            //load standard config file
             List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseConfigFileName), baseConfigFileName.Substring(baseDirLen)));
@@ -44,6 +45,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             if (FileSystem.Instance.FileExists(serviceConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceConfigFileName), serviceConfigFileName.Substring(baseDirLen)));
 
+            //load specific machine configuration files
             if (!String.IsNullOrEmpty(hostName))
             {
                 String hostBaseConfigFileName = Path.Combine(appDirectory, hostName, "base.config");
@@ -57,7 +59,35 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 throw new ConfigurationErrorsException("There are no valid config at directory: " + baseDirectory);
             }
-            return ComposeJsonContent(configFiles.ToArray());
+
+            //then load all parameter files.
+            String baseParametersFileName = Path.Combine(baseDir.FullName, "parameters.config");
+            String applicationBaseParametersFileName = Path.Combine(appDirectory, "parameters.config");
+            String defaultDirectoryBaseParametersFileName = Path.Combine(appDirectory, "Default", "parameters.config");
+            String serviceParametersFileName = Path.Combine(appDirectory, "Default", serviceName + ".parameters.config");
+            List<ConfigFileInfo> parametersFiles = new List<ConfigFileInfo>();
+            if (FileSystem.Instance.FileExists(baseParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseParametersFileName), baseParametersFileName.Substring(baseDirLen)));
+            if (FileSystem.Instance.FileExists(applicationBaseParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseParametersFileName), applicationBaseParametersFileName.Substring(baseDirLen)));
+            if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultDirectoryBaseParametersFileName), defaultDirectoryBaseParametersFileName.Substring(baseDirLen)));
+            if (FileSystem.Instance.FileExists(serviceParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceParametersFileName), serviceParametersFileName.Substring(baseDirLen)));
+
+            var baseConfigObject = ComposeJsonContent(configFiles.ToArray());
+            if (parametersFiles.Count > 0)
+            {
+                var parameterObject = ComposeJsonContent(parametersFiles.ToArray());
+                //Do the substitution
+                String parameterObjectAsString = baseConfigObject.ToString();
+                while (ReplaceParameters(baseConfigObject, parameterObject)) 
+                {
+                    //do nothing, everything is done by the replace parameters routine
+                }
+            }
+
+            return baseConfigObject;
         }
 
         public static String GetResourceFile
@@ -158,6 +188,44 @@ namespace Jarvis.ConfigurationService.Host.Support
 
                 }
             }
+        }
+
+        /// <summary>
+        /// it is used to retrieve parameters settings from config file.
+        /// </summary>
+        /// <param name="settingName"></param>
+        /// <returns></returns>
+        private static String GetParameterValue(string settingName, JObject parameterObject)
+        {
+            var path = settingName.Split('.');
+            JObject current = parameterObject;
+            for (int i = 0; i < path.Length - 1; i++)
+            {
+                if (current[path[i]] == null) return null;
+                current = (JObject)current[path[i]];
+            }
+            if (current[path.Last()] == null)
+                return null;
+            return current[path.Last()].ToString();
+        }
+
+        private static Boolean ReplaceParameters(JObject source, JObject parameterObject) 
+        {
+            Boolean hasReplaced = false;
+            foreach (var property in source.Properties())
+	        {
+                if (property.Value is JObject)
+                { 
+                    hasReplaced = hasReplaced || ReplaceParameters((JObject) property.Value, parameterObject);
+                }
+                else if (property.Value is JToken && System.Text.RegularExpressions.Regex.IsMatch(property.Value.ToString(), "^%.*%$"))
+                {
+                    JToken token = (JToken)property.Value;
+                    source[property.Name] = GetParameterValue(property.Value.ToString().Trim('%'), parameterObject);
+                    hasReplaced = true;
+                }
+	        }
+            return hasReplaced;
         }
 
         internal class ConfigFileInfo 
