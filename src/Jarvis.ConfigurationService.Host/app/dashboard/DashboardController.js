@@ -14,6 +14,7 @@
         vm.version = status.Version;
         vm.informationalVersion = status.InformationalVersion;
         vm.applications = [];
+        vm.appDetailsVisible = false;
         /* */
 
         var init = function () {
@@ -23,7 +24,7 @@
                     "name": tname
                 };
                 dashboardData.getApplicationStats(tname).then(function (d) {
-                    appStats.stats = d;
+                    appStats.services = d;
                     vm.applications.push(appStats);
                 });
             });
@@ -34,6 +35,12 @@
         var update = function () {
             
         };
+
+        vm.showApp = function (app)
+        {
+            vm.currentApplication = app;
+            vm.appDetailsVisible = true;
+        }
 
         $scope.$on('$destroy', function () {
             $interval.cancel(stop);

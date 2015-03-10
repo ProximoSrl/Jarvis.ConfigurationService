@@ -1,7 +1,6 @@
 ﻿
 <div class="row" ng-repeat="application in dashboard.applications">
-
-    <div class="col-lg-5 col-xs-9">
+    <div class="col-lg-6 col-xs-6">
         <!-- small box -->
         <div class="small-box bg-aqua">
             <div class="inner">
@@ -9,16 +8,21 @@
                     {{application.name}}
                 </h3>
                 <p>
-                    Applications: {{application.stats.length}}
+                    Applications: {{application.services.length}}
                 </p>
             </div>
             <div class="icon">
                 <i class="ion ion-document-text"></i>
             </div>
-            <a href="#" class="small-box-footer">
+            <a href="#" class="small-box-footer" ng-click="dashboard.showApp(application)">
                 View configuration <i class="fa fa-arrow-circle-right"></i>
             </a>
         </div>
     </div><!-- ./col -->
-    
 </div><!-- /.row -->
+<div class="col-lg-6 col-xs-6" ng-show="dashboard.appDetailsVisible">
+    <h3>Application Name: {{dashboard.currentApplication.name}}</h3>
+    <div class="row" ng-repeat="services in dashboard.currentApplication.services">
+        <div><a href="/{{dashboard.currentApplication.name}}/{{services}}.config" target="_blank">Service: {{services}}</a></div>
+    </div>
+</div>
