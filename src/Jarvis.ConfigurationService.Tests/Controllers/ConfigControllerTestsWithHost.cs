@@ -383,12 +383,31 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That((String)jobj["partial-parameter"], Is.EqualTo("this is 104 partial"), "parameters supports partial substitution");
         }
 
+         [Test]
+        public void override_parameters_with_multiple_partial_and_nested()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["partial-multiple-parameter"], Is.EqualTo("this is 104 partial I want also test"), "parameters supports partial substitution");
+        }
+
+
         [Test]
         public void nested_parameter_support()
         {
             var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["nested-settings"], Is.EqualTo("Composed with final nested value"), "parameter contains other parameter settings");
+        }
+
+        [Test]
+        public void escape_support()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["escape-parameter-char"], Is.EqualTo("this settings contains % char"), "percentage char is escaped with %%");
+            Assert.That((String)jobj["double-escape-parameter-char"], Is.EqualTo("this settings contains % char and I'm expecting % not to be altered"), "percentage char is escaped with %%");
+        
         }
     }
 }

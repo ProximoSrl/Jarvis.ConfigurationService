@@ -34,7 +34,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
-             
+
             //load standard config file
             List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseConfigFileName))
@@ -51,12 +51,12 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 String hostBaseConfigFileName = Path.Combine(appDirectory, hostName, "base.config");
                 if (FileSystem.Instance.FileExists(hostBaseConfigFileName))
-                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostBaseConfigFileName),hostBaseConfigFileName.Substring(baseDirLen) , hostName));
+                    configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostBaseConfigFileName), hostBaseConfigFileName.Substring(baseDirLen), hostName));
                 String hostConfigFileName = Path.Combine(appDirectory, hostName, serviceName + ".config");
                 if (FileSystem.Instance.FileExists(hostConfigFileName))
                     configFiles.Add(ConfigFileInfo.ForHostSpecific(FileSystem.Instance.GetFileContent(hostConfigFileName), hostBaseConfigFileName.Substring(baseDirLen), hostName));
             }
-            if (configFiles.Count == 0) 
+            if (configFiles.Count == 0)
             {
                 throw new ConfigurationErrorsException("There are no valid config at directory: " + baseDirectory);
             }
@@ -81,10 +81,11 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 var parameterObject = ComposeJsonContent(parametersFiles.ToArray());
                 //Do the substitution
-                while (ReplaceParameters(baseConfigObject, parameterObject)) 
+                while (ReplaceParameters(baseConfigObject, parameterObject))
                 {
                     //do nothing, everything is done by the replace parameters routine
                 }
+                UnescapePercentage(baseConfigObject);
             }
 
             return baseConfigObject;
@@ -114,7 +115,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             return GetContentOfFirstExistingFile(hostSpecificServiceFileName, hostSpecificApplicationFileName, resourceServiceFileName, resourceApplicationFileName);
         }
 
-        private static String GetContentOfFirstExistingFile(params String[] paths) 
+        private static String GetContentOfFirstExistingFile(params String[] paths)
         {
             foreach (var path in paths)
             {
@@ -175,7 +176,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                             {
                                 result[propertyName] = "Unable to decrypt";
                             }
-                        } 
+                        }
                         else
                         {
                             result[propertyName] = "Unable to decrypt. Error: " + errorMessage;
@@ -209,30 +210,50 @@ namespace Jarvis.ConfigurationService.Host.Support
             return current[path.Last()].ToString();
         }
 
-        private static Boolean ReplaceParameters(JObject source, JObject parameterObject) 
+        private static Boolean ReplaceParameters(JObject source, JObject parameterObject)
         {
             Boolean hasReplaced = false;
             foreach (var property in source.Properties())
-	        {
+            {
                 if (property.Value is JObject)
-                { 
-                    hasReplaced = hasReplaced || ReplaceParameters((JObject) property.Value, parameterObject);
-                }
-                else if (property.Value is JToken && Regex.IsMatch(property.Value.ToString(), "%.*%"))
                 {
-                    JToken token = (JToken)property.Value;
-                    var replaced = Regex.Replace(
-                        property.Value.ToString(), 
-                        @"%(?<match>.*)%", 
-                        new MatchEvaluator(m => GetParameterValue(m.Groups["match"].Value, parameterObject)));
-                    source[property.Name] = replaced;
-                    hasReplaced = true;
+                    hasReplaced = hasReplaced || ReplaceParameters((JObject)property.Value, parameterObject);
                 }
-	        }
+                else if (property.Value is JToken)
+                {
+                    String value = property.Value.ToString();
+                    if (Regex.IsMatch(property.Value.ToString(), "(?<!%)%(?!%).+?(?<!%)%(?!%)"))
+                    {
+                        JToken token = (JToken)property.Value;
+                        value = Regex.Replace(
+                            value,
+                            @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
+                            new MatchEvaluator(m => GetParameterValue(m.Groups["match"].Value, parameterObject)));
+                        
+                        hasReplaced = true;
+                    }
+                    source[property.Name] = value;
+                }
+            }
             return hasReplaced;
         }
 
-        internal class ConfigFileInfo 
+        private static void UnescapePercentage(JObject source)
+        {
+            foreach (var property in source.Properties())
+            {
+                if (property.Value is JObject)
+                {
+                    UnescapePercentage((JObject)property.Value);
+                }
+                else if (property.Value is JToken && property.Value.ToString().Contains("%%"))
+                {
+                    source[property.Name] = property.Value.ToString().Replace("%%", "%");
+                }
+            }
+        }
+
+        internal class ConfigFileInfo
         {
             public static ConfigFileInfo ForBase(String content, String fileName)
             {
