@@ -39,7 +39,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void Smoke_test_root()
         {
-            var result = client.DownloadString(baseUri);
+            var result = client.DownloadString(baseUri+ "/status");
             Assert.That(result, Is.Not.Empty);
         }
 
@@ -52,14 +52,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
                 File.Delete(file);
             }
             File.WriteAllText(Path.Combine(FileSystem.Instance.GetBaseDirectory(), "myapp3.redirect"), @"c:\temp\myapp3");
-            var result = client.DownloadString(baseUri);
+            var result = client.DownloadString(baseUri + "/status");
             Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppParam"",""MyAppTest"",""myapp3""]"));
         }
 
         [Test]
         public void correct_listing_of_all_services_in_application()
         {
-            var result = client.DownloadString(baseUri + "/MyApp1");
+            var result = client.DownloadString(baseUri + "/MyApp1/status");
             Assert.That(result, Is.StringContaining(@"[""Service1"",""Service2""]"));
         }
 
@@ -275,7 +275,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That(Directory.Exists(anotherTestconfigurationDir), "Test data does not exists");
             String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample","ApplicationX.redirect");
             File.WriteAllText(redirectFile, anotherTestconfigurationDir);
-            var result = client.DownloadString(baseUri + "/ApplicationX");
+            var result = client.DownloadString(baseUri + "/ApplicationX/status");
             JArray setting = (JArray)JsonConvert.DeserializeObject(result);
             Assert.That(setting.Count, Is.EqualTo(1));
         }

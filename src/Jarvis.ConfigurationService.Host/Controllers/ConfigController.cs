@@ -39,7 +39,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         }
 
         [HttpGet]
-        [Route("")]
+        [Route("status")]
         public ServerStatusModel Status()
         {
             string baseDirectory = FileSystem.Instance.GetBaseDirectory();
@@ -60,7 +60,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         }
 
         [HttpGet]
-        [Route("{appName}")]
+        [Route("{appName}/status")]
         public HttpResponseMessage GetConfiguration(String appName)
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();

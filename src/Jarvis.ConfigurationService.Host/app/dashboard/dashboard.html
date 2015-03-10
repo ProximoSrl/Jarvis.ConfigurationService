@@ -1,0 +1,24 @@
+﻿
+<div class="row" ng-repeat="application in dashboard.applications">
+
+    <div class="col-lg-5 col-xs-9">
+        <!-- small box -->
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>
+                    {{application.name}}
+                </h3>
+                <p>
+                    Applications: {{application.stats.length}}
+                </p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-document-text"></i>
+            </div>
+            <a href="#" class="small-box-footer">
+                View configuration <i class="fa fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div><!-- ./col -->
+    
+</div><!-- /.row -->
