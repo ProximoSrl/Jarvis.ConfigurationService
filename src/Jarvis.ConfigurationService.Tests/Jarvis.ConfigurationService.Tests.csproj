@@ -79,7 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.CastleIntegration\ConfigurationSubDependencyResolverTest.cs" />
-    <Compile Include="Client\ConfigurationServiceClientWithHostTests.cs" />
     <Compile Include="Client\ConfigurationServiceClientTests.cs" />
     <Compile Include="Controllers\HelpersControllerTestWithHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
