@@ -92,14 +92,20 @@ namespace Jarvis.ConfigurationService.Client
 
         void LoadSettings()
         {
-            String configurationFullContent;
+            String configurationFullContent = null;
             try
             {
                 configurationFullContent = _environment.DownloadFile(ConfigFileLocation);
             }
-            catch (ConfigurationErrorsException ex)
+            catch (ServerConfigurationException ex)
             {
-                throw new ConfigurationErrorsException(ex.Message);
+                LogError("Server configuration exception.", ex);
+                if (ex.ServerResponse.Contains("Error reading config file"))
+                    throw new ConfigurationErrorsException("Server Configuration Exception", ex);
+            }
+            catch (Exception ex)
+            {
+                LogError("Unable to connect to remote server", ex);
             }
 
             //If server did not responded we can use last good configuration

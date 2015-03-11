@@ -116,7 +116,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         [Test]
         public void verify_correct_exception_handling()
         {
-            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(x => { throw new ConfigurationErrorsException("Malformed Json"); });
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(x => { throw new ServerConfigurationException("Exception test", "server response: Error reading config file error in line xxxx"); });
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
             try
             {
@@ -125,7 +125,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             }
             catch (ConfigurationErrorsException expectedException)
             {
-                Assert.That(expectedException.Message, Contains.Substring("Malformed Json"));
+                Assert.That(expectedException.Message, Contains.Substring("Server Configuration Exception"));
             }
 
         }

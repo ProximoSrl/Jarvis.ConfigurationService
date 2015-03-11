@@ -57,7 +57,10 @@ namespace Jarvis.ConfigurationService.Client.Support
                         using (var reader = new StreamReader(responseStream))
                         {
                             var responseText = reader.ReadToEnd();
-                            throw new ConfigurationErrorsException(responseText);
+                            throw new ServerConfigurationException(
+                                "web exception:" + ex.Message,
+                                responseText,
+                                ex);
                         }
                     }
                 }
