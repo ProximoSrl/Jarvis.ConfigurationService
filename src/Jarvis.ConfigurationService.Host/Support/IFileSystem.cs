@@ -123,7 +123,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                     actualFolderName = actualFolderName.Substring(0, lastSeparatorPathPosition);
                 }
             } while (lastSeparatorPathPosition > 0);
-            return folderName;
+            return null;
         }
 
 

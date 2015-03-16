@@ -65,7 +65,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var appFolder = Path.Combine(baseDirectory, appName, "Default");
-            var redirected = FileSystem.Instance.RedirectDirectory(appFolder);
+            var redirected = FileSystem.Instance.RedirectDirectory(appFolder) ??
+                appFolder;
             if (!FileSystem.Instance.DirectoryExists(redirected, false))
                 return Request.CreateErrorResponse(HttpStatusCode.NotFound, "App not found");
 

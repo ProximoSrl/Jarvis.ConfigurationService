@@ -70,7 +70,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             stubEnvironment.GetFileContent("").ReturnsForAnyArgs(String.Empty);
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://localhost");
             ClientConfiguration config = new ClientConfiguration(@"#jarvis-config
-application-name : TESTAPPLICATIONAssert.That(ex.Message, Contains.Substring("CQRS_TEST_CONFIGURATION_MANAGER"));", "C:\\temp\\TESTAPPLICATION.config");
+application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             stubEnvironment.GetApplicationConfig().ReturnsForAnyArgs(config); 
             stubEnvironment.GetMachineName().ReturnsForAnyArgs("TestMachine");
         }

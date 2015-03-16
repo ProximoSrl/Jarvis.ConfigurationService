@@ -53,7 +53,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }
             File.WriteAllText(Path.Combine(FileSystem.Instance.GetBaseDirectory(), "myapp3.redirect"), @"c:\temp\myapp3");
             var result = client.DownloadString(baseUri + "/status");
-            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppParam"",""MyAppTest"",""myapp3""]"));
+            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppParam"",""MyAppTest"",""OverrideTest"",""myapp3""]"));
         }
 
         [Test]
@@ -312,6 +312,24 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void redirect_of_folder_support_overriding_with_local_directory()
+        {
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
+            
+            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
+            File.WriteAllText(redirectFile, anotherTestconfigurationDir);
+            var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
+            JObject setting = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)setting["connectionStringsX"]["operational"],
+                Is.EqualTo("mongodb://localhost/operational"),
+                "operational connection string exists only in the redirect folder and should win");
+            Assert.That((String)setting["connectionStringsX"]["log"],
+                    Is.EqualTo("mongodb://localhost/this-should-win"),
+                    "base folder must win over redirection");
+            Assert.That((String)setting["workers"],Is.EqualTo("1000"), "base folder must win over redirection");
+        }
+
+        [Test]
         public void handling_of_simple_resource_for_entire_application()
         {
             var resFile = client.DownloadString(baseUri + "/MyApp1/resources/ServiceY/resourceFile.xml/hostnonexisting");
@@ -354,7 +372,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void override_parameters_for_service_with_base_app_parameter()
         {
-            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["override-parameter-test"], Is.EqualTo("104"), "Override parameters with base parameters failed");
         }
@@ -362,7 +380,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void override_parameters_for_service_with_service_parameter_file()
         {
-            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["override-parameter-complex"], Is.EqualTo("test"), "Override parameters with service parameters failed");
         }
@@ -370,7 +388,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test] 
         public void override_parameters_for_service_with_service_parameter_file_not_change_other_properteis()
         {
-            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["subparam2-parameter"], Is.EqualTo("43"), "overriding complex parameters leaves sibling unaltered");
         }
@@ -378,7 +396,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void override_parameters_with_partial()
         {
-            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["partial-parameter"], Is.EqualTo("this is 104 partial"), "parameters supports partial substitution");
         }
@@ -386,7 +404,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
          [Test]
         public void override_parameters_with_multiple_partial_and_nested()
         {
-            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["partial-multiple-parameter"], Is.EqualTo("this is 104 partial I want also test"), "parameters supports partial substitution");
         }
@@ -395,7 +413,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void nested_parameter_support()
         {
-            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["nested-settings"], Is.EqualTo("Composed with final nested value"), "parameter contains other parameter settings");
         }
@@ -403,11 +421,32 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void escape_support()
         {
-            var result = client.DownloadString(baseUri + "/MyAppParam/service1/config.json/Host1");
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["escape-parameter-char"], Is.EqualTo("this settings contains % char"), "percentage char is escaped with %%");
             Assert.That((String)jobj["double-escape-parameter-char"], Is.EqualTo("this settings contains % char and I'm expecting % not to be altered"), "percentage char is escaped with %%");
         
         }
+         
+        [Test]
+        public void base_system_parameters()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["paramTest"], Is.EqualTo("this use MyAppParam in config"), "Usage of base sys.appName parameter does not work");
+        }
+
+        [Test]
+        public void redirected_parameters_should_not_win()
+        {
+            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
+
+            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
+            File.WriteAllText(redirectFile, anotherTestconfigurationDir);
+            var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
+            JObject setting = (JObject)JsonConvert.DeserializeObject(result);
+
+            Assert.That((String)setting["with-param"], Is.EqualTo("override-value"), "Param in non-redirected folder should win");
+        } 
     }
 }

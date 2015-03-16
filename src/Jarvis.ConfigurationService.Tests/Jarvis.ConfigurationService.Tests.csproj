@@ -88,6 +88,9 @@
     <Compile Include="Support\TestLogger.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AnotherTestConfiguration\ApplicationX\parameters.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="AnotherTestConfiguration\ApplicationX\HostA\ServiceY.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -99,6 +102,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Configuration.Sample\MyAppTest\Default\ServiceMalformed.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Configuration.Sample\OverrideTest\base.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Configuration.Sample\OverrideTest\parameters.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
