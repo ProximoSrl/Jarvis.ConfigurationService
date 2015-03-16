@@ -84,7 +84,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Support\ConfigurationServiceBootstrapper.cs" />
     <Compile Include="Controllers\ConfigController.cs" />
     <Compile Include="Controllers\HelpersController.cs" />
@@ -97,6 +96,8 @@
     <Compile Include="Support\HexEncoding.cs" />
     <Compile Include="Support\IFileSystem.cs" />
     <Compile Include="Support\ConfigurationServiceApplication.cs" />
+    <Compile Include="Support\JsonComposer.cs" />
+    <Compile Include="Support\ParameterManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="app\app.js" />
@@ -1250,6 +1251,9 @@
     <None Include="Configuration.Sample\MyAppParam\base.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration.Sample\MyAppParam\Default\servicemalformed.parameters.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Configuration.Sample\MyAppParam\Default\service1.parameters.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -1257,6 +1261,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Configuration.Sample\MyAppParam\Default\service1.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Configuration.Sample\MyAppParam\Default\servicemalformed.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Configuration.Sample\parameters.config">

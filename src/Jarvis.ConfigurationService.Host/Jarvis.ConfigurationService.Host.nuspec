@@ -15,7 +15,8 @@
 
   <files>
     <file src="bin\release\*.*" target="bin" />
-    <file src="..\..\Tools\Nuge\init.ps1" target="tools" />
+    <file src="app\*.*" target="bin\app" />
+    <file src="..\..\Tools\Nuget\init.ps1" target="tools" />
   </files>
 
 </package>

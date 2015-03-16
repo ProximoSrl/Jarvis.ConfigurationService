@@ -16,7 +16,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void Compose_empty_return_empty()
         {
-            var composed = ConfigFileLocator.ComposeJsonContent();
+            var composed = JsonComposer.ComposeJsonContent();
             Assert.That(composed, Is.EqualTo(null));
         }
         [Test]
@@ -25,7 +25,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var json1 = "{prop : 'test'}";
             var json2 = "{otherProp : 'anotherTest'}";
 
-            var result = ConfigFileLocator.ComposeJsonContent(json1, json2);
+            var result = JsonComposer.ComposeJsonContent(json1, json2);
 
             Assert.That((String) result["prop"], Is.EqualTo("test"));
             Assert.That((String)result["otherProp"], Is.EqualTo("anotherTest"));
@@ -37,7 +37,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var json1 = "{prop : 'test'}";
             var json2 = "{otherProp : 'anotherTest', prop : 'modified'}";
 
-            var result = ConfigFileLocator.ComposeJsonContent(json1, json2);
+            var result = JsonComposer.ComposeJsonContent(json1, json2);
 
             Assert.That((String)result["prop"], Is.EqualTo("modified"));
         }
@@ -48,7 +48,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var json1 = "{prop : 'test', complexobj : {'prop1' : 1, 'prop2' : 2}}";
             var json2 = "{complexobj : {'prop2' : 42}}";
 
-            var result = ConfigFileLocator.ComposeJsonContent(json1, json2);
+            var result = JsonComposer.ComposeJsonContent(json1, json2);
             var complexObject = (JObject)result["complexobj"];
             Assert.That((Int32)complexObject["prop1"], Is.EqualTo(1));
             Assert.That((Int32)complexObject["prop2"], Is.EqualTo(42));
@@ -60,7 +60,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var json1 = "{prop : 'test', complexobj : { 'cp' : {'p1' : 5, 'p2' : 6}, 'prop1' : 1, 'prop2' : 2}}";
             var json2 = "{complexobj : {'cp' : {'p1' : 0}}}";
 
-            var result = ConfigFileLocator.ComposeJsonContent(json1, json2);
+            var result = JsonComposer.ComposeJsonContent(json1, json2);
             var complexObject = (JObject)result["complexobj"];
             Assert.That((Int32)complexObject["prop1"], Is.EqualTo(1));
             Assert.That((Int32)complexObject["prop2"], Is.EqualTo(2));

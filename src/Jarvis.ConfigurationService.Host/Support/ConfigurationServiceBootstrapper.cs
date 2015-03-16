@@ -1,9 +1,8 @@
 ﻿using System;
-using Jarvis.ConfigurationService.Host.Support;
 using log4net;
 using Microsoft.Owin.Hosting;
 
-namespace Jarvis.ConfigurationService.Host
+namespace Jarvis.ConfigurationService.Host.Support
 {
     internal class ConfigurationServiceBootstrapper
     {

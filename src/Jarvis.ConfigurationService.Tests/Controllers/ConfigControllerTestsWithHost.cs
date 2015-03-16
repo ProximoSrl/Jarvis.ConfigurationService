@@ -436,6 +436,29 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That((String)jobj["paramTest"], Is.EqualTo("this use MyAppParam in config"), "Usage of base sys.appName parameter does not work");
         }
 
+        [Test] 
+        public void missing_parameter_should_throw()
+        {
+            try
+            {
+                client.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/Host1");
+            }
+            catch (WebException ex)
+            {
+
+                var responseStream = ex.Response.GetResponseStream();
+
+                using (var reader = new StreamReader(responseStream))
+                {
+                    var responseText = reader.ReadToEnd();
+                    JObject obj = (JObject)JsonConvert.DeserializeObject(responseText);
+                    Assert.That((String)obj["ExceptionMessage"], Contains.Substring("missing-parameter"));
+                }
+                return;
+            }  
+            Assert.Fail("Should throw because a parameter is missing");
+         }
+
         [Test]
         public void redirected_parameters_should_not_win()
         {

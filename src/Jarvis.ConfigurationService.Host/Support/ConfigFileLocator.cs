@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Configuration;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace Jarvis.ConfigurationService.Host.Support
@@ -61,11 +62,11 @@ namespace Jarvis.ConfigurationService.Host.Support
                 hostName,
                 parametersFiles);
 
-            var baseConfigObject = ComposeJsonContent(configFiles.ToArray());
+            var baseConfigObject = JsonComposer.ComposeJsonContent(configFiles.ToArray());
             JObject parameterObject;
             if (parametersFiles.Count > 0)
             {
-                parameterObject = ComposeJsonContent(parametersFiles.ToArray());
+                parameterObject = JsonComposer.ComposeJsonContent(parametersFiles.ToArray());
             }
             else
             {
@@ -80,11 +81,17 @@ namespace Jarvis.ConfigurationService.Host.Support
             parameterObject.Add("sys", sysParams);
 
             //Do the substitution
-            while (ReplaceParameters(baseConfigObject, parameterObject))
+            ParameterManager.ReplaceResult replaceResult;
+            while ((replaceResult = ParameterManager.ReplaceParameters(baseConfigObject, parameterObject)).HasReplaced)
             {
                 //do nothing, everything is done by the replace parameters routine
             }
-            UnescapePercentage(baseConfigObject);
+            if (replaceResult.MissingParams.Count > 0)
+            {
+                throw new ConfigurationErrorsException("Missing parameters: " + 
+                    replaceResult.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2));
+            }
+            ParameterManager.UnescapePercentage(baseConfigObject);
 
             return baseConfigObject;
         }
@@ -232,132 +239,6 @@ namespace Jarvis.ConfigurationService.Host.Support
                 }
             }
             return null;
-        }
-
-        internal static JObject ComposeJsonContent
-            (
-            params ConfigFileInfo[] jsonContent
-            )
-        {
-            if (jsonContent.Length == 0) return null;
-            JObject result = new JObject();
-            foreach (ConfigFileInfo fileInfo in jsonContent)
-            {
-                try
-                {
-                    JObject parsed = JObject.Parse(fileInfo.FileContent);
-                    ComposeObject(parsed, fileInfo.Host, result);
-                }
-                catch (Newtonsoft.Json.JsonException ex)
-                {
-                    //unable to parse the file, we need to tell the user that the file is malformed.
-                    throw new ApplicationException("Error reading config file " + fileInfo.FileName + ": " + ex.Message, ex);
-                }
-            }
-            return result;
-        }
-
-        private static void ComposeObject(JObject parsed, String host, JObject result)
-        {
-            foreach (var property in parsed)
-            {
-                if (property.Value is JObject &&
-                    result[property.Key] is JObject)
-                {
-                    ComposeObject((JObject)property.Value, host, (JObject)result[property.Key]);
-                }
-                else
-                {
-                    if (property.Key.StartsWith("$") && property.Key.EndsWith("$"))
-                    {
-                        var propertyName = property.Key.Trim('$');
-                        String errorMessage;
-                        var key = EncryptionUtils.GetDefaultEncryptionKey(host, out errorMessage);
-                        if (String.IsNullOrEmpty(errorMessage))
-                        {
-                            try
-                            {
-                                result[propertyName] = EncryptionUtils.Decrypt(key.Key, key.IV, (String)property.Value);
-                            }
-                            catch (Exception ex)
-                            {
-                                result[propertyName] = "Unable to decrypt";
-                            }
-                        }
-                        else
-                        {
-                            result[propertyName] = "Unable to decrypt. Error: " + errorMessage;
-                        }
-                    }
-                    else
-                    {
-                        result[property.Key] = property.Value;
-                    }
-
-                }
-            }
-        }
-
-        /// <summary>
-        /// it is used to retrieve parameters settings from config file.
-        /// </summary>
-        /// <param name="settingName"></param>
-        /// <returns></returns>
-        private static String GetParameterValue(string settingName, JObject parameterObject)
-        {
-            var path = settingName.Split('.');
-            JObject current = parameterObject;
-            for (int i = 0; i < path.Length - 1; i++)
-            {
-                if (current[path[i]] == null) return null;
-                current = (JObject)current[path[i]];
-            }
-            if (current[path.Last()] == null)
-                return null;
-            return current[path.Last()].ToString();
-        }
-
-        private static Boolean ReplaceParameters(JObject source, JObject parameterObject)
-        {
-            Boolean hasReplaced = false;
-            foreach (var property in source.Properties())
-            {
-                if (property.Value is JObject)
-                {
-                    hasReplaced = hasReplaced || ReplaceParameters((JObject)property.Value, parameterObject);
-                }
-                else if (property.Value is JToken)
-                {
-                    String value = property.Value.ToString();
-                    if (Regex.IsMatch(property.Value.ToString(), "(?<!%)%(?!%).+?(?<!%)%(?!%)"))
-                    {
-                        JToken token = (JToken)property.Value;
-                        value = Regex.Replace(
-                            value,
-                            @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
-                            new MatchEvaluator(m => GetParameterValue(m.Groups["match"].Value, parameterObject)));
-
-                        hasReplaced = true;
-                    }
-                    source[property.Name] = value;
-                }
-            }
-            return hasReplaced;
-        }
-
-        private static void UnescapePercentage(JObject source)
-        {
-            foreach (var property in source.Properties())
-            {
-                if (property.Value is JObject)
-                {
-                    UnescapePercentage((JObject)property.Value);
-                }
-                else if (property.Value is JToken && property.Value.ToString().Contains("%%"))
-                {
-                    source[property.Name] = property.Value.ToString().Replace("%%", "%");
-                }
-            }
         }
 
         internal class ConfigFileInfo
