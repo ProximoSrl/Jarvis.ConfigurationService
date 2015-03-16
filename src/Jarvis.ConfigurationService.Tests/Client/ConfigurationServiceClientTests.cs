@@ -69,8 +69,9 @@ namespace Jarvis.ConfigurationService.Tests.Client
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(String.Empty);
             stubEnvironment.GetFileContent("").ReturnsForAnyArgs(String.Empty);
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://localhost");
-  
-            stubEnvironment.GetApplicationName().ReturnsForAnyArgs("TESTAPPLICATION"); 
+            ClientConfiguration config = new ClientConfiguration(@"#jarvis-config
+application-name : TESTAPPLICATIONAssert.That(ex.Message, Contains.Substring("CQRS_TEST_CONFIGURATION_MANAGER"));", "C:\\temp\\TESTAPPLICATION.config");
+            stubEnvironment.GetApplicationConfig().ReturnsForAnyArgs(config); 
             stubEnvironment.GetMachineName().ReturnsForAnyArgs("TestMachine");
         }
 
@@ -276,27 +277,10 @@ namespace Jarvis.ConfigurationService.Tests.Client
         }
 
         [Test]
-        public void verify_support_local_base_address_config_file()
-        {
-
-            //Configuration returns standard file 
-            stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("");
-            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
-            stubEnvironment.GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.BaseAddressConfigFileName)))
-                .Returns("http://configuration.test.com/baseDirectory");
-            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
-            stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
-            CreateSut();
-
-            stubEnvironment.Received().DownloadFile(Arg.Is<String>(s => s.Equals("http://configuration.test.com/baseDirectory/TESTAPPLICATION/myapp.config/TestMachine")));
-        }
-
-        [Test]
         public void verify_exception_if_no_environment_is_configured()
         {
 			var currentPath = Path.Combine ("testpath","myprogram","release");
-			var expectedPath = Path.Combine (currentPath, ConfigurationServiceClient.BaseAddressConfigFileName);
-            try
+			try
             {
                 stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("");
                 stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
@@ -307,7 +291,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             catch (ConfigurationErrorsException ex)
             {
                 Assert.That(ex.Message, Contains.Substring("CQRS_TEST_CONFIGURATION_MANAGER"));
-				Assert.That(ex.Message, Contains.Substring( expectedPath ));
+                Assert.That(ex.Message, Contains.Substring("base-server-address"));
             }
         }
 
@@ -380,13 +364,39 @@ namespace Jarvis.ConfigurationService.Tests.Client
             var previousDir = new DirectoryInfo(baseDir + "/../../");
             stubEnvironment.GetCurrentPath().Returns(baseDir);
             var fileName = new FileInfo(Path.Combine(previousDir.FullName, "testappname.application"));
-            if (!File.Exists(fileName.FullName))
+            if (File.Exists(fileName.FullName))
             {
-                File.WriteAllText(fileName.FullName, "");
+                File.Delete(fileName.FullName);
             }
+            File.WriteAllText(fileName.FullName,
+@"#jarvis-configuration
+application-name : testappname
+base-server-address : http://localhost:55555/");
+            
             var sut = new StandardEnvironment();
-            var applicationName = sut.GetApplicationName();
-            Assert.That(applicationName, Is.EqualTo("testappname"));
+            var config = sut.GetApplicationConfig();
+            Assert.That(config.ApplicationName, Is.EqualTo("testappname"));
+            Assert.That(config.BaseServerAddress, Is.EqualTo("http://localhost:55555/"));
+        }
+
+        [Test]
+        public void verify_getting_application_name_from_file_name()
+        {
+            var baseDir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            var previousDir = new DirectoryInfo(baseDir + "/../../");
+            stubEnvironment.GetCurrentPath().Returns(baseDir);
+            var fileName = new FileInfo(Path.Combine(previousDir.FullName, "testappname.application"));
+            if (File.Exists(fileName.FullName))
+            {
+                File.Delete(fileName.FullName);
+            }
+            File.WriteAllText(fileName.FullName,
+@"#jarvis-config
+base-server-address : http://localhost:55555/");
+            
+            var sut = new StandardEnvironment();
+            var config = sut.GetApplicationConfig();
+            Assert.That(config.ApplicationName, Is.EqualTo("testappname"));
         }
 
         [Test]

@@ -18,7 +18,17 @@ The application name is found simply looking in all parent directory of the exec
 
 	jarvis.application
 
-in the root directory and each service of the suite share that application name. This technique will permit having more deploy on a single machine. Suppose you want to install a test version of jarvis, you can simply rename the application file in jarvis-test.application and the client will call configuration for an application called jarvis-test.
+in the root directory and each service of the suite share that application name. This file should start with the line
+	
+	#jarvis-config
+
+to distinguish this file from other .application files, and it can contain other configurations, ex:
+
+	#jarvis-config
+	application-name : TESTAPPLICATION
+	base-server-address : http://localhost:55555/
+
+application-name overrides default application name (name of the application file) while base-server-address overrides the location of configuration service specified in the environment variable.
 
 Service name is the name of the folder that contains the executable or the site that is running. A convention discard all folders called bin, debug, release, to avoid having all services called Debug or Release when launched from Visual Studio.
 

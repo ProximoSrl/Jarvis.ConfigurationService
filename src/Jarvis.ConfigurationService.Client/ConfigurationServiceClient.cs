@@ -34,7 +34,6 @@ namespace Jarvis.ConfigurationService.Client
             return new DisposableAction(() => _instance = actual);
         }
 
-        internal const String BaseAddressConfigFileName = "baseConfigAddress.config";
         internal const String LastGoodConfigurationFileName = "lastGoodConfiguration.config";
 
         private Action<String, Boolean, Exception> _logger;
@@ -44,7 +43,7 @@ namespace Jarvis.ConfigurationService.Client
         private String _baseServerAddressEnvironmentVariable;
         private String _baseConfigurationServer;
         private String _moduleName;
-        private String _applicationName;
+        private ClientConfiguration _clientConfiguration;
 
         private IEnvironment _environment;
 
@@ -150,13 +149,13 @@ namespace Jarvis.ConfigurationService.Client
                 .TrimEnd('/', '\\')
                 .Split('/', '\\');
             _moduleName = splittedPath[splittedPath.Length - 1];
-            _applicationName = _environment.GetApplicationName();
+            _clientConfiguration = _environment.GetApplicationConfig();
             //if a bin folder is present we are in "developer mode" module name is name of the folder before /bin/
             //and not the previous folder
             if (splittedPath.Contains("bin"))
             {
                 _moduleName = splittedPath.Reverse().SkipWhile(s => s != "bin").Skip(1).FirstOrDefault();
-                if (String.IsNullOrEmpty(_applicationName))
+                if (_clientConfiguration == null)
                 {
                     String errorString =
                         @"Unable to determine application name. Since bin is present in the path of the exe I'm expecting the path to be in the form of: x:\xxxx\APPLICATIONAME\SRC\..\..\BIN\XXX.EXE";
@@ -165,7 +164,7 @@ namespace Jarvis.ConfigurationService.Client
             }
             //Try grab base address from a local config file then from env variable
 
-            _baseConfigurationServer = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), BaseAddressConfigFileName));
+            _baseConfigurationServer = _clientConfiguration.BaseServerAddress;
             if (String.IsNullOrEmpty(_baseConfigurationServer))
             {
                 _baseConfigurationServer = _environment.GetEnvironmentVariable(_baseServerAddressEnvironmentVariable);
@@ -174,16 +173,15 @@ namespace Jarvis.ConfigurationService.Client
             {
                 String errorString =
                     string.Format(
-                        "You need to specify base address for configuration server in environment variable: {0} or in config file {1}",
-                        _baseServerAddressEnvironmentVariable,
-                        Path.Combine(_environment.GetCurrentPath(), BaseAddressConfigFileName)
+                        "You need to specify base address for configuration server in environment variable: {0} or in .application file with setting base-server-address",
+                        _baseServerAddressEnvironmentVariable
                         );
                 throw new ConfigurationErrorsException(errorString);
             }
             _configFileLocation = String.Format(
                 "{0}/{1}/{2}.config/{3}",
                 _baseConfigurationServer.TrimEnd('/', '\\'),
-                _applicationName,
+                _clientConfiguration.ApplicationName,
                 _moduleName,
                 _environment.GetMachineName());
 
@@ -373,7 +371,7 @@ namespace Jarvis.ConfigurationService.Client
             var resourceUri = String.Format(
                 "{0}/{1}/resources/{2}/{3}/{4}",
                 _baseConfigurationServer.TrimEnd('/', '\\'),
-                _applicationName,
+                _clientConfiguration.ApplicationName,
                 _moduleName,
                 resourceName,
                 _environment.GetMachineName());

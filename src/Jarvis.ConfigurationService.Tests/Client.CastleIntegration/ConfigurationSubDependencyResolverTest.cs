@@ -31,8 +31,10 @@ namespace Jarvis.ConfigurationService.Tests.Client.CastleIntegration
 
             stubEnvironment.GetFileContent("").ReturnsForAnyArgs(String.Empty);
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://localhost");
-
-            stubEnvironment.GetApplicationName().ReturnsForAnyArgs("TESTAPPLICATION");
+            ClientConfiguration config = new ClientConfiguration(@"#jarvis-config
+application-name : TESTAPPLICATION
+base-server-address : http://localhost:55555/", "C:\\temp\\TESTAPPLICATION.config");
+            stubEnvironment.GetApplicationConfig().ReturnsForAnyArgs(config);
             stubEnvironment.GetMachineName().ReturnsForAnyArgs("TestMachine");
         }
 

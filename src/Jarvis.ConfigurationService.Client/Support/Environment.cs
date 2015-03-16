@@ -18,7 +18,14 @@ namespace Jarvis.ConfigurationService.Client.Support
         String DownloadFile(String address);
 
         String GetFileContent(String fileName);
-        String GetApplicationName();
+
+        /// <summary>
+        /// Retrieve the configuration for the client, looking for a file
+        /// with extension .application
+        /// </summary>
+        /// <returns></returns>
+        ClientConfiguration GetApplicationConfig();
+
         void SaveFile(string fileName, string content, bool ignoreErrors);
 
         /// <summary>
@@ -78,18 +85,21 @@ namespace Jarvis.ConfigurationService.Client.Support
             return File.ReadAllText(fileName);
         }
 
-        public String GetApplicationName()
+        public ClientConfiguration GetApplicationConfig()
         {
             var actualFolder = GetCurrentPath();
             DirectoryInfo currentDirectory = new DirectoryInfo(actualFolder);
             do
             {
-                var applicationFile = currentDirectory
+                var clientConfig = currentDirectory
                     .GetFiles("*.application")
+                    .Select(f => ClientConfiguration.TryCreateConfigurationFromFile(f.FullName))
+                    .Where(c => c != null)
                     .FirstOrDefault();
-                if (applicationFile != null)
+
+                if (clientConfig != null)
                 {
-                    return Path.GetFileNameWithoutExtension(applicationFile.FullName);
+                    return clientConfig;
                 }
                 currentDirectory = currentDirectory.Parent;
             } while (currentDirectory != null);
