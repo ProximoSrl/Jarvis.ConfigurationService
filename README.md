@@ -66,6 +66,18 @@ During development is natural to store a default configuration for each service 
 
 If you place a file called **ApplicationName.redirect** that contains a single line pointing to a physical directory, configuration server will follow that redirect. This de facto permits you to create a soft link from configuration store to the real directory where the files are. This is expecially useful during development to point to source controlled configuration files.
 
+***IMPORTANT***: If you use .redirect file, you can still use standard folder in the folder of configuration service. Settings that are placed inside the base directory have priority than same configuration in folder pointed by .redirect files. 
+
+###Parameter support
+
+Configuration supports concepts of parameters in form of string enclosed by percentage sign %xxxx%. Configuration service will look for parameter in special files called *parameters.config* placed in the various configuration directory. The precedence of these files are the same of standard config files.
+
+There are three special parameters that are handled by configuration service, and represents application name, service name and machine name.
+
+	%sys.appName%
+	%sys.serviceName%
+	%sys.apphostName%
+
 ###Encrypting credentials
 
 If you need to store some sensitive data inside file that will be included in source control you can use basic form of encryption. First you need to call a function to generate an encryption key
