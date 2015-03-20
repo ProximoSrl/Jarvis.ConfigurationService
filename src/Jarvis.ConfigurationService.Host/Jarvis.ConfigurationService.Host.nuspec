@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Jarvis.ConfigurationService.Host</id>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <authors>Proximo S.r.L.</authors>
     <owners>Proximo S.r.L.</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
