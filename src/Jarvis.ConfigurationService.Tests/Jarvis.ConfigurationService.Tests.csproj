@@ -102,6 +102,7 @@
     <Compile Include="Controllers\ConfigControllerTestsWithHost.cs" />
     <Compile Include="Support\StandardFileSystemTests.cs" />
     <Compile Include="Support\TestLogger.cs" />
+    <Compile Include="Support\TestWebClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AnotherTestConfiguration\ApplicationX\parameters.config">

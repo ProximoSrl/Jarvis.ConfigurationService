@@ -20,20 +20,21 @@ namespace Jarvis.ConfigurationService.Tests.Support
     public class ConfigControllerTestsWithHost
     {
         IDisposable _app;
-        WebClient client;
+        TestWebClient client;
         String baseUri = "http://localhost:53642";
 
         [TestFixtureSetUp]
         public void FixtureSetup()
         {
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
-            client = new WebClient();
+            client = new TestWebClient();
         }
 
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
             _app.Dispose();
+
         }
 
         [Test]
@@ -121,9 +122,10 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void malformed_json_return_error_with_json_payload()
         {
+            var thisClient = new WebClient();
             try
             {
-                var result = client.DownloadString(baseUri + "/MyAppTest/ServiceMalformed.config");
+                var result = thisClient.DownloadString(baseUri + "/MyAppTest/ServiceMalformed.config");
                 Assert.Fail("An exception should be generated");
             }
             catch (WebException ex)
@@ -143,9 +145,10 @@ namespace Jarvis.ConfigurationService.Tests.Support
         [Test]
         public void verify_exception_with_malformed_json_is_entered()
         {
+            var thisClient = new WebClient();
             try
             {
-                var result = client.DownloadString(baseUri + "/MyAppTest/ServiceMalformed.config");
+                var result = thisClient.DownloadString(baseUri + "/MyAppTest/ServiceMalformed.config");
                 Assert.Fail("An exception should be generated");
             }
             catch (WebException ex)
@@ -376,7 +379,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["override-parameter-test"], Is.EqualTo("104"), "Override parameters with base parameters failed");
         }
-
+          
         [Test]
         public void override_parameters_for_service_with_service_parameter_file()
         {
@@ -427,7 +430,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That((String)jobj["double-escape-parameter-char"], Is.EqualTo("this settings contains % char and I'm expecting % not to be altered"), "percentage char is escaped with %%");
         
         }
-         
+          
         [Test]
         public void base_system_parameters()
         {
@@ -436,12 +439,21 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That((String)jobj["paramTest"], Is.EqualTo("this use MyAppParam in config"), "Usage of base sys.appName parameter does not work");
         }
 
+        [Test]
+        public void cyclic_parameter_substitution_with_parameterse()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["readmodel"], Is.EqualTo("mongodb://localhost/MyAppParam-readmodel"), "Usage of base sys.appName parameter in parameters definition does not work");
+        }
+
         [Test] 
         public void missing_parameter_should_throw()
         {
+            var thisClient = new WebClient();
             try
             {
-                client.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/Host1");
+                thisClient.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/Host1");
             }
             catch (WebException ex)
             {
