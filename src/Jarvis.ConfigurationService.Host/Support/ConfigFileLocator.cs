@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using System.Configuration;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using log4net.Repository.Hierarchy;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
@@ -85,6 +86,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             while ((replaceResult = ParameterManager.ReplaceParameters(baseConfigObject, parameterObject)).HasReplaced)
             {
                 //do nothing, everything is done by the replace parameters routine
+                
             }
             if (replaceResult.MissingParams.Count > 0)
             {

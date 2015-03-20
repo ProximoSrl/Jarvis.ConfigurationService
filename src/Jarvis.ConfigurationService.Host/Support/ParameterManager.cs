@@ -56,8 +56,8 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 if (property.Value is JObject)
                 {
-                    ReplaceParameters((JObject)property.Value, parameterObject)
-                        .Merge(result);
+                    var replaceReturn = ReplaceParameters((JObject)property.Value, parameterObject);
+                    result.Merge(replaceReturn);
                 }
                 else if (property.Value is JToken)
                 {
