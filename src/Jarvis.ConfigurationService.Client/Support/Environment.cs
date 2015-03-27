@@ -134,6 +134,8 @@ namespace Jarvis.ConfigurationService.Client.Support
 
         public String GetEnvironmentVariable(String variableName)
         {
+            if (String.IsNullOrEmpty(variableName)) return null;
+
             return Environment.GetEnvironmentVariable(variableName);
         }
 

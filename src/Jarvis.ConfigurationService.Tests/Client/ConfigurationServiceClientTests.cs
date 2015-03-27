@@ -643,6 +643,8 @@ base-server-address : http://localhost:55555/");
                Arg.Is<String>(s => s.Equals(configContent)), false);
         }
 
+
+
         private TestLogger currentTestLogger;
 
         private ConfigurationServiceClient CreateSut()
