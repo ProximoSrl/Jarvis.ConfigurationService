@@ -71,7 +71,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                             {
                                 var parameterName = m.Groups["match"].Value;
                                 var paramValue = GetParameterValue(parameterName, parameterObject);
-                                if (String.IsNullOrEmpty(paramValue))
+                                if (paramValue == null)
                                 {
                                     result.MissingParams.Add(parameterName);
                                     return "%" + parameterName + "%";
