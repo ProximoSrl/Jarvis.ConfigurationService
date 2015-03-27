@@ -19,11 +19,17 @@ namespace Jarvis.ConfigurationService.Tests.Support
             _client = new WebClient();
         }
 
-        public String DownloadString(String uri)
+        public String DownloadString(String uri, String payloadJson = null)
         {
             try
             {
-                return _client.DownloadString(uri);
+                if (payloadJson == null)
+                    return _client.DownloadString(uri);
+                else
+                {
+                    _client.Headers[HttpRequestHeader.ContentType] = "application/json";
+                    return _client.UploadString(uri, payloadJson);
+                }
             }
             catch (WebException ex)
             {

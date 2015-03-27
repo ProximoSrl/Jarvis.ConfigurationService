@@ -18,22 +18,39 @@ namespace Jarvis.ConfigurationService.Host.Support
     /// </summary>
     public static class ConfigFileLocator
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="baseDirectory"></param>
+        /// <param name="applicationName"></param>
+        /// <param name="serviceName"></param>
+        /// <param name="hostName"></param>
+        /// <param name="defaultConfiguration">Json configuration sent by the client
+        /// that represents base configuration for the application. It has lower priority. It can be null.</param>
+        /// <param name="defaultParameters">Json configuration sent by the client
+        /// to contain base parameters for the application, it has lower priority. It can be null.</param>
+        /// <returns></returns>
         public static Object GetConfig
             (
                 String baseDirectory,
                 String applicationName,
                 String serviceName,
-                String hostName
+                String hostName,
+                JObject defaultConfiguration = null,
+                JObject defaultParameters = null
             )
         {
 
-             DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
+            DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
             var appDirectory = FileSystem.Instance.RedirectDirectory(
                 Path.Combine(baseDir.FullName, applicationName)
             );
+            var systemDirectory = Path.Combine(baseDir.FullName, ".system");
+            if (!Directory.Exists(systemDirectory)) Directory.CreateDirectory(systemDirectory);
 
             var baseDirLen = Directory.GetParent(appDirectory).FullName.Length;
             String baseConfigFileName = Path.Combine(baseDir.FullName, "base.config");
+            String defaultApplicationBaseConfigFileName = Path.Combine(systemDirectory, applicationName, "ClientDefault", (hostName ?? "") + ".config");
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
@@ -42,6 +59,14 @@ namespace Jarvis.ConfigurationService.Host.Support
             List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseConfigFileName), baseConfigFileName.Substring(baseDirLen)));
+            
+            //check default configuration file
+            if (defaultConfiguration != null) 
+            {
+                FileSystem.Instance.WriteFile(defaultApplicationBaseConfigFileName, defaultConfiguration.ToString());
+                configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultApplicationBaseConfigFileName), defaultApplicationBaseConfigFileName.Substring(baseDirLen)));
+            }
+            
             if (FileSystem.Instance.FileExists(applicationBaseConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName), applicationBaseConfigFileName.Substring(baseDirLen)));
             if (FileSystem.Instance.FileExists(defaultDirectoryBaseConfigFileName))
@@ -67,11 +92,19 @@ namespace Jarvis.ConfigurationService.Host.Support
             //then load all parameter files.
             String baseParametersFileName = Path.Combine(baseDir.FullName, "parameters.config");
             String applicationBaseParametersFileName = Path.Combine(appDirectory, "parameters.config");
+            String defaultApplicationBaseParametersFileName = Path.Combine(systemDirectory, applicationName, "ClientDefault", (hostName ?? "") + ".parameters.config");
+            
             String defaultDirectoryBaseParametersFileName = Path.Combine(appDirectory, "Default", "parameters.config");
             String serviceParametersFileName = Path.Combine(appDirectory, "Default", serviceName + ".parameters.config");
             List<ConfigFileInfo> parametersFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseParametersFileName))
                 parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseParametersFileName), baseParametersFileName.Substring(baseDirLen)));
+            //check default parameters file passed by the client
+            if (defaultParameters != null)
+            {
+                FileSystem.Instance.WriteFile(defaultApplicationBaseParametersFileName, defaultParameters.ToString());
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultApplicationBaseParametersFileName), defaultApplicationBaseParametersFileName.Substring(baseDirLen)));
+            }
             if (FileSystem.Instance.FileExists(applicationBaseParametersFileName))
                 parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseParametersFileName), applicationBaseParametersFileName.Substring(baseDirLen)));
             if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName))

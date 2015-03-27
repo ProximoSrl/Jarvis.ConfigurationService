@@ -258,6 +258,27 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void verify_uploaded_base_configuration()
+        {
+            var result = client.DownloadString(
+                baseUri + "/MyApp1/Service1.config/Host1",
+                "{'defaultConfiguration' : {'clientparam' : 100}}");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["clientparam"], Is.EqualTo("100"), "parameter passed by client is not used");
+        }
+
+        [Test]
+        public void verify_uploaded_base_parameters()
+        {
+            var result = client.DownloadString(
+                baseUri + "/MyApp1/Service1.config/Host1",
+                @"{'defaultConfiguration' : {'clientparam' : 'test %paramclient%'},
+                   'defaultParameters' : {'paramclient' : 'param-value'}}");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["clientparam"], Is.EqualTo("test param-value"), "parameter passed by client is not used");
+        }
+
+        [Test]
         public void redirect_of_folder_is_working_app_and_service()
         {
             String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration","ApplicationX");

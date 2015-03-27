@@ -27,6 +27,8 @@ namespace Jarvis.ConfigurationService.Host.Support
         bool FileExists(string fileName);
 
         string GetFileContent(string fileName);
+
+        void WriteFile(string fileName, string content);
     }
 
     /// <summary>
@@ -126,8 +128,13 @@ namespace Jarvis.ConfigurationService.Host.Support
             return folderName;
         }
 
+        public void WriteFile(string fileName, string content)
+        {
+            var info = new FileInfo(fileName);
+            if (!info.Directory.Exists) info.Directory.Create();
 
-
+            File.WriteAllText(fileName, content);
+        }
     }
 
     public static class FileSystem

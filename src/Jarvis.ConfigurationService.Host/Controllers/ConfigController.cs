@@ -14,6 +14,7 @@ using Jarvis.ConfigurationService.Host.Model;
 using Jarvis.ConfigurationService.Host.Support;
 using Microsoft.SqlServer.Server;
 using log4net;
+using Newtonsoft.Json.Linq;
 
 namespace Jarvis.ConfigurationService.Host.Controllers
 {
@@ -45,7 +46,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             string baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var applicationsDir = FileSystem.Instance
                 .GetDirectories(baseDirectory)
-                .Select(Path.GetFileName);
+                .Select(Path.GetFileName)
+                .Where(d => !d.StartsWith("."));
             var redirectedApps = FileSystem.Instance
                 .GetFiles(baseDirectory, "*.redirect")
                 .Select(f => Path.GetFileNameWithoutExtension(f));
@@ -86,6 +88,31 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
+        }
+
+        [HttpPost]
+        [Route("{appName}/{moduleName}.config/{hostName=}")]
+        public Object GetConfigurationWithDefault(
+            [FromBody] GetConfigurationWithDefault def,
+            String appName, 
+            String moduleName,
+            String hostName = "")
+        {
+            var baseDirectory = FileSystem.Instance.GetBaseDirectory();
+            JObject defaultParameters  =null;
+            JObject defaultConfiguration = null;
+            if (def != null) 
+            {
+                defaultParameters = def.DefaultParameters;
+                defaultConfiguration = def.DefaultConfiguration;
+            }
+            return ConfigFileLocator.GetConfig(
+                baseDirectory, 
+                appName, 
+                moduleName, 
+                hostName,
+                defaultConfiguration,
+                defaultParameters);
         }
 
         [HttpGet]

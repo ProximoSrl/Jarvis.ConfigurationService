@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\GetConfigurationWithDefault.cs" />
     <Compile Include="Support\ConfigurationServiceBootstrapper.cs" />
     <Compile Include="Controllers\ConfigController.cs" />
     <Compile Include="Controllers\HelpersController.cs" />
