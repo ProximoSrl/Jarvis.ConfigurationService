@@ -314,23 +314,23 @@ namespace Jarvis.ConfigurationService.Tests.Support
                 );
         }
 
-        [Test]
-        public void redirect_of_folder_support_overriding_with_local_directory()
-        {
-            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
+        //[Test]
+        //public void redirect_of_folder_support_overriding_with_local_directory()
+        //{
+        //    String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
             
-            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
-            File.WriteAllText(redirectFile, anotherTestconfigurationDir);
-            var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
-            JObject setting = (JObject)JsonConvert.DeserializeObject(result);
-            Assert.That((String)setting["connectionStringsX"]["operational"],
-                Is.EqualTo("mongodb://localhost/operational"),
-                "operational connection string exists only in the redirect folder and should win");
-            Assert.That((String)setting["connectionStringsX"]["log"],
-                    Is.EqualTo("mongodb://localhost/this-should-win"),
-                    "base folder must win over redirection");
-            Assert.That((String)setting["workers"],Is.EqualTo("1000"), "base folder must win over redirection");
-        }
+        //    String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
+        //    File.WriteAllText(redirectFile, anotherTestconfigurationDir);
+        //    var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
+        //    JObject setting = (JObject)JsonConvert.DeserializeObject(result);
+        //    Assert.That((String)setting["connectionStringsX"]["operational"],
+        //        Is.EqualTo("mongodb://localhost/operational"),
+        //        "operational connection string exists only in the redirect folder and should win");
+        //    Assert.That((String)setting["connectionStringsX"]["log"],
+        //            Is.EqualTo("mongodb://localhost/this-should-win"),
+        //            "base folder must win over redirection");
+        //    Assert.That((String)setting["workers"],Is.EqualTo("1000"), "base folder must win over redirection");
+        //}
 
         [Test]
         public void handling_of_simple_resource_for_entire_application()
@@ -471,17 +471,17 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.Fail("Should throw because a parameter is missing");
          }
 
-        [Test]
-        public void redirected_parameters_should_not_win()
-        {
-            String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
+        //[Test]
+        //public void redirected_parameters_should_not_win()
+        //{
+        //    String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
 
-            String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
-            File.WriteAllText(redirectFile, anotherTestconfigurationDir);
-            var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
-            JObject setting = (JObject)JsonConvert.DeserializeObject(result);
+        //    String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
+        //    File.WriteAllText(redirectFile, anotherTestconfigurationDir);
+        //    var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
+        //    JObject setting = (JObject)JsonConvert.DeserializeObject(result);
 
-            Assert.That((String)setting["with-param"], Is.EqualTo("override-value"), "Param in non-redirected folder should win");
-        } 
+        //    Assert.That((String)setting["with-param"], Is.EqualTo("override-value"), "Param in non-redirected folder should win");
+        //} 
     }
 }
