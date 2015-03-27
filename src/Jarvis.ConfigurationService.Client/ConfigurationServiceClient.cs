@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -232,6 +233,18 @@ namespace Jarvis.ConfigurationService.Client
 
         public String GetSetting(string settingName, string settingDefaultValue)
         {
+            if (!String.IsNullOrEmpty(settingDefaultValue) && settingDefaultValue.Contains('%'))
+            {
+                //parameter substituition.
+                settingDefaultValue = Regex.Replace(
+                            settingDefaultValue,
+                            @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
+                            new MatchEvaluator(m =>
+                            {
+                                var parameterName = "jarvis-parameters." + m.Groups["match"].Value;
+                                return InternalGetSetting(parameterName);
+                            }));
+            }
             return InternalGetSetting(settingName) ?? settingDefaultValue;
         }
 

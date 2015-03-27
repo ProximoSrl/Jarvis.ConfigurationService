@@ -20,7 +20,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
     [TestFixture]
     public class ConfigurationServiceClientTests
     {
-        private const String a_valid_configuration_file = "{ 'setting' : 'value', 'goodSetting' : 'hello setting' }";
+        private const String a_valid_configuration_file = "{ 'setting' : 'value', 'goodSetting' : 'hello setting' , 'jarvis-parameters' : {'param1' : 'value_42'}}";
         private const String an_invalid_configuration_file = "{ 'setting' , 'value' }";
         private const String a_valid_configuration_file_with_suboject = "{ 'setting' : 'value', 'connections' : { 'conn1' : 'valueconn1', 'conn2' : 'valueconn2'} }";
         private const String a_valid_configuration_file_with_nestedsuboject = @"{ 'setting' : 'value', 
@@ -343,6 +343,16 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             var sut = CreateSut();
             var configuration = sut.GetSetting("setting_not_in_json_file", "defvalue");
             Assert.That(configuration, Is.EqualTo("defvalue"));
+        }
+
+        [Test]
+        public void verify_parameter_substitution_on_default_value()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
+
+            var sut = CreateSut();
+            var configuration = sut.GetSetting("setting_not_in_json_file", "def: %param1% parameter");
+            Assert.That(configuration, Is.EqualTo("def: value_42 parameter"));
         }
 
         [Test]

@@ -58,13 +58,13 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
-        public void correct_listing_of_all_services_in_application()
+        public void correct_listing_of_all_services_in_application() 
         {
             var result = client.DownloadString(baseUri + "/MyApp1/status");
             Assert.That(result, Is.StringContaining(@"[""Service1"",""Service2""]"));
-        }
+        } 
 
-        String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false""}";
+        String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false"",""jarvis-parameters"":{""simple-parameter"":""100"",""complex-parameter"":{""subparam1"":""1"",""subparam2"":""42""},""sys"":{""appName"":""MyApp1"",""serviceName"":""Service2"",""hostName"":""""}}}";
         [Test]
         public void correct_configuration_of_single_service()
         { 
@@ -314,24 +314,6 @@ namespace Jarvis.ConfigurationService.Tests.Support
                 );
         }
 
-        //[Test]
-        //public void redirect_of_folder_support_overriding_with_local_directory()
-        //{
-        //    String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
-            
-        //    String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
-        //    File.WriteAllText(redirectFile, anotherTestconfigurationDir);
-        //    var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
-        //    JObject setting = (JObject)JsonConvert.DeserializeObject(result);
-        //    Assert.That((String)setting["connectionStringsX"]["operational"],
-        //        Is.EqualTo("mongodb://localhost/operational"),
-        //        "operational connection string exists only in the redirect folder and should win");
-        //    Assert.That((String)setting["connectionStringsX"]["log"],
-        //            Is.EqualTo("mongodb://localhost/this-should-win"),
-        //            "base folder must win over redirection");
-        //    Assert.That((String)setting["workers"],Is.EqualTo("1000"), "base folder must win over redirection");
-        //}
-
         [Test]
         public void handling_of_simple_resource_for_entire_application()
         {
@@ -470,18 +452,5 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }  
             Assert.Fail("Should throw because a parameter is missing");
          }
-
-        //[Test]
-        //public void redirected_parameters_should_not_win()
-        //{
-        //    String anotherTestconfigurationDir = Path.Combine(Environment.CurrentDirectory, "AnotherTestConfiguration", "ApplicationX");
-
-        //    String redirectFile = Path.Combine(Environment.CurrentDirectory, "Configuration.Sample", "OverrideTest.redirect");
-        //    File.WriteAllText(redirectFile, anotherTestconfigurationDir);
-        //    var result = client.DownloadString(baseUri + "/OverrideTest/anyservice.config");
-        //    JObject setting = (JObject)JsonConvert.DeserializeObject(result);
-
-        //    Assert.That((String)setting["with-param"], Is.EqualTo("override-value"), "Param in non-redirected folder should win");
-        //} 
     }
 }

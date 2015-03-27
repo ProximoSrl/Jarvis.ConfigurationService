@@ -9,6 +9,7 @@ using System.Configuration;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using log4net.Repository.Hierarchy;
+using Newtonsoft.Json;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
@@ -95,6 +96,11 @@ namespace Jarvis.ConfigurationService.Host.Support
             sysParams.Add("serviceName", serviceName);
             sysParams.Add("hostName", hostName);
             parameterObject.Add("sys", sysParams);
+
+            //need to return all parameters.
+
+            baseConfigObject["jarvis-parameters"] = (JObject) JsonConvert.DeserializeObject(
+                JsonConvert.SerializeObject( parameterObject));
 
             //Do the substitution
             ParameterManager.ReplaceResult replaceResult;
