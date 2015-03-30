@@ -169,16 +169,10 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             //Resource file are simply located in default director of the application or in the host override folder
             List<String> possibleLocationsOfResourceFile = new List<string>();
-            possibleLocationsOfResourceFile.Add(Path.Combine(appDirectory, hostName, serviceName, resourceFileName));
-            possibleLocationsOfResourceFile.Add(Path.Combine(appDirectory, hostName, resourceFileName));
-            possibleLocationsOfResourceFile.Add(Path.Combine(appDirectory, "Default", serviceName, resourceFileName));
-            possibleLocationsOfResourceFile.Add(Path.Combine(appDirectory, "Default", resourceFileName));
-
-            if (!String.IsNullOrEmpty(redirectedAppDirectory))
-            {
-                possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, "Default", serviceName, resourceFileName));
-                possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, "Default", resourceFileName));
-            }
+            possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, hostName, serviceName, resourceFileName));
+            possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, hostName, resourceFileName));
+            possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, "Default", serviceName, resourceFileName));
+            possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, "Default", resourceFileName));
 
             return GetContentOfFirstExistingFile(possibleLocationsOfResourceFile);
         }
