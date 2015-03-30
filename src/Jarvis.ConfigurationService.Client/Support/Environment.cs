@@ -17,6 +17,15 @@ namespace Jarvis.ConfigurationService.Client.Support
         /// </summary>
         String DownloadFile(String address);
 
+        /// <summary>
+        /// Used to download a file from the server with POST passing a JSON payload
+        /// as single argument
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="payload"></param>
+        /// <returns></returns>
+        String DownloadFile(String address, String payload);
+
         String GetFileContent(String fileName);
 
         /// <summary>
@@ -45,12 +54,30 @@ namespace Jarvis.ConfigurationService.Client.Support
         /// </summary>
         public String DownloadFile(String address)
         {
+            Func<WebClient, String> webClientFunc = wc => {
+                wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+                return wc.DownloadString(address);
+            };
+            return ExecuteDownload(webClientFunc);
+        }
+
+        public String DownloadFile(String address, String payload)
+        {
+            Func<WebClient, String> webClientFunc = wc =>
+            {
+                wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+                return wc.UploadString(address, payload);
+            };
+            return ExecuteDownload(webClientFunc);
+        }
+
+        private static String ExecuteDownload(Func<WebClient, String> functor)
+        {
             try
             {
                 using (var wc = new WebClient())
                 {
-                    wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-                    return wc.DownloadString(address);
+                    return functor(wc);
                 }
             }
             catch (WebException ex)
@@ -73,7 +100,6 @@ namespace Jarvis.ConfigurationService.Client.Support
                 }
                 throw new ConfigurationErrorsException("Error reading configuration File, server responded with exception: " + ex.Message);
             }
-
         }
 
         public String GetFileContent(String fileName)

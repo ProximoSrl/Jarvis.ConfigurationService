@@ -28,7 +28,7 @@ namespace Jarvis.ConfigurationService.Client
             }
         }
 
-        internal static IDisposable OverrideInstanceForUnitTesting(ConfigurationServiceClient overrideInstance) 
+        internal static IDisposable OverrideInstanceForUnitTesting(ConfigurationServiceClient overrideInstance)
         {
             var actual = _instance;
             _instance = overrideInstance;
@@ -69,7 +69,10 @@ namespace Jarvis.ConfigurationService.Client
                 String baseServerAddressEnvironmentVariable
             )
         {
-            _instance = new ConfigurationServiceClient(loggerFunction, baseServerAddressEnvironmentVariable, new StandardEnvironment());
+            _instance = new ConfigurationServiceClient(
+                loggerFunction,
+                baseServerAddressEnvironmentVariable,
+                new StandardEnvironment());
         }
 
 
@@ -77,7 +80,9 @@ namespace Jarvis.ConfigurationService.Client
             (
                 Action<String, Boolean, Exception> loggerFunction,
                 String baseServerAddressEnvironmentVariable,
-                IEnvironment environment
+                IEnvironment environment,
+                FileInfo standardConfigFile = null,
+                FileInfo standardParameterFile = null
             )
         {
             _logger = loggerFunction;
@@ -85,17 +90,36 @@ namespace Jarvis.ConfigurationService.Client
             _environment = environment;
             _resourceToMonitor = new ConcurrentDictionary<String, MonitoredFile>();
             AutoConfigure();
-            LoadSettings();
+            LoadSettings(standardConfigFile, standardParameterFile);
             _configChangePollerTimer = new Timer(60 * 1000);
             _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
         }
 
-        void LoadSettings()
+        void LoadSettings(
+            FileInfo standardConfigFile,
+            FileInfo standardParameterFile)
         {
             String configurationFullContent = null;
             try
             {
-                configurationFullContent = _environment.DownloadFile(ConfigFileLocation);
+                if (standardConfigFile != null || standardParameterFile != null)
+                {
+                    String defaultConfigPayload = "{}";
+                    if (standardConfigFile != null && standardConfigFile.Exists)
+                        defaultConfigPayload = _environment.GetFileContent(standardConfigFile.FullName);
+                    String defaultParameterPayload = "{}";
+                    if (standardParameterFile != null && standardParameterFile.Exists)
+                        defaultParameterPayload = _environment.GetFileContent(standardParameterFile.FullName);
+
+                    String payload = String.Format(
+@"{{'defaultConfiguration' : {0},
+   'defaultParameters' : {1}}}", defaultConfigPayload, defaultParameterPayload);
+                    configurationFullContent = _environment.DownloadFile(ConfigFileLocation, payload);
+                }
+                else
+                {
+                    configurationFullContent = _environment.DownloadFile(ConfigFileLocation);
+                }
             }
             catch (ServerConfigurationException ex)
             {
@@ -125,7 +149,7 @@ namespace Jarvis.ConfigurationService.Client
             try
             {
                 LogDebug(String.Format("Configuration is:\n{0}\n-------------", configurationFullContent));
-                _configurationObject = (JObject) JsonConvert.DeserializeObject(configurationFullContent);
+                _configurationObject = (JObject)JsonConvert.DeserializeObject(configurationFullContent);
                 if (_configurationObject == null)
                 {
                     throw new Exception("Configuration is null");
@@ -347,7 +371,7 @@ namespace Jarvis.ConfigurationService.Client
 
         private ConcurrentDictionary<String, MonitoredFile> _resourceToMonitor;
 
-        private class MonitoredFile 
+        private class MonitoredFile
         {
             public String Content { get; set; }
 
@@ -361,15 +385,15 @@ namespace Jarvis.ConfigurationService.Client
             CheckForMonitoredResourceChange();
         }
 
-        public void CheckForMonitoredResourceChange() 
+        public void CheckForMonitoredResourceChange()
         {
             if (_resourceToMonitor.Count == 0) return;
             foreach (var res in _resourceToMonitor)
             {
                 var resourceValue = GetResource(res.Key);
-                if (!String.IsNullOrEmpty(resourceValue)) 
+                if (!String.IsNullOrEmpty(resourceValue))
                 {
-                    if (!resourceValue.Equals(res.Value.Content)) 
+                    if (!resourceValue.Equals(res.Value.Content))
                     {
                         //configuration is changed, we need to resave the file.
                         res.Value.Content = resourceValue;
@@ -405,19 +429,19 @@ namespace Jarvis.ConfigurationService.Client
         /// for change and update local file accordingly.</param>
         /// <returns>true if the configuration service respond correctly, false otherwise.</returns>
         public Boolean DownloadResource(
-            string resourceName, 
-            String localResourceFileName = null, 
+            string resourceName,
+            String localResourceFileName = null,
             Boolean monitorForChange = false)
         {
             String valueOfFile = GetResource(resourceName);
-            if (String.IsNullOrEmpty(valueOfFile)) 
+            if (String.IsNullOrEmpty(valueOfFile))
             {
                 this.LogError("Configuration server return null content for resource " + resourceName, null);
                 return false;
             }
             var savedFileName = Path.Combine(_environment.GetCurrentPath(), localResourceFileName ?? resourceName);
             _environment.SaveFile(savedFileName, valueOfFile, false);
-            if (monitorForChange) 
+            if (monitorForChange)
             {
                 var monitoredFile = new MonitoredFile()
                 {
@@ -434,6 +458,6 @@ namespace Jarvis.ConfigurationService.Client
 
 
 
-      
+
     }
 }

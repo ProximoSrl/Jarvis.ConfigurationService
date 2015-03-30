@@ -95,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.CastleIntegration\ConfigurationSubDependencyResolverTest.cs" />
+    <Compile Include="Client\ConfigurationServiceClientTestsWithHost.cs" />
     <Compile Include="Client\ConfigurationServiceClientTests.cs" />
     <Compile Include="Controllers\HelpersControllerTestWithHost.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -116,6 +117,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="AnotherTestConfiguration\ApplicationX\Default\ServiceY.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Client\base.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Client\parameters.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Configuration.Sample\MyAppTest\Default\ServiceMalformed.config">
