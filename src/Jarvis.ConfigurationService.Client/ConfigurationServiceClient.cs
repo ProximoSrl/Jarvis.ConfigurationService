@@ -66,13 +66,17 @@ namespace Jarvis.ConfigurationService.Client
         public static void AppDomainInitializer
              (
                 Action<String, Boolean, Exception> loggerFunction,
-                String baseServerAddressEnvironmentVariable
+                String baseServerAddressEnvironmentVariable,
+                FileInfo defaultConfigFile = null,
+                FileInfo defaultParameterFile = null
             )
         {
             _instance = new ConfigurationServiceClient(
                 loggerFunction,
                 baseServerAddressEnvironmentVariable,
-                new StandardEnvironment());
+                new StandardEnvironment(),
+                defaultConfigFile,
+                defaultParameterFile);
         }
 
 
@@ -81,8 +85,8 @@ namespace Jarvis.ConfigurationService.Client
                 Action<String, Boolean, Exception> loggerFunction,
                 String baseServerAddressEnvironmentVariable,
                 IEnvironment environment,
-                FileInfo standardConfigFile = null,
-                FileInfo standardParameterFile = null
+                FileInfo defaultConfigFile = null,
+                FileInfo defaultParameterFile = null
             )
         {
             _logger = loggerFunction;
@@ -90,7 +94,7 @@ namespace Jarvis.ConfigurationService.Client
             _environment = environment;
             _resourceToMonitor = new ConcurrentDictionary<String, MonitoredFile>();
             AutoConfigure();
-            LoadSettings(standardConfigFile, standardParameterFile);
+            LoadSettings(defaultConfigFile, defaultParameterFile);
             _configChangePollerTimer = new Timer(60 * 1000);
             _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
         }
