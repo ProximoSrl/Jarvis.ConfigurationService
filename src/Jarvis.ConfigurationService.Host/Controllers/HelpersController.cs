@@ -11,6 +11,7 @@ using System.Web.Http;
 
 namespace Jarvis.ConfigurationService.Host.Controllers
 {
+    [ExceptionHandlingAttribute]
     public class HelpersController : ApiController
     {
         private static ILog _logger = LogManager.GetLogger(typeof(HelpersController));

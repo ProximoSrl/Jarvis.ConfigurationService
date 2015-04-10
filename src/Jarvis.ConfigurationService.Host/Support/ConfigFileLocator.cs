@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using log4net.Repository.Hierarchy;
 using Newtonsoft.Json;
+using log4net;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
@@ -18,6 +19,8 @@ namespace Jarvis.ConfigurationService.Host.Support
     /// </summary>
     public static class ConfigFileLocator
     {
+        private static ILog _logger = LogManager.GetLogger(typeof(ConfigFileLocator));
+
         /// <summary>
         /// 
         /// </summary>
@@ -50,7 +53,8 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             var baseDirLen = Directory.GetParent(appDirectory).FullName.Length;
             String baseConfigFileName = Path.Combine(baseDir.FullName, "base.config");
-            String defaultApplicationBaseConfigFileName = Path.Combine(systemDirectory, applicationName, "ClientDefault", (hostName ?? "") + ".config");
+            String defaultApplicationBaseConfigFileName = Path.Combine(systemDirectory, applicationName, serviceName, (hostName ?? "") + DateTime.Now.ToString("_yyyyMMdd_hhMMss_fff_") + ".config");
+           
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
@@ -65,6 +69,8 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 FileSystem.Instance.WriteFile(defaultApplicationBaseConfigFileName, defaultConfiguration.ToString());
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultApplicationBaseConfigFileName), defaultApplicationBaseConfigFileName.Substring(baseDirLen)));
+                _logger.InfoFormat("Default File used. App {0} service {1} host {2} content {3}",
+                    applicationName, serviceName, hostName, defaultConfiguration.ToString());
             }
             
             if (FileSystem.Instance.FileExists(applicationBaseConfigFileName))
@@ -92,8 +98,9 @@ namespace Jarvis.ConfigurationService.Host.Support
             //then load all parameter files.
             String baseParametersFileName = Path.Combine(baseDir.FullName, "parameters.config");
             String applicationBaseParametersFileName = Path.Combine(appDirectory, "parameters.config");
-            String defaultApplicationBaseParametersFileName = Path.Combine(systemDirectory, applicationName, "ClientDefault", (hostName ?? "") + ".parameters.config");
             
+            String defaultApplicationBaseParametersFileName = Path.Combine(systemDirectory, applicationName, serviceName, (hostName ?? "") + DateTime.Now.ToString("_yyyyMMdd_hhMMss_fff_") + ".parameters.config");
+
             String defaultDirectoryBaseParametersFileName = Path.Combine(appDirectory, "Default", "parameters.config");
             String serviceParametersFileName = Path.Combine(appDirectory, "Default", serviceName + ".parameters.config");
             List<ConfigFileInfo> parametersFiles = new List<ConfigFileInfo>();
@@ -104,6 +111,8 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 FileSystem.Instance.WriteFile(defaultApplicationBaseParametersFileName, defaultParameters.ToString());
                 parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultApplicationBaseParametersFileName), defaultApplicationBaseParametersFileName.Substring(baseDirLen)));
+                _logger.InfoFormat("Default Parameters used. App {0} service {1} host {2} content {3}",
+                    applicationName, serviceName, hostName, defaultParameters.ToString());
             }
             if (FileSystem.Instance.FileExists(applicationBaseParametersFileName))
                 parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseParametersFileName), applicationBaseParametersFileName.Substring(baseDirLen)));
@@ -148,6 +157,17 @@ namespace Jarvis.ConfigurationService.Host.Support
                     replaceResult.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2));
             }
             ParameterManager.UnescapePercentage(baseConfigObject);
+
+            //cleanup file 
+
+            if (FileSystem.Instance.FileExists(defaultApplicationBaseConfigFileName))
+            {
+                FileSystem.Instance.DeleteFile(defaultApplicationBaseConfigFileName);
+            }
+            if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName)) 
+            {
+                FileSystem.Instance.DeleteFile(defaultApplicationBaseConfigFileName);
+            }
 
             return baseConfigObject;
         }

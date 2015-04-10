@@ -18,6 +18,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Jarvis.ConfigurationService.Host.Controllers
 {
+    [ExceptionHandlingAttribute]
     public class ConfigController : ApiController
     {
         private static ILog _logger = LogManager.GetLogger(typeof(ConfigController));

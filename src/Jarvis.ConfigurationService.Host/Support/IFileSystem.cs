@@ -29,6 +29,8 @@ namespace Jarvis.ConfigurationService.Host.Support
         string GetFileContent(string fileName);
 
         void WriteFile(string fileName, string content);
+
+        void DeleteFile(string defaultApplicationBaseConfigFileName);
     }
 
     /// <summary>
@@ -135,6 +137,14 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             File.WriteAllText(fileName, content);
         }
+
+        public void DeleteFile(String fileName) 
+        {
+            File.Delete(fileName);
+        }
+
+
+      
     }
 
     public static class FileSystem
