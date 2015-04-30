@@ -463,7 +463,7 @@ base-server-address : http://localhost:55555/");
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
             var sut = CreateSut();
-            IEnumerable<dynamic> configuration = sut.WithArraySetting("setting");
+            IEnumerable<dynamic> configuration = sut.GetArraySetting("setting");
             Assert.That(configuration.Count(), Is.EqualTo(3));
             Assert.That((String)configuration.ElementAt(0), Is.EqualTo("a"));
             Assert.That((String)configuration.ElementAt(1), Is.EqualTo("b"));
@@ -522,7 +522,7 @@ base-server-address : http://localhost:55555/");
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
             var sut = CreateSut();
-            IEnumerable<dynamic> configuration = sut.WithArraySetting("complex.settings");
+            IEnumerable<dynamic> configuration = sut.GetArraySetting("complex.settings");
             Assert.That(configuration.Count(), Is.EqualTo(2));
             Assert.That((String)configuration.ElementAt(0).propA, Is.EqualTo("value1"));
             Assert.That((Int32)configuration.ElementAt(0).propB, Is.EqualTo(1));

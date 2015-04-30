@@ -347,7 +347,7 @@ namespace Jarvis.ConfigurationService.Client
         /// </summary>
         /// <param name="settingName"></param>
         /// <returns></returns>
-        public IEnumerable<dynamic> WithArraySetting(string settingName)
+        public IEnumerable<dynamic> GetArraySetting(string settingName)
         {
             var setting = InternalGetSetting(settingName);
             return (JArray)JsonConvert.DeserializeObject(setting);
@@ -355,13 +355,13 @@ namespace Jarvis.ConfigurationService.Client
 
         public void WithArraySetting(string settingName, Func<IEnumerable<dynamic>, String> useConfigurationFunction)
         {
-            var setting = WithArraySetting(settingName);
+            var setting = GetArraySetting(settingName);
             InnerUseConfigurationFunction(useConfigurationFunction, setting, settingName);
         }
 
         public void WithArraySetting(string settingName, Action<IEnumerable<dynamic>> useConfigurationFunction)
         {
-            var setting = WithArraySetting(settingName);
+            var setting = GetArraySetting(settingName);
             InnerUseConfigurationFunction(s =>
             {
                 useConfigurationFunction(s);
