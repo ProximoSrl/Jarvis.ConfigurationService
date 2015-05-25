@@ -96,7 +96,11 @@ namespace Jarvis.ConfigurationService.Host.Support
             }
 
             //then load all parameter files.
+            //Base file parameters.config
             String baseParametersFileName = Path.Combine(baseDir.FullName, "parameters.config");
+            //base file for application, in base directory called parameters.applicationname.config
+            String baseApplicationParametersFileName = Path.Combine(baseDir.FullName, "parameters." + applicationName + ".config");
+            //parameters.config inside the application directory
             String applicationBaseParametersFileName = Path.Combine(appDirectory, "parameters.config");
             
             String defaultApplicationBaseParametersFileName = Path.Combine(systemDirectory, applicationName, serviceName, (hostName ?? "") + DateTime.Now.ToString("_yyyyMMdd_hhMMss_fff_") + ".parameters.config");
@@ -106,6 +110,9 @@ namespace Jarvis.ConfigurationService.Host.Support
             List<ConfigFileInfo> parametersFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseParametersFileName))
                 parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseParametersFileName), baseParametersFileName.Substring(baseDirLen)));
+            if (FileSystem.Instance.FileExists(baseApplicationParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseApplicationParametersFileName), baseApplicationParametersFileName.Substring(baseDirLen)));
+
             //check default parameters file passed by the client
             if (defaultParameters != null)
             {

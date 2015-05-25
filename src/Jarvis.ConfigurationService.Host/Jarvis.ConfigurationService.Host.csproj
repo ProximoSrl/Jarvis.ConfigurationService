@@ -1268,6 +1268,9 @@
     <None Include="Configuration.Sample\MyAppParam\Default\servicemalformed.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration.Sample\parameters.MyAppParam.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Configuration.Sample\parameters.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

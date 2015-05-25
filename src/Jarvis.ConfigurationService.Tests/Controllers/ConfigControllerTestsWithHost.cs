@@ -385,12 +385,28 @@ namespace Jarvis.ConfigurationService.Tests.Support
 
         [Test]
         public void parameter_with_null_value()
-        {
+        {  
             var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["null-setting"], Is.EqualTo(""), "Can specify null string for parameter");
         }
-          
+
+        [Test]
+        public void parameter_specific_for_application()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["specific"], Is.EqualTo("specificValue"), "Parameters should be taken from application specific parameter file");
+        }
+
+        [Test]
+        public void parameter_specific_for_application_has_precedence()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["overridden"], Is.EqualTo("overriddenValue"), "Application specific parameter file has precedence over base parameters.config");
+        }
+        
         [Test]
         public void override_parameters_for_service_with_service_parameter_file()
         {
