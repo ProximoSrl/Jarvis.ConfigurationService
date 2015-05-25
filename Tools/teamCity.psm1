@@ -40,7 +40,7 @@
     return $true
 } 
 
-function Get-LatestBuildUri   
+function Get-LatestBuildNumber   
 {
     param
     (
@@ -66,6 +66,19 @@ function Get-LatestBuildUri
     $xmlContent = [xml]$result.Content
     $latestBuildId= $xmlContent.SelectNodes("(/builds/build/@id)[1]")[0].Value
 
+    return $latestBuildId
+
+}
+
+function Get-LatestBuildUri   
+{
+    param
+    (
+        [string] $url,
+        [string] $buildId,
+        [string] $latestBuildId
+    )
+   
     return "http://$url/repository/download/$buildId/$latestBuildId" + ":id"
 }
 

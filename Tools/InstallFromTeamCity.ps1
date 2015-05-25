@@ -1,8 +1,9 @@
 param(
-    [string]$BranchName = 'master',
-    [string]$InstallDir = ''
+    [string] $BranchName = 'master',
+    [string] $InstallDir = '',
+    [string] $teamCityBuildId = 'Jarvis_JarvisConfigurationService_Build'
 )
-#Remove-Module teamCity
+Remove-Module teamCity
 
 Import-Module -Name ".\teamCity.psm1"
 
@@ -11,15 +12,23 @@ if ($InstallDir -eq '')
     $InstallDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
 }
 
-$targetpath = [System.IO.Path]::GetFullPath($InstallDir + "\Jarvis.ConfigurationService.Host.zip ") 
-$finalInstallDir = [System.IO.Path]::GetFullPath($InstallDir + "\ConfigurationManagerHost")
+
 Write-Host "Installing in:$finalInstallDir"
 $user  = Read-Host 'What is your username?' 
 $pass = Read-Host 'What is your password?' -AsSecureString
 $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
 
+$lastBuildNumber = Get-LatestBuildNumber -url "demo.prxm.it:8811" -buildId $teamCityBuildId -branch "master" -username $user  -password $plainPassword
+$baseBuildUri = Get-LatestBuildUri -url "demo.prxm.it:8811" -buildId $teamCityBuildId -latestBuildId $lastBuildNumber
 
-$baseBuildUri = Get-LatestBuildUri -url "demo.prxm.it:8811" -buildId "Jarvis_JarvisConfigurationService_Build" -branch "master" -username $user  -password $plainPassword
+if ($baseBuildUri -eq $null) 
+{
+    Write-Host "Error calling team city city server";
+    return;
+}
+
+$targetpath = [System.IO.Path]::GetFullPath($InstallDir + "\Jarvis.ConfigurationService.Host.build-$lastBuildNumber.zip ") 
+$finalInstallDir = [System.IO.Path]::GetFullPath($InstallDir + "\ConfigurationManagerHost")
 
 $hostUri = "$baseBuildUri/Jarvis.ConfigurationService.Host.zip"
 
