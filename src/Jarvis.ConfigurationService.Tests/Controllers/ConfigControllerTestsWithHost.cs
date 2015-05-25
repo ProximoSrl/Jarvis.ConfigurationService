@@ -64,7 +64,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That(result, Is.StringContaining(@"[""Service1"",""Service2""]"));
         } 
 
-        String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false"",""jarvis-parameters"":{""simple-parameter"":""100"",""complex-parameter"":{""subparam1"":""1"",""subparam2"":""42""},""null-param"":"""",""sys"":{""appName"":""MyApp1"",""serviceName"":""Service2"",""hostName"":""""}}}";
+        String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false"",""jarvis-parameters"":{""simple-parameter"":""100"",""complex-parameter"":{""subparam1"":""1"",""subparam2"":""42""},""null-param"":"""",""overriddenParam"":""x"",""sys"":{""appName"":""MyApp1"",""serviceName"":""Service2"",""hostName"":""""}}}";
         [Test]
         public void correct_configuration_of_single_service()
         { 
