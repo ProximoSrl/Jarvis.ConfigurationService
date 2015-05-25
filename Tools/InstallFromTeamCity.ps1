@@ -2,7 +2,7 @@ param(
     [string]$BranchName = 'master',
     [string]$InstallDir = ''
 )
-Remove-Module teamCity
+#Remove-Module teamCity
 
 Import-Module -Name ".\teamCity.psm1"
 
@@ -18,7 +18,7 @@ $user  = Read-Host 'What is your username?'
 $pass = Read-Host 'What is your password?' -AsSecureString
 $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
 
-Write-Host "PASSWORD: [$plainPassword]"
+
 $baseBuildUri = Get-LatestBuildUri -url "demo.prxm.it:8811" -buildId "Jarvis_JarvisConfigurationService_Build" -branch "master" -username $user  -password $plainPassword
 
 $hostUri = "$baseBuildUri/Jarvis.ConfigurationService.Host.zip"
