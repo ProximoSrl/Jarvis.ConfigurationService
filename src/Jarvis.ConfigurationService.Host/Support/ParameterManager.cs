@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
@@ -64,12 +65,12 @@ namespace Jarvis.ConfigurationService.Host.Support
                     String value = property.Value.ToString();
                     if (Regex.IsMatch(property.Value.ToString(), "(?<!%)%(?!%).+?(?<!%)%(?!%)"))
                     {
-                        value = Regex.Replace(
+                        var newValue = Regex.Replace(
                             value,
                             @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
                             new MatchEvaluator(m =>
                             {
-                                var parameterName = m.Groups["match"].Value;
+                                var parameterName = m.Groups["match"].Value.Trim('{', '}');
                                 var paramValue = GetParameterValue(parameterName, parameterObject);
                                 if (paramValue == null)
                                 {
@@ -79,8 +80,15 @@ namespace Jarvis.ConfigurationService.Host.Support
                                 result.HasReplaced = true;
                                 return paramValue;
                             }));
+                        if (value.StartsWith("%{") && value.EndsWith("}%"))
+                        {
+                            source[property.Name] = (JToken) JsonConvert.DeserializeObject(newValue);
+                        }
+                        else
+                        {
+                            source[property.Name] = newValue;
+                        }
                     }
-                    source[property.Name] = value;
                 }
             }
             return result;

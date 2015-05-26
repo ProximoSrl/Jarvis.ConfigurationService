@@ -64,13 +64,13 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That(result, Is.StringContaining(@"[""Service1"",""Service2""]"));
         } 
 
-        String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false"",""jarvis-parameters"":{""simple-parameter"":""100"",""complex-parameter"":{""subparam1"":""1"",""subparam2"":""42""},""null-param"":"""",""overriddenParam"":""x"",""sys"":{""appName"":""MyApp1"",""serviceName"":""Service2"",""hostName"":""""}}}";
+        String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false"",""jarvis-parameters"":{""simple-parameter"":100,""complex-parameter"":{""subparam1"":1,""subparam2"":42},""null-param"":"""",""overriddenParam"":""x"",""sys"":{""appName"":""MyApp1"",""serviceName"":""Service2"",""hostName"":null}}}";
         [Test]
         public void correct_configuration_of_single_service()
         { 
             var result = client.DownloadString(baseUri + "/MyApp1/Service2.config");
             Assert.That(result, Is.EqualTo(expected));
-        }
+        } 
 
         [Test]
         public void correct_configuration_of_single_service_with_old_route()
@@ -397,6 +397,27 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["specific"], Is.EqualTo("specificValue"), "Parameters should be taken from application specific parameter file");
+        }
+
+        [Test]
+        public void verify_support_for_complex_parameters()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["object-param"]["Value1"], Is.EqualTo("test"), "Complex parameter are not resolved correctly");
+            Assert.That((String)jobj["object-param"]["Value2"], Is.EqualTo("42"), "Complex parameter are not resolved correctly");
+        }
+
+        [Test]
+        public void verify_support_for_array_parameters()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That(jobj["array-param"], Is.InstanceOf<JArray>(), "Array parameter are not resolved correctly");
+            JArray param = jobj["array-param"] as JArray;
+            Assert.That(param.Count, Is.EqualTo(2));
+            Assert.That(param[0].Value<String>(), Is.EqualTo("bla"));
+            Assert.That(param[1].Value<String>(), Is.EqualTo("bla1"));
         }
 
         [Test]
