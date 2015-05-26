@@ -4,8 +4,11 @@ param(
     [string] $teamCityBuildId = 'Jarvis_JarvisConfigurationService_Build'
 )
 Remove-Module teamCity
+Remove-Module jarvisUtils
 
-Import-Module -Name ".\teamCity.psm1"
+Import-Module -Name ".\teamCity"
+Import-Module -Name ".\jarvisUtils"
+
 
 if ($InstallDir -eq '') 
 {
@@ -32,8 +35,15 @@ $finalInstallDir = [System.IO.Path]::GetFullPath($InstallDir + "\ConfigurationMa
 
 $hostUri = "$baseBuildUri/Jarvis.ConfigurationService.Host.zip"
 
-Write-Host "Download Host Url $hostUri"
-Get-Artifact $hostUri $targetpath $user $plainPassword 
+if(Test-Path -Path $targetpath)
+{
+    Write-Host "Target File already downloaded: $targetpath"
+}
+else
+{
+    Write-Host "Download Host Url $hostUri"
+    Get-Artifact $hostUri $targetpath $user $plainPassword 
+}
 
 Write-Host 'Stopping Service Jarvis - Configuration Service'
 
@@ -49,6 +59,7 @@ if (Test-Path $finalInstallDir)
 {
     Remove-Item $finalInstallDir -Recurse -Force
 }
+
 Write-Host "Unzipping host zip file"
 
 $shell = new-object -com shell.application
@@ -69,7 +80,22 @@ if ($service -eq $null)
     & "$finalInstallDir\Jarvis.ConfigurationService.Host.exe" install
 } 
 
-#Write-Host 'Starting the service'
-#Start-Service "Jarvis - Configuration Service"
+Write-Host "Changing configuration"
+
+$configFileName = $finalInstallDir + "\Jarvis.ConfigurationService.Host.exe.config"
+$xml = [xml](Get-Content $configFileName)
+ 
+Edit-XmlNodes $xml -xpath "/configuration/appSettings/add[@key='uri']/@value" -value "http://localhost:55555"
+Edit-XmlNodes $xml -xpath "/configuration/appSettings/add[@key='baseConfigDirectory']/@value" -value "..\ConfigurationStore"
+
+$xml.save($configFileName)
+$configurationDir = $InstallDir + "\ConfigurationStore"
+if(Test-Path -Path $configurationDir)
+{
+    New-Item -ItemType directory -Path $configurationDir
+}
+
+Write-Host 'Starting the service'
+Start-Service "Jarvis - Configuration Service"
 Write-Host "Jarvis Configuration Service Installed"
 
