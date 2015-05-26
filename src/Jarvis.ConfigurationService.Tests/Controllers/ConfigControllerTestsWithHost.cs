@@ -398,6 +398,42 @@ namespace Jarvis.ConfigurationService.Tests.Support
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((String)jobj["specific"], Is.EqualTo("specificValue"), "Parameters should be taken from application specific parameter file");
         }
+            
+        [Test]
+        public void verify_parameters_inside_array_of_objects()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That(jobj["array-inner-param"], Is.InstanceOf<JArray>(), "Array parameter are changed from array to other value");
+            JArray param = jobj["array-inner-param"] as JArray;
+            Assert.That(param.Count, Is.EqualTo(1));
+            Assert.That(param[0], Is.InstanceOf<JObject>());
+            Assert.That(param[0]["key"].Value<String>(), Is.EqualTo("HELLO-otherValue"));
+        }
+
+        [Test]
+        public void verify_parameters_inside_array_of_array_of_objects()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That(jobj["array-inside-array"][0]["array"], Is.InstanceOf<JArray>(), "Error handling array inside array");
+            JArray param = jobj["array-inside-array"][0]["array"] as JArray;
+            Assert.That(param.Count, Is.EqualTo(1));
+            Assert.That(param[0], Is.InstanceOf<JObject>());
+            Assert.That(param[0]["key"].Value<String>(), Is.EqualTo("HELLO-otherValue"));
+        }
+
+        [Test]
+        public void verify_parameters_inside_array_of_values()
+        {
+            var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That(jobj["array-inner-value"], Is.InstanceOf<JArray>(), "Array parameter are changed from array to other value");
+            JArray param = jobj["array-inner-value"] as JArray;
+            Assert.That(param.Count, Is.EqualTo(2));
+            Assert.That(param[0].Value<String>(), Is.EqualTo("test"));
+            Assert.That(param[1].Value<String>(), Is.EqualTo("HELLO-otherValue"));
+        }
 
         [Test]
         public void verify_support_for_complex_parameters()
