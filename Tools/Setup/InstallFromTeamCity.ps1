@@ -4,8 +4,8 @@ param(
     [string] $teamCityBuildId = "Jarvis_JarvisConfigurationService_Build",
     [string] $port = "55555"
 )
-Remove-Module teamCity
-Remove-Module jarvisUtils
+#Remove-Module teamCity
+#Remove-Module jarvisUtils
 
 Import-Module -Name ".\teamCity"
 Import-Module -Name ".\jarvisUtils"
@@ -97,8 +97,10 @@ if(!(Test-Path -Path $configurationDir))
 }
 
 Write-Host "Removing sample directories"
-Remove-Item -Force -Path $finalInstallDir + "Configuration.Sample"
-Remove-Item -Force -Path $finalInstallDir + "ConfigurationStore"
+$configurationSampleDir = $finalInstallDir + "\Configuration.Sample"
+Remove-Item -Force -Path $configurationSampleDir -Recurse
+$configurationStoreDefaultDir = $finalInstallDir + "\ConfigurationStore"
+Remove-Item -Force -Path $configurationStoreDefaultDir -Recurse
 
 Write-Host 'Starting the service'
 Start-Service "Jarvis - Configuration Service"
