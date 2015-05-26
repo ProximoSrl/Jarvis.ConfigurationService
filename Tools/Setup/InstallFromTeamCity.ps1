@@ -1,7 +1,8 @@
 param(
-    [string] $BranchName = 'master',
-    [string] $InstallDir = '',
-    [string] $teamCityBuildId = 'Jarvis_JarvisConfigurationService_Build'
+    [string] $BranchName = "master",
+    [string] $InstallDir = "",
+    [string] $teamCityBuildId = "Jarvis_JarvisConfigurationService_Build",
+    [string] $port = "55555"
 )
 Remove-Module teamCity
 Remove-Module jarvisUtils
@@ -90,10 +91,14 @@ Edit-XmlNodes $xml -xpath "/configuration/appSettings/add[@key='baseConfigDirect
 
 $xml.save($configFileName)
 $configurationDir = $InstallDir + "\ConfigurationStore"
-if(Test-Path -Path $configurationDir)
+if(!(Test-Path -Path $configurationDir))
 {
     New-Item -ItemType directory -Path $configurationDir
 }
+
+Write-Host "Removing sample directories"
+Remove-Item -Force -Path $finalInstallDir + "Configuration.Sample"
+Remove-Item -Force -Path $finalInstallDir + "ConfigurationStore"
 
 Write-Host 'Starting the service'
 Start-Service "Jarvis - Configuration Service"
