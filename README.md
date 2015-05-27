@@ -97,3 +97,5 @@ with such payload
 This will return encrypted string. Now if you want to include an encrypted string inside config you should simply enclose with Dollar Sign, ex
 
 	'$ldapPassword$' : '061FC47C86934D2B3311CE094CA61BB9'
+
+
