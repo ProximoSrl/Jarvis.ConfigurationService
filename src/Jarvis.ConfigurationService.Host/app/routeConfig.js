@@ -17,7 +17,7 @@
                 url: "/dashboard",
                 templateUrl: "dashboard/dashboard.html",
                 controller: "DashboardController as dashboard",
-                data: { pageTitle: 'Dashboardd'},
+                data: { pageTitle: 'Dashboard'},
                 resolve: {
                     configService : 'configService',
                     status: function (configService) {

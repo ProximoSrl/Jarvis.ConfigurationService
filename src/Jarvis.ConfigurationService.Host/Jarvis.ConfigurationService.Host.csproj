@@ -915,7 +915,7 @@
     <Content Include="app\lib\skin\css\datatables\images\sort_desc_disabled.png" />
     <Content Include="app\lib\skin\css\datepicker\datepicker3.css" />
     <Content Include="app\lib\skin\css\daterangepicker\daterangepicker-bs3.css" />
-    <Content Include="app\lib\skin\css\documentstore.css" />
+    <Content Include="app\lib\skin\css\configurationManager.css" />
     <Content Include="app\lib\skin\css\iCheck\all.css" />
     <Content Include="app\lib\skin\css\iCheck\flat\aero%402x.png" />
     <Content Include="app\lib\skin\css\iCheck\flat\aero.css" />
