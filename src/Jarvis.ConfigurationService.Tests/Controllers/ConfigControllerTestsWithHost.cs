@@ -376,6 +376,16 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void resource_files_supports_parameters()
+        {
+            var resFile = client.DownloadString(baseUri + "/MyAppParam/resources/Aservice/parametricResource.xml/Host1");
+            Assert.That(resFile, Is.EqualTo(
+@"<root>
+  <node value=""test_11"" />
+</root>"));
+        }
+
+        [Test]
         public void override_parameters_for_service_with_base_app_parameter()
         {
             var result = client.DownloadString(baseUri + "/MyAppParam/service1.config/Host1");

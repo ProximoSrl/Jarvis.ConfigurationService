@@ -166,14 +166,13 @@ namespace Jarvis.ConfigurationService.Host.Support
             ParameterManager.UnescapePercentage(baseConfigObject);
 
             //cleanup file 
-
             if (FileSystem.Instance.FileExists(defaultApplicationBaseConfigFileName))
             {
                 FileSystem.Instance.DeleteFile(defaultApplicationBaseConfigFileName);
             }
             if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName)) 
             {
-                FileSystem.Instance.DeleteFile(defaultApplicationBaseConfigFileName);
+                FileSystem.Instance.DeleteFile(defaultDirectoryBaseParametersFileName);
             }
 
             return baseConfigObject;

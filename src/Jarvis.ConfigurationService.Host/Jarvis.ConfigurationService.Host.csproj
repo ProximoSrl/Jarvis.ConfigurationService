@@ -1181,6 +1181,9 @@
     <Content Include="app\shared\fileSizeFilter.js" />
     <Content Include="app\shared\sharedModule.js" />
     <Content Include="app\shared\updateTitle.js" />
+    <Content Include="Configuration.Sample\MyAppParam\Default\parametricResource.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Configuration.Sample\MyApp1\Default\Service1\resourceFile.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
