@@ -379,10 +379,16 @@ namespace Jarvis.ConfigurationService.Tests.Support
         public void resource_files_supports_parameters()
         {
             var resFile = client.DownloadString(baseUri + "/MyAppParam/resources/Aservice/parametricResource.xml/Host1");
-            Assert.That(resFile, Is.EqualTo(
-@"<root>
-  <node value=""test_11"" />
-</root>"));
+            Assert.That(resFile, Is.StringContaining(
+@"<node value=""test_11"" />"));
+        }
+
+        [Test]
+        public void resource_files_supports_escaping()
+        {
+            var resFile = client.DownloadString(baseUri + "/MyAppParam/resources/Aservice/parametricResource.xml/Host1");
+            Assert.That(resFile, Is.StringContaining(
+@"this%% should be escaped %%"));
         }
 
         [Test]

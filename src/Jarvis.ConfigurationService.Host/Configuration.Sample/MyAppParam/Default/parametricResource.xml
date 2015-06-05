@@ -1,3 +1,4 @@
 ﻿<root>
   <node value="test_%complex-parameter.subparam3.value%" />
+  <escape value="this%% should be escaped %%" />
 </root>
