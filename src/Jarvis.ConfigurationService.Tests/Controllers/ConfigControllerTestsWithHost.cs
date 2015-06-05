@@ -388,7 +388,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         {
             var resFile = client.DownloadString(baseUri + "/MyAppParam/resources/Aservice/parametricResource.xml/Host1");
             Assert.That(resFile, Is.StringContaining(
-@"this%% should be escaped %%"));
+@"this% should be escaped %"));
         }
 
         [Test]

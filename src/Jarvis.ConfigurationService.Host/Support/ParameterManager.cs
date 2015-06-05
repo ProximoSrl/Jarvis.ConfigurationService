@@ -95,6 +95,10 @@ namespace Jarvis.ConfigurationService.Host.Support
                 throw new ConfigurationErrorsException("Missing parameters: " +
                    result.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2));
             }
+            if (newValue.Contains("%%"))
+            {
+                newValue = newValue.Replace("%%", "%");
+            }
             return newValue;
         }
 
