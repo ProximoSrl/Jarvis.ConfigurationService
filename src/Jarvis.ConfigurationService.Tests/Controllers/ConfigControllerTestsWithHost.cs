@@ -373,7 +373,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
 @"<root>
   <node value=""host 1 and service 1"" />
 </root>"));
-        }
+        } 
 
         [Test]
         public void resource_files_supports_parameters()

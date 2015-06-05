@@ -94,58 +94,17 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 throw new ConfigurationErrorsException("There are no valid config at directory: " + baseDirectory);
             }
-
-            //then load all parameter files.
-            //Base file parameters.config
-            String baseParametersFileName = Path.Combine(baseDir.FullName, "parameters.config");
-            //base file for application, in base directory called parameters.applicationname.config
-            String baseApplicationParametersFileName = Path.Combine(baseDir.FullName, "parameters." + applicationName + ".config");
-            //parameters.config inside the application directory
-            String applicationBaseParametersFileName = Path.Combine(appDirectory, "parameters.config");
-            
-            String defaultApplicationBaseParametersFileName = Path.Combine(systemDirectory, applicationName, serviceName, (hostName ?? "") + DateTime.Now.ToString("_yyyyMMdd_hhMMss_fff_") + ".parameters.config");
-
-            String defaultDirectoryBaseParametersFileName = Path.Combine(appDirectory, "Default", "parameters.config");
-            String serviceParametersFileName = Path.Combine(appDirectory, "Default", serviceName + ".parameters.config");
-            List<ConfigFileInfo> parametersFiles = new List<ConfigFileInfo>();
-            if (FileSystem.Instance.FileExists(baseParametersFileName))
-                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseParametersFileName), baseParametersFileName.Substring(baseDirLen)));
-            if (FileSystem.Instance.FileExists(baseApplicationParametersFileName))
-                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseApplicationParametersFileName), baseApplicationParametersFileName.Substring(baseDirLen)));
-
-            //check default parameters file passed by the client
-            if (defaultParameters != null)
-            {
-                FileSystem.Instance.WriteFile(defaultApplicationBaseParametersFileName, defaultParameters.ToString());
-                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultApplicationBaseParametersFileName), defaultApplicationBaseParametersFileName.Substring(baseDirLen)));
-                _logger.InfoFormat("Default Parameters used. App {0} service {1} host {2} content {3}",
-                    applicationName, serviceName, hostName, defaultParameters.ToString());
-            }
-            if (FileSystem.Instance.FileExists(applicationBaseParametersFileName))
-                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseParametersFileName), applicationBaseParametersFileName.Substring(baseDirLen)));
-            if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName))
-                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultDirectoryBaseParametersFileName), defaultDirectoryBaseParametersFileName.Substring(baseDirLen)));
-            if (FileSystem.Instance.FileExists(serviceParametersFileName))
-                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceParametersFileName), serviceParametersFileName.Substring(baseDirLen)));
-
             var baseConfigObject = JsonComposer.ComposeJsonContent(configFiles.ToArray());
-            JObject parameterObject;
-            if (parametersFiles.Count > 0)
-            {
-                parameterObject = JsonComposer.ComposeJsonContent(parametersFiles.ToArray());
-            }
-            else
-            {
-                parameterObject = new JObject();
-            }
-
-            //use base parameters 
-            JObject sysParams = new JObject();
-            sysParams.Add("appName", applicationName);
-            sysParams.Add("serviceName", serviceName);
-            sysParams.Add("hostName", hostName);
-            parameterObject.Add("sys", sysParams);
-
+            String defaultDirectoryBaseParametersFileName = Path.Combine(appDirectory, "Default", "parameters.config");
+            //then load all parameter files.
+            var parameterObject = GetParameterObject(
+                baseDirectory,
+                applicationName,
+                serviceName,
+                hostName,
+                defaultDirectoryBaseParametersFileName,
+                defaultConfiguration,
+                defaultParameters);
             //need to return all parameters.
 
             baseConfigObject["jarvis-parameters"] = (JObject) JsonConvert.DeserializeObject(
@@ -178,6 +137,77 @@ namespace Jarvis.ConfigurationService.Host.Support
             return baseConfigObject;
         }
 
+        public static JObject GetParameterObject
+           (
+               String baseDirectory,
+               String applicationName,
+               String serviceName,
+               String hostName, 
+               String defaultDirectoryBaseParametersFileName,
+               JObject defaultConfiguration = null,
+               JObject defaultParameters = null
+           )
+        {
+
+            DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
+            var appDirectory = FileSystem.Instance.RedirectDirectory(
+                Path.Combine(baseDir.FullName, applicationName)
+            );
+            var systemDirectory = Path.Combine(baseDir.FullName, ".system");
+            if (!Directory.Exists(systemDirectory)) Directory.CreateDirectory(systemDirectory);
+
+            var baseDirLen = Directory.GetParent(appDirectory).FullName.Length;
+
+            //Base file parameters.config
+            String baseParametersFileName = Path.Combine(baseDir.FullName, "parameters.config");
+            //base file for application, in base directory called parameters.applicationname.config
+            String baseApplicationParametersFileName = Path.Combine(baseDir.FullName, "parameters." + applicationName + ".config");
+            //parameters.config inside the application directory
+            String applicationBaseParametersFileName = Path.Combine(appDirectory, "parameters.config");
+
+            String defaultApplicationBaseParametersFileName = Path.Combine(systemDirectory, applicationName, serviceName, (hostName ?? "") + DateTime.Now.ToString("_yyyyMMdd_hhMMss_fff_") + ".parameters.config");
+
+            String serviceParametersFileName = Path.Combine(appDirectory, "Default", serviceName + ".parameters.config");
+            List<ConfigFileInfo> parametersFiles = new List<ConfigFileInfo>();
+            if (FileSystem.Instance.FileExists(baseParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseParametersFileName), baseParametersFileName.Substring(baseDirLen)));
+            if (FileSystem.Instance.FileExists(baseApplicationParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseApplicationParametersFileName), baseApplicationParametersFileName.Substring(baseDirLen)));
+
+            //check default parameters file passed by the client
+            if (defaultParameters != null)
+            {
+                FileSystem.Instance.WriteFile(defaultApplicationBaseParametersFileName, defaultParameters.ToString());
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultApplicationBaseParametersFileName), defaultApplicationBaseParametersFileName.Substring(baseDirLen)));
+                _logger.InfoFormat("Default Parameters used. App {0} service {1} host {2} content {3}",
+                    applicationName, serviceName, hostName, defaultParameters.ToString());
+            }
+            if (FileSystem.Instance.FileExists(applicationBaseParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseParametersFileName), applicationBaseParametersFileName.Substring(baseDirLen)));
+            if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultDirectoryBaseParametersFileName), defaultDirectoryBaseParametersFileName.Substring(baseDirLen)));
+            if (FileSystem.Instance.FileExists(serviceParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(serviceParametersFileName), serviceParametersFileName.Substring(baseDirLen)));
+
+            JObject parameterObject;
+            if (parametersFiles.Count > 0)
+            {
+                parameterObject = JsonComposer.ComposeJsonContent(parametersFiles.ToArray());
+            }
+            else
+            {
+                parameterObject = new JObject();
+            }
+
+            //use base parameters 
+            JObject sysParams = new JObject();
+            sysParams.Add("appName", applicationName);
+            sysParams.Add("serviceName", serviceName);
+            sysParams.Add("hostName", hostName);
+            parameterObject.Add("sys", sysParams);
+
+            return parameterObject;
+        }
 
         public static String GetResourceFile
             (
@@ -189,7 +219,6 @@ namespace Jarvis.ConfigurationService.Host.Support
             )
         {
 
-            DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
             String appDirectory = Path.Combine(baseDirectory, applicationName);
             var redirectedAppDirectory = FileSystem.Instance.RedirectDirectory(appDirectory);
 
@@ -199,8 +228,19 @@ namespace Jarvis.ConfigurationService.Host.Support
             possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, hostName, resourceFileName));
             possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, "Default", serviceName, resourceFileName));
             possibleLocationsOfResourceFile.Add(Path.Combine(redirectedAppDirectory, "Default", resourceFileName));
+            String defaultDirectoryBaseParametersFileName = Path.Combine(appDirectory, "Default", "parameters.config");
 
-            return GetContentOfFirstExistingFile(possibleLocationsOfResourceFile);
+            var parameterObject = GetParameterObject(
+                  baseDirectory,
+                  applicationName,
+                  serviceName,
+                  hostName,
+                  defaultDirectoryBaseParametersFileName);
+
+            String content = GetContentOfFirstExistingFile(possibleLocationsOfResourceFile);
+            content = ParameterManager.ReplaceParametersInString(content, parameterObject);
+
+            return content;
         }
 
         private static String GetContentOfFirstExistingFile(IEnumerable<String> paths)

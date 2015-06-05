@@ -72,6 +72,32 @@ namespace Jarvis.ConfigurationService.Host.Support
             return result;
         }
 
+        internal static String ReplaceParametersInString(String source, JObject parameterObject)
+        {
+            ReplaceResult result = new ReplaceResult();
+            var newValue = Regex.Replace(
+                    source,
+                    @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
+                    new MatchEvaluator(m =>
+                    {
+                        var parameterName = m.Groups["match"].Value.Trim('{', '}');
+                        var paramValue = GetParameterValue(parameterName, parameterObject);
+                        if (paramValue == null)
+                        {
+                            result.MissingParams.Add(parameterName);
+                            return "%" + parameterName + "%";
+                        }
+                        result.HasReplaced = true;
+                        return paramValue;
+                    }));
+            if (result.MissingParams.Count > 0)
+            {
+                throw new ConfigurationErrorsException("Missing parameters: " +
+                   result.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2));
+            }
+            return newValue;
+        }
+
         private static void ReplaceParametersInArray(
             JObject parameterObject, 
             ReplaceResult result, 
@@ -103,7 +129,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             JToken token)
         {
             String value = token.ToString();
-            if (Regex.IsMatch(token.ToString(), "(?<!%)%(?!%).+?(?<!%)%(?!%)"))
+            if (Regex.IsMatch(value, "(?<!%)%(?!%).+?(?<!%)%(?!%)"))
             {
                 var newValue = Regex.Replace(
                     value,
