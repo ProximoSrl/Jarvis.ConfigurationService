@@ -15,6 +15,7 @@ using Jarvis.ConfigurationService.Host.Support;
 using Microsoft.SqlServer.Server;
 using log4net;
 using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace Jarvis.ConfigurationService.Host.Controllers
 {
@@ -25,11 +26,17 @@ namespace Jarvis.ConfigurationService.Host.Controllers
 
         private static String version;
 
+        private static String fileVersion;
+
         private static String informationalVersion;
 
         static ConfigController()
         {
-            version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            version = assembly.GetName().Version.ToString();
+            
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            fileVersion = fvi.FileVersion;
 
             var informationalAttribute = Attribute
                 .GetCustomAttribute(
@@ -58,6 +65,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                 BaseFolder = baseDirectory,
                 Applications = applicationsDir.Union(redirectedApps).ToArray(),
                 Version = version,
+                FileVersion = fileVersion,
                 InformationalVersion = informationalVersion,
             };
         }
