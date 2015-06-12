@@ -108,6 +108,7 @@
     <Content Include="app\dashboard\dashboardData.js" />
     <Content Include="app\dashboard\dashboardModule.js" />
     <Content Include="app\index.html" />
+    <Content Include="app\layout\footer.html" />
     <Content Include="app\layout\header.html" />
     <Content Include="app\layout\header.js" />
     <Content Include="app\layout\layout.js" />

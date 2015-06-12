@@ -1,4 +1,6 @@
-﻿
+﻿<div class="col-lg-12 col-xs-12">
+    version: {{dashboard.fileVersion}} - {{dashboard.informationalVersion}}
+</div>
 <div class="row" ng-repeat="application in dashboard.applications">
     <div class="col-lg-6 col-xs-6">
         <!-- small box -->
@@ -26,3 +28,5 @@
         <div><a href="/{{dashboard.currentApplication.name}}/{{services}}.config" target="_blank">Service: {{services}}</a></div>
     </div>
 </div>
+
+

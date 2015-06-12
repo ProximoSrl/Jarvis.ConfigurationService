@@ -8,10 +8,11 @@
     function DashboardController(dashboardData, $interval, $scope, status) {
 
         console.log('Applications are ', status);
-
+   
         var vm = this;
-        vm.title = 'prova';
+        vm.title = 'Dashboard';
         vm.version = status.Version;
+        vm.fileVersion = status.FileVersion;
         vm.informationalVersion = status.InformationalVersion;
         vm.applications = [];
         vm.appDetailsVisible = false;

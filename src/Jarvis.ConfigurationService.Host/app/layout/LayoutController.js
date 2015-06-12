@@ -7,5 +7,6 @@
 
     function Layout() {
         var vm = this;
+        vm.version = "test version";
     }
 })(window, window.angular);
