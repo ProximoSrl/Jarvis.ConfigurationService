@@ -169,10 +169,9 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             String serviceParametersFileName = Path.Combine(appDirectory, "Default", serviceName + ".parameters.config");
             List<ConfigFileInfo> parametersFiles = new List<ConfigFileInfo>();
+            //Lower precedence, base parameter file name.
             if (FileSystem.Instance.FileExists(baseParametersFileName))
                 parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseParametersFileName), baseParametersFileName.Substring(baseDirLen)));
-            if (FileSystem.Instance.FileExists(baseApplicationParametersFileName))
-                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseApplicationParametersFileName), baseApplicationParametersFileName.Substring(baseDirLen)));
 
             //check default parameters file passed by the client
             if (defaultParameters != null)
@@ -182,6 +181,11 @@ namespace Jarvis.ConfigurationService.Host.Support
                 _logger.InfoFormat("Default Parameters used. App {0} service {1} host {2} content {3}",
                     applicationName, serviceName, hostName, defaultParameters.ToString());
             }
+            //PAY ATTENTION: base application parameters file name should have higher precedence than client
+            //passed parameter file.
+            if (FileSystem.Instance.FileExists(baseApplicationParametersFileName))
+                parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseApplicationParametersFileName), baseApplicationParametersFileName.Substring(baseDirLen)));
+
             if (FileSystem.Instance.FileExists(applicationBaseParametersFileName))
                 parametersFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseParametersFileName), applicationBaseParametersFileName.Substring(baseDirLen)));
             if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName))
