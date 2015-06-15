@@ -6,6 +6,8 @@ Simply copy all these scripts in the folder you want to install ConfigurationSer
 
 You will be prompted for credentials for the build server, then it will download the latest build from selected branch (default is master) and install everything.
 
+If you cannot access build server, you can create a folder named artifacts and then place inside that folder the result of the build downloaded from build service.
+
 #Installation Layout
 
 Base configuration install the host in subdirectory ConfigurationManagerHost, and rewrite the config file to use configuration store in a subfolder named ConfigurationStore. This will avoid further update to overwrite the ConfigurationStore directory
