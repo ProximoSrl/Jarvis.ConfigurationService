@@ -96,7 +96,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         public Object GetConfiguration(String appName, String moduleName, String hostName = "")
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            return ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
+            var configuration = ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
+            return configuration.Configuration;
         }
 
         [HttpPost]
@@ -115,13 +116,16 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                 defaultParameters = def.DefaultParameters;
                 defaultConfiguration = def.DefaultConfiguration;
             }
-            return ConfigFileLocator.GetConfig(
+            ParameterManager.ReplaceResult replaceResult;
+
+            var config = ConfigFileLocator.GetConfig(
                 baseDirectory, 
                 appName, 
                 moduleName, 
                 hostName,
                 defaultConfiguration,
                 defaultParameters);
+            return config.Configuration;
         }
 
         [HttpGet]

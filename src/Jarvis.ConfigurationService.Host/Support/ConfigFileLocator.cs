@@ -14,6 +14,21 @@ using log4net;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
+    internal class ComposedConfiguration
+    {
+        public Object Configuration { get; set; }
+
+        public ParameterManager.ReplaceResult ReplaceResult { get; set; }
+
+        public ComposedConfiguration(
+            Object configuration,
+            ParameterManager.ReplaceResult replaceResult)
+        {
+            Configuration = configuration;
+            ReplaceResult = replaceResult;
+        }
+    }
+
     /// <summary>
     /// Class used to phisically locate and compose json files.
     /// </summary>
@@ -33,14 +48,15 @@ namespace Jarvis.ConfigurationService.Host.Support
         /// <param name="defaultParameters">Json configuration sent by the client
         /// to contain base parameters for the application, it has lower priority. It can be null.</param>
         /// <returns></returns>
-        public static Object GetConfig
+        internal static ComposedConfiguration GetConfig
             (
                 String baseDirectory,
                 String applicationName,
                 String serviceName,
                 String hostName,
                 JObject defaultConfiguration = null,
-                JObject defaultParameters = null
+                JObject defaultParameters = null,
+                Boolean throwIfParameterIsMissing = true
             )
         {
 
@@ -115,9 +131,8 @@ namespace Jarvis.ConfigurationService.Host.Support
             while ((replaceResult = ParameterManager.ReplaceParameters(baseConfigObject, parameterObject)).HasReplaced)
             {
                 //do nothing, everything is done by the replace parameters routine
-
             }
-            if (replaceResult.MissingParams.Count > 0)
+            if (replaceResult.MissingParams.Count > 0 && throwIfParameterIsMissing)
             {
                 throw new ConfigurationErrorsException("Missing parameters: " +
                     replaceResult.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2));
@@ -134,7 +149,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                 FileSystem.Instance.DeleteFile(defaultDirectoryBaseParametersFileName);
             }
 
-            return baseConfigObject;
+            return new ComposedConfiguration(baseConfigObject, replaceResult);
         }
 
         public static JObject GetParameterObject
