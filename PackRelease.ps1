@@ -17,6 +17,7 @@ elseif ($DestinationDir.StartsWith("."))
 
 $DestinationDir = [System.IO.Path]::GetFullPath($DestinationDir)
 $DestinationDirHost = $DestinationDir + "\Jarvis.ConfigurationService.Host"
+$DestinationDirClient = $DestinationDir + "\Jarvis.ConfigurationService.Client"
 
 Write-Host "Destination dir is $DestinationDir"
 
@@ -39,6 +40,7 @@ $DestinationDir = $DestinationDir.TrimEnd('/', '\')
 
 New-Item -ItemType Directory -Path $DestinationDir
 New-Item -ItemType Directory -Path $DestinationDirHost
+New-Item -ItemType Directory -Path $DestinationDirClient
 
 Copy-Item ".\src\Jarvis.ConfigurationService.Host\bin\$configuration\*.*" `
     $DestinationDirHost `
@@ -61,12 +63,17 @@ Edit-XmlNodes $xml -xpath "/configuration/appSettings/add[@key='baseConfigDirect
 $xml.save($configFileName)
 
 Write-Host "Cleaning up $DestinationDirHost"
-Get-ChildItem $DestinationDirHost -Include *.xml | foreach ($_) `
-{
-    Write-Host "Removing: $_"
-    remove-item $_.fullname
-}
+Get-ChildItem $DestinationDirHost -Include *.xml | foreach ($_) {remove-item $_.fullname}
 
+
+Write-Host "Copying file for client"
+Copy-Item ".\src\Jarvis.ConfigurationService.Client\bin\$configuration\*.*" `
+    $DestinationDirClient `
+    -Force -Recurse
+Write-Host "Cleaning up $DestinationDirClient"
+Get-ChildItem $DestinationDirClient -Include *.xml | foreach ($_) {remove-item $_.fullname}
+
+Write-Host "Compressing everything with 7z"
 if (-not (test-path "$env:ProgramFiles\7-Zip\7z.exe")) {throw "$env:ProgramFiles\7-Zip\7z.exe needed"} 
 set-alias sz "$env:ProgramFiles\7-Zip\7z.exe"  
 
@@ -74,4 +81,10 @@ $Source = $DestinationDirHost
 $Target = $DestinationDir + "\Jarvis.ConfigurationService.Host.7z"
 
 sz a -mx=9 $Target $Source
-#Remove-Item $DestinationDirHost  -Recurse -Force
+Remove-Item $DestinationDirHost  -Recurse -Force
+
+$Source = $DestinationDirClient 
+$Target = $DestinationDir + "\Jarvis.ConfigurationService.Client.7z"
+
+sz a -mx=9 $Target $Source
+Remove-Item $DestinationDirClient  -Recurse -Force
