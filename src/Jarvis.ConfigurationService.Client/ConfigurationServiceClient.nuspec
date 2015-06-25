@@ -18,6 +18,7 @@
 
   <files>
     <file src="bin\release\Jarvis.ConfigurationService.Client.dll" target="lib\NET45" />
+    <file src="**\*.cs" target="src" />    
   </files>
 
 </package>
