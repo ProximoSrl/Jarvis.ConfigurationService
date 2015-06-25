@@ -1,7 +1,8 @@
 Param
 (
     [String] $Configuration,
-    [String] $DestinationDir = ""
+    [String] $DestinationDir = "",
+    [bool] $DeleteUnzipped = $false
 )
 
 $runningDirectory = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
@@ -81,10 +82,17 @@ $Source = $DestinationDirHost
 $Target = $DestinationDir + "\Jarvis.ConfigurationService.Host.7z"
 
 sz a -mx=9 $Target $Source
-Remove-Item $DestinationDirHost  -Recurse -Force
-
+if ($deleteUnzipped -eq $true) 
+{
+    Write-Host "Deleting all unzipped artifacts from $DestinationDirClient"
+    Remove-Item $DestinationDirHost  -Recurse -Force
+}
 $Source = $DestinationDirClient 
 $Target = $DestinationDir + "\Jarvis.ConfigurationService.Client.7z"
 
 sz a -mx=9 $Target $Source
-Remove-Item $DestinationDirClient  -Recurse -Force
+if ($deleteUnzipped -eq $true) 
+{
+    Write-Host "Deleting all unzipped artifacts from $DestinationDirClient"
+    Remove-Item $DestinationDirClient  -Recurse -Force
+}
