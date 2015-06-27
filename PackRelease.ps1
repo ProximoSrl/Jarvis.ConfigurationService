@@ -2,7 +2,7 @@ Param
 (
     [String] $Configuration,
     [String] $DestinationDir = "",
-    [bool] $DeleteUnzipped = $false
+    [Bool] $DeleteOriginalAfterZip = $true
 )
 
 $runningDirectory = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
@@ -78,21 +78,19 @@ Write-Host "Compressing everything with 7z"
 if (-not (test-path "$env:ProgramFiles\7-Zip\7z.exe")) {throw "$env:ProgramFiles\7-Zip\7z.exe needed"} 
 set-alias sz "$env:ProgramFiles\7-Zip\7z.exe"  
 
-$Source = $DestinationDirHost 
+$Source = $DestinationDirHost + "\*"
 $Target = $DestinationDir + "\Jarvis.ConfigurationService.Host.7z"
 
 sz a -mx=9 $Target $Source
-if ($deleteUnzipped -eq $true) 
-{
-    Write-Host "Deleting all unzipped artifacts from $DestinationDirClient"
-    Remove-Item $DestinationDirHost  -Recurse -Force
-}
-$Source = $DestinationDirClient 
+
+$Source = $DestinationDirClient + "\*"
 $Target = $DestinationDir + "\Jarvis.ConfigurationService.Client.7z"
 
 sz a -mx=9 $Target $Source
-if ($deleteUnzipped -eq $true) 
+
+if ($DeleteOriginalAfterZip -eq $true) 
 {
-    Write-Host "Deleting all unzipped artifacts from $DestinationDirClient"
-    Remove-Item $DestinationDirClient  -Recurse -Force
+    Remove-Item $DestinationDirHost  -Recurse -Force
+	Remove-Item $DestinationDirClient  -Recurse -Force
 }
+
