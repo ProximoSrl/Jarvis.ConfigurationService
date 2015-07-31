@@ -127,9 +127,9 @@ namespace Jarvis.ConfigurationService.Client
             }
             catch (ServerConfigurationException ex)
             {
-                LogError("Server configuration exception.", ex);
-                if (ex.ServerResponse.Contains("Error reading config file"))
-                    throw new ConfigurationErrorsException("Server Configuration Exception", ex);
+                LogError("Server configuration exception. Using Last Good Configuration Known", ex);
+                if (ExceptionTextIndicatesErrorInConfiguration(ex))
+                    throw new ConfigurationErrorsException("Server Configuration Exception:" + ex.ServerResponse, ex);
             }
             catch (Exception ex)
             {
@@ -169,6 +169,19 @@ namespace Jarvis.ConfigurationService.Client
                 LogError(errorString, ex);
                 throw new ConfigurationErrorsException(errorString);
             }
+        }
+
+        /// <summary>
+        /// If the error indicates that something is not good in configuration file, we should 
+        /// re-trhow the exception. The only situation when the client can go on is when the 
+        /// server is not reachable or have some internal error
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <returns></returns>
+        private static bool ExceptionTextIndicatesErrorInConfiguration(ServerConfigurationException ex)
+        {
+            return ex.ServerResponse.Contains("Error reading config file") ||
+                ex.ServerResponse.IndexOf("Missing parameters", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         void AutoConfigure()
