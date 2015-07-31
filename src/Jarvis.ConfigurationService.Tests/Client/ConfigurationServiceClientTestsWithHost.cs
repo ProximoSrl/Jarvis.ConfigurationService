@@ -39,7 +39,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             }
             File.WriteAllText(fileName.FullName,
 @"#jarvis-configuration
-application-name : MyAppParam
+application-name : MyApp1
 base-server-address : http://localhost:53642/");
 
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
@@ -67,6 +67,58 @@ base-server-address : http://localhost:53642/");
                 new StandardEnvironment());
         }
 
+     
+
+        [Test]
+        public void simple_call_smoke_test() 
+        {
+            CreateStandardSut();
+            var result = sut.GetSetting("baseSetting");
+            Assert.That(result, Is.EqualTo("hello world"));
+        }      
+    }
+
+    [TestFixture]
+    public class ConfigurationServiceClientTestsWithHostAndParams
+    {
+        IDisposable _app;
+        TestWebClient client;
+        String baseUri = "http://localhost:53642";
+        ConfigurationServiceClient sut;
+
+        [TestFixtureSetUp]
+        public void FixtureSetup()
+        {
+            var baseDir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            var previousDir = new DirectoryInfo(baseDir + "/../../");
+            var fileName = new FileInfo(Path.Combine(previousDir.FullName, "testappname.application"));
+            if (File.Exists(fileName.FullName))
+            {
+                File.Delete(fileName.FullName);
+            }
+            File.WriteAllText(fileName.FullName,
+@"#jarvis-configuration
+application-name : MyAppParam
+base-server-address : http://localhost:53642/");
+
+            _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
+            client = new TestWebClient();
+        }
+
+        [TestFixtureTearDown]
+        public void FixtureTearDown()
+        {
+            _app.Dispose();
+
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+
+
+        }
+
         private void CreateSutWithDefault(FileInfo defaultConfig, FileInfo defaultParametersConfig)
         {
             sut = new ConfigurationServiceClient(
@@ -75,14 +127,6 @@ base-server-address : http://localhost:53642/");
                 new StandardEnvironment(),
                 defaultConfig,
                 defaultParametersConfig);
-        }
-
-        [Test]
-        public void simple_call_smoke_test() 
-        {
-            CreateStandardSut();
-            var result = sut.GetSetting("baseSetting");
-            Assert.That(result, Is.EqualTo("hello world app 3"));
         }
 
         [Test]
@@ -97,8 +141,8 @@ base-server-address : http://localhost:53642/");
             result = sut.GetSetting("default-setting-param");
             Assert.That(result, Is.EqualTo("def-value:default-param"));
         }
-         
-        [Test]  
+
+        [Test]
         public void default_parameters_has_lower_precedence()
         {
             FileInfo defConf = new FileInfo("Client\\base.config");
