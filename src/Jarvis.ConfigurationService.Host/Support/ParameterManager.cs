@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
-    static internal class ParameterManager
+    internal class ParameterManager
     {
         internal class ReplaceResult
         {
@@ -30,27 +30,40 @@ namespace Jarvis.ConfigurationService.Host.Support
             }
         }
 
+        private String _missingParametersToken;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="missingParametersToken">If a parameter is missing we can
+        /// substituite this token to the missing parameter instead of marking the 
+        /// parameter as missing.</param>
+        public ParameterManager(String missingParametersToken = null)
+        {
+            _missingParametersToken = missingParametersToken;
+        }
+
         /// <summary>
         /// it is used to retrieve parameters settings from config file.
         /// </summary>
         /// <param name="settingName"></param>
         /// <param name="parameterObject"></param>
         /// <returns></returns>
-        internal static String GetParameterValue(string settingName, JObject parameterObject)
+        internal String GetParameterValue(string settingName, JObject parameterObject)
         {
             var path = settingName.Split('.');
             JObject current = parameterObject;
             for (int i = 0; i < path.Length - 1; i++)
             {
-                if (current[path[i]] == null) return null;
+                if (current[path[i]] == null) return _missingParametersToken;
                 current = (JObject)current[path[i]];
             }
             if (current[path.Last()] == null)
-                return null;
+                return _missingParametersToken;
             return current[path.Last()].ToString();
         }
 
-        internal static ReplaceResult ReplaceParameters(JObject source, JObject parameterObject)
+        internal ReplaceResult ReplaceParameters(JObject source, JObject parameterObject)
         {
             ReplaceResult result = new ReplaceResult();
             foreach (var property in source.Properties())
@@ -72,7 +85,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             return result;
         }
 
-        internal static String ReplaceParametersInString(String source, JObject parameterObject)
+        internal String ReplaceParametersInString(String source, JObject parameterObject)
         {
             ReplaceResult result = new ReplaceResult();
             var newValue = Regex.Replace(
@@ -102,7 +115,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             return newValue;
         }
 
-        private static void ReplaceParametersInArray(
+        private void ReplaceParametersInArray(
             JObject parameterObject, 
             ReplaceResult result, 
             JArray array)
@@ -127,7 +140,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             }
         }
 
-        private static JToken ManageParametersInJToken(
+        private JToken ManageParametersInJToken(
             JObject parameterObject, 
             ReplaceResult result, 
             JToken token)
@@ -162,7 +175,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             return token;
         }
 
-        internal static void UnescapePercentage(JObject source)
+        internal void UnescapePercentage(JObject source)
         {
             foreach (var property in source.Properties())
             {

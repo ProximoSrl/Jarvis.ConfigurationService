@@ -86,6 +86,7 @@
   <ItemGroup>
     <Compile Include="Controllers\ExceptionFilterAttribute.cs" />
     <Compile Include="Model\GetConfigurationWithDefault.cs" />
+    <Compile Include="Model\MissingParametersAction.cs" />
     <Compile Include="Support\ConfigurationServiceBootstrapper.cs" />
     <Compile Include="Controllers\ConfigController.cs" />
     <Compile Include="Controllers\HelpersController.cs" />

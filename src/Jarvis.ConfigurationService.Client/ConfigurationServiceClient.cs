@@ -44,6 +44,7 @@ namespace Jarvis.ConfigurationService.Client
         private String _baseServerAddressEnvironmentVariable;
         private String _baseConfigurationServer;
         private String _moduleName;
+        private ConfigurationManagerMissingParametersAction? _missingParametersAction;
         private ClientConfiguration _clientConfiguration;
 
         private IEnvironment _environment;
@@ -86,22 +87,29 @@ namespace Jarvis.ConfigurationService.Client
                 String baseServerAddressEnvironmentVariable,
                 IEnvironment environment,
                 FileInfo defaultConfigFile = null,
-                FileInfo defaultParameterFile = null
+                FileInfo defaultParameterFile = null,
+                ConfigurationManagerMissingParametersAction? missingParametersAction = null
+
             )
         {
             _logger = loggerFunction;
             _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
             _environment = environment;
+            _missingParametersAction = missingParametersAction;
             _resourceToMonitor = new ConcurrentDictionary<String, MonitoredFile>();
             AutoConfigure();
-            LoadSettings(defaultConfigFile, defaultParameterFile);
+            LoadSettings(
+                defaultConfigFile, 
+                defaultParameterFile, 
+                missingParametersAction ?? ConfigurationManagerMissingParametersAction.Throw);
             _configChangePollerTimer = new Timer(60 * 1000);
             _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
         }
 
         void LoadSettings(
             FileInfo standardConfigFile,
-            FileInfo standardParameterFile)
+            FileInfo standardParameterFile,
+            ConfigurationManagerMissingParametersAction missingParametersAction)
         {
             String configurationFullContent = null;
             try
@@ -220,12 +228,21 @@ namespace Jarvis.ConfigurationService.Client
                         );
                 throw new ConfigurationErrorsException(errorString);
             }
+
             _configFileLocation = String.Format(
                 "{0}/{1}/{2}.config/{3}",
                 _baseConfigurationServer.TrimEnd('/', '\\'),
                 _clientConfiguration.ApplicationName,
                 _moduleName,
                 _environment.GetMachineName());
+
+            if (_missingParametersAction.HasValue)
+            {
+                _configFileLocation = String.Format("{0}?missingParameterAction={1}",
+                    _configFileLocation,
+                    _missingParametersAction.ToString().ToLower());
+            }
+            
 
             LogDebug("Loading configuration from " + _configFileLocation);
         }

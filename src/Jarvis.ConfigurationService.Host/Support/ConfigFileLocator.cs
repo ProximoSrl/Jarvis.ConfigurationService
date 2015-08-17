@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using log4net.Repository.Hierarchy;
 using Newtonsoft.Json;
 using log4net;
+using Jarvis.ConfigurationService.Host.Model;
 
 namespace Jarvis.ConfigurationService.Host.Support
 {
@@ -54,9 +55,9 @@ namespace Jarvis.ConfigurationService.Host.Support
                 String applicationName,
                 String serviceName,
                 String hostName,
+                MissingParametersAction missingParams,
                 JObject defaultConfiguration = null,
-                JObject defaultParameters = null,
-                Boolean throwIfParameterIsMissing = true
+                JObject defaultParameters = null
             )
         {
 
@@ -128,16 +129,38 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             //Do the substitution
             ParameterManager.ReplaceResult replaceResult;
-            while ((replaceResult = ParameterManager.ReplaceParameters(baseConfigObject, parameterObject)).HasReplaced)
+
+            ParameterManager parameterManager;
+            if (missingParams == MissingParametersAction.Blank)
+            {
+                parameterManager= new ParameterManager(String.Empty);
+            }
+            else
+            {
+                parameterManager = new ParameterManager();
+            }
+            while ((replaceResult = parameterManager.ReplaceParameters(baseConfigObject, parameterObject)).HasReplaced)
             {
                 //do nothing, everything is done by the replace parameters routine
             }
-            if (replaceResult.MissingParams.Count > 0 && throwIfParameterIsMissing)
+            if (replaceResult.MissingParams.Count > 0)
             {
-                throw new ConfigurationErrorsException("Missing parameters: " +
-                    replaceResult.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2));
+                var missingParametersList = replaceResult.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2);
+
+                switch (missingParams)
+                {
+                    case MissingParametersAction.Throw:
+                        throw new ConfigurationErrorsException("Missing parameters: " +
+                            missingParametersList); 
+                    case MissingParametersAction.Ignore:
+                        _logger.DebugFormat("Missing Parameter List {0} but client ask to ignore", missingParametersList);
+                        break;
+                    case MissingParametersAction.Blank:
+
+                        break;
+                }
             }
-            ParameterManager.UnescapePercentage(baseConfigObject);
+            parameterManager.UnescapePercentage(baseConfigObject);
 
             //cleanup file 
             if (FileSystem.Instance.FileExists(defaultApplicationBaseConfigFileName))
@@ -257,7 +280,8 @@ namespace Jarvis.ConfigurationService.Host.Support
                   defaultDirectoryBaseParametersFileName);
 
             String content = GetContentOfFirstExistingFile(possibleLocationsOfResourceFile);
-            content = ParameterManager.ReplaceParametersInString(content, parameterObject);
+            ParameterManager parameterManager = new ParameterManager();
+            content = parameterManager.ReplaceParametersInString(content, parameterObject);
 
             return content;
         }

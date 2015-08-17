@@ -570,5 +570,45 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }  
             Assert.Fail("Should throw because a parameter is missing");
          }
+
+        [Test]
+        public void missing_parameter_with_blank_should_NOT_throw_and_substitute_blank()
+        {
+            var thisClient = new WebClient();
+            
+            var result =  thisClient.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/Host1?missingParametersAction=blank");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["missing-parameter-config"], Is.EqualTo("this contains "), "missing parameters should be substituted with blanck if missingParams=blank");
+        }
+
+        [Test]
+        public void missing_parameter_with_ignore_should_NOT_throw_and_leave_parameter()
+        {
+            var thisClient = new WebClient();
+
+            var result = thisClient.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/?missingParametersAction=ignore");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String) jobj["missing-parameter-config"], Is.EqualTo("this contains %missing-parameter%"), "missing parameters should be substituted with blanck if missingParams=blank");
+        }
+
+        [Test]
+        public void missing_parameter_with_blank_and_hostname_should_NOT_throw_and_substitute_blank()
+        {
+            var thisClient = new WebClient();
+
+            var result = thisClient.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/?missingParametersAction=Blank");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["missing-parameter-config"], Is.EqualTo("this contains "), "missing parameters should be substituted with blanck if missingParams=blank");
+        }
+
+        [Test]
+        public void missing_parameter_with_ignore_and_hostname_should_NOT_throw_and_leave_parameter()
+        {
+            var thisClient = new WebClient();
+
+            var result = thisClient.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/Host1?missingParametersAction=ignore");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["missing-parameter-config"], Is.EqualTo("this contains %missing-parameter%"), "missing parameters should be substituted with blanck if missingParams=blank");
+        }
     }
 }

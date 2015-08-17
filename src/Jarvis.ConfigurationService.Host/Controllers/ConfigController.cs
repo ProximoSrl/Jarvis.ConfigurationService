@@ -93,10 +93,10 @@ namespace Jarvis.ConfigurationService.Host.Controllers
         [HttpGet]
         [Route("{appName}/{moduleName}/config.json/{hostName=}")]
         [Route("{appName}/{moduleName}.config/{hostName=}")]
-        public Object GetConfiguration(String appName, String moduleName, String hostName = "")
+        public Object GetConfiguration(String appName, String moduleName, String hostName = "", MissingParametersAction missingParametersAction = MissingParametersAction.Throw)
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            var configuration = ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName);
+            var configuration = ConfigFileLocator.GetConfig(baseDirectory, appName, moduleName, hostName, missingParametersAction);
             return configuration.Configuration;
         }
 
@@ -106,7 +106,8 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             [FromBody] GetConfigurationWithDefault def,
             String appName, 
             String moduleName,
-            String hostName = "")
+            String hostName = "",
+            MissingParametersAction missingParametersAction = MissingParametersAction.Throw)
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             JObject defaultParameters  =null;
@@ -123,6 +124,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                 appName, 
                 moduleName, 
                 hostName,
+                missingParametersAction,
                 defaultConfiguration,
                 defaultParameters);
             return config.Configuration;
@@ -130,7 +132,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
 
         [HttpGet]
         [Route("{appName}/resources/{moduleName}/{filename}/{hostName=}")]
-        public HttpResponseMessage GetConfiguration(String appName, String moduleName, String fileName, String hostName = "")
+        public HttpResponseMessage GetResource(String appName, String moduleName, String fileName, String hostName = "")
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
             var resourceContent = ConfigFileLocator.GetResourceFile(baseDirectory, appName, moduleName, hostName, fileName);
