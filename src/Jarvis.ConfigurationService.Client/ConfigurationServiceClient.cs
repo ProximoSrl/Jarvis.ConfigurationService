@@ -240,7 +240,7 @@ namespace Jarvis.ConfigurationService.Client
 
             if (_missingParametersAction.HasValue)
             {
-                _configFileLocation = String.Format("{0}?missingParameterAction={1}",
+                _configFileLocation = String.Format("{0}?missingParametersAction={1}",
                     _configFileLocation,
                     _missingParametersAction.ToString().ToLower());
             }
