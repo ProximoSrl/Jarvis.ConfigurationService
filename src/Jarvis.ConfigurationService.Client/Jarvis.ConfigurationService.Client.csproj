@@ -43,6 +43,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurationManagerMissingParametersAction.cs" />
     <Compile Include="ConfigurationServiceClient.cs" />
     <Compile Include="DisposableAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
