@@ -69,7 +69,8 @@ namespace Jarvis.ConfigurationService.Client
                 Action<String, Boolean, Exception> loggerFunction,
                 String baseServerAddressEnvironmentVariable,
                 FileInfo defaultConfigFile = null,
-                FileInfo defaultParameterFile = null
+                FileInfo defaultParameterFile = null,
+                ConfigurationManagerMissingParametersAction? missingParametersAction = null
             )
         {
             _instance = new ConfigurationServiceClient(
@@ -77,7 +78,8 @@ namespace Jarvis.ConfigurationService.Client
                 baseServerAddressEnvironmentVariable,
                 new StandardEnvironment(),
                 defaultConfigFile,
-                defaultParameterFile);
+                defaultParameterFile,
+                missingParametersAction);
         }
 
 
