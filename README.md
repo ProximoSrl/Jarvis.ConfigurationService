@@ -97,5 +97,14 @@ with such payload
 This will return encrypted string. Now if you want to include an encrypted string inside config you should simply enclose with Dollar Sign, ex
 
 	'$ldapPassword$' : '061FC47C86934D2B3311CE094CA61BB9'
+	
+	
+##Chocolatey package
+
+install with 
+
+	choco install Jarvis.ConfigurationService.Host -source 'https://www.myget.org/F/jarvis/api/v2' -packageParameters "/installationRoot:C:\Program files\Proximo\ConfigurationManager" -force 
+
+Remember that if you want to install a prerelease version you need to add -pre switch and the exact version you want to install.
 
 
