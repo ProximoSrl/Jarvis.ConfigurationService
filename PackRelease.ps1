@@ -2,8 +2,16 @@ Param
 (
     [String] $Configuration,
     [String] $DestinationDir = "",
-    [Bool] $DeleteOriginalAfterZip = $true
+    [String] $DeleteOriginalAfterZip = "$true",
+    [String] $StandardZipFormat = "$false"
 )
+
+Write-Output "Configuration = $Configuration, DestinationDir = $DestinationDir, DeleteOriginalAfterZip = $DeleteOriginalAfterZip, StandardZipFormat = $StandardZipFormat"
+#they are string because of a teamcity problem: http://stackoverflow.com/questions/26340157/how-to-set-a-powershell-switch-parameter-from-teamcity-build-configuration/35074980
+$DeleteOriginalAfterZipBool = ($DeleteOriginalAfterZip -eq "$true") -or ($DeleteOriginalAfterZip -eq "true")
+$StandardZipFormatBool =  ($StandardZipFormat -eq "$true") -or ($StandardZipFormat -eq "true")
+
+Write-Output "standardZipFormatBool = $StandardZipFormatBool, DeleteOriginalAfterZipBool = $DeleteOriginalAfterZipBool"
 
 $runningDirectory = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
 
@@ -75,20 +83,37 @@ Write-Host "Cleaning up $DestinationDirClient"
 Get-ChildItem $DestinationDirClient -Include *.xml | foreach ($_) {remove-item $_.fullname}
 
 Write-Host "Compressing everything with 7z"
-if (-not (test-path "$env:ProgramFiles\7-Zip\7z.exe")) {throw "$env:ProgramFiles\7-Zip\7z.exe needed"} 
-set-alias sz "$env:ProgramFiles\7-Zip\7z.exe"  
+$sevenZipExe = "c:\Program Files\7-Zip\7z.exe"
+if (-not (test-path $sevenZipExe)) 
+{
+    $sevenZipExe =  "C:\Program Files (x86)\7-Zip\7z.exe"
+    if (-not (test-path $sevenZipExe)) 
+    {
+        throw "$env:ProgramFiles\7-Zip\7z.exe needed"
+        Exit 
+    }
 
+} 
+set-alias sz $sevenZipExe 
+
+$extension = ".7z"
+if ($StandardZipFormatBool -eq $true) 
+{
+    Write-Output "Choose standard ZIP format instead of 7Z"
+    $extension = ".zip"
+}
 $Source = $DestinationDirHost + "\*"
-$Target = $DestinationDir + "\Jarvis.ConfigurationService.Host.7z"
+$Target = $DestinationDir + "\Jarvis.ConfigurationService.Host" + $extension
+
 
 sz a -mx=9 $Target $Source
 
 $Source = $DestinationDirClient + "\*"
-$Target = $DestinationDir + "\Jarvis.ConfigurationService.Client.7z"
+$Target = $DestinationDir + "\Jarvis.ConfigurationService.Client" + $extension
 
 sz a -mx=9 $Target $Source
 
-if ($DeleteOriginalAfterZip -eq $true) 
+if ($DeleteOriginalAfterZipBool -eq $true) 
 {
     Remove-Item $DestinationDirHost  -Recurse -Force
 	Remove-Item $DestinationDirClient  -Recurse -Force
