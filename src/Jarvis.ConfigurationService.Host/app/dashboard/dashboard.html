@@ -25,7 +25,7 @@
 <div class="col-lg-6 col-xs-6" ng-show="dashboard.appDetailsVisible">
     <h3>Application Name: {{dashboard.currentApplication.name}}</h3>
     <div class="row" ng-repeat="services in dashboard.currentApplication.services">
-        <div><a href="/{{dashboard.currentApplication.name}}/{{services}}.config" target="_blank">Service: {{services}}</a></div>
+        <div><a href="/{{dashboard.currentApplication.name}}/{{services}}.config?missingParametersAction=ignore" target="_blank">Service: {{services}}</a></div>
     </div>
 </div>
 
