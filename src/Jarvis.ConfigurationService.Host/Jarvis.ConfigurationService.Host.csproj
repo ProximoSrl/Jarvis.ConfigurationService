@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\EditConfigurationController.cs" />
     <Compile Include="Controllers\ExceptionFilterAttribute.cs" />
     <Compile Include="Model\GetConfigurationWithDefault.cs" />
     <Compile Include="Model\MissingParametersAction.cs" />

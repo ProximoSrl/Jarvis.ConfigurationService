@@ -40,6 +40,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                 );
 
             appBuilder.UseWebApi(config);
+            config.EnsureInitialized();
         }
 
         void ConfigureAdmin(IAppBuilder application)
