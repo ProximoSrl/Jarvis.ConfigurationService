@@ -31,6 +31,30 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             return new { success = true };
         }
 
+        [HttpPut]
+        [Route("api/defaultparameters/{appName}/{hostName}")]
+        public async Task<Object> AddDefaultParameters(
+          String appName,
+          String hostName)
+        {
+            var content = await Request.Content.ReadAsStringAsync();
+            string applicationParameterFile = GetApplicationParametersFileName(appName);
+            JObject actualParam;
+            if (!File.Exists(applicationParameterFile))
+            {
+                actualParam = new JObject();
+            }
+            else
+            {
+                actualParam = (JObject)JsonConvert.DeserializeObject(File.ReadAllText(applicationParameterFile));
+            }
+            var jsonObj = (JObject)JsonConvert.DeserializeObject(content);
+            JsonComposer.ComposeObject(jsonObj, hostName, actualParam);
+            var stringJson = actualParam.ToString();
+            File.WriteAllText(applicationParameterFile, stringJson);
+            return new { success = true };
+        }
+
         [HttpGet]
         [Route("api/parameters/{appName}")]
         public Object GetParameters(
