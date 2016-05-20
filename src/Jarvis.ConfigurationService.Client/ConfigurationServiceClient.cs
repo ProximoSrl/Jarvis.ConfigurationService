@@ -1,4 +1,5 @@
-﻿using Jarvis.ConfigurationService.Client.Support;
+﻿using Jarvis.ConfigurationService.Client.ClientModels;
+using Jarvis.ConfigurationService.Client.Support;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -492,8 +493,19 @@ namespace Jarvis.ConfigurationService.Client
 
         #endregion
 
+        #region Application Management
 
+        public Boolean AddApplication(AddApplication application)
+        {
+            var callUri = String.Format(
+                "{0}/api/applications/{1}",
+                _baseConfigurationServer,
+                application.ApplicationName);
+            var result = _environment.ExecuteRequest(callUri, application, "PUT");
+            var resultObject = (JObject)JsonConvert.DeserializeObject(result);
+            return resultObject["success"].Value<Boolean>();
+        }
 
-
+        #endregion
     }
 }

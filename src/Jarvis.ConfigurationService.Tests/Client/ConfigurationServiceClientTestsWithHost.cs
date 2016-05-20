@@ -152,5 +152,20 @@ base-server-address : http://localhost:53642/");
             Assert.That(result, Is.EqualTo("overriddenValue"));
 
         }
+
+        [Test]
+        public void create_new_application()
+        {
+            FileInfo defConf = new FileInfo("Client\\base.config");
+            FileInfo defParam = new FileInfo("Client\\parameters.config");
+            CreateSutWithDefault(defConf, defParam);
+            var appId = Guid.NewGuid().ToString();
+            var result = sut.AddApplication(new ConfigurationService.Client.ClientModels.AddApplication()
+            {
+                ApplicationName = appId,
+                RedirectFolder = "c:\\test\\" + appId
+            });
+            Assert.That(result, Is.True);
+        }
     }
 }

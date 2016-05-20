@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -25,6 +26,15 @@ namespace Jarvis.ConfigurationService.Client.Support
         /// <param name="payload"></param>
         /// <returns></returns>
         String DownloadFile(String address, String payload);
+
+        /// <summary>
+        /// Execute a call to the server
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="payload"></param>
+        /// <param name="method"></param>
+        /// <returns></returns>
+        String ExecuteRequest(String address, Object payload, String method);
 
         String GetFileContent(String fileName);
 
@@ -67,6 +77,17 @@ namespace Jarvis.ConfigurationService.Client.Support
             {
                 wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
                 return wc.UploadString(address, payload);
+            };
+            return ExecuteDownload(webClientFunc);
+        }
+
+        public String ExecuteRequest(String address, Object payload, String method)
+        {
+            Func<WebClient, String> webClientFunc = wc =>
+            {
+                var json = JsonConvert.SerializeObject(payload);
+                wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+                return wc.UploadString(address, method, json);
             };
             return ExecuteDownload(webClientFunc);
         }
