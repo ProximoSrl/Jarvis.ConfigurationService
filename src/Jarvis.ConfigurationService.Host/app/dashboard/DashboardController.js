@@ -3,9 +3,9 @@
 
     angular.module('admin.dashboard').controller('DashboardController', DashboardController);
 
-    DashboardController.$inject = ['dashboardData', '$interval', '$scope', 'status'];
+    DashboardController.$inject = ['dashboardData', '$interval', '$scope', 'status', '$http'];
 
-    function DashboardController(dashboardData, $interval, $scope, status) {
+    function DashboardController(dashboardData, $interval, $scope, status, $http) {
 
         console.log('Applications are ', status);
    
@@ -43,9 +43,24 @@
             vm.appDetailsVisible = true;
         }
 
+        vm.editConfig = function (service) {
+            var url = '/' + vm.currentApplication.name + '/' + service + '.config?missingParametersAction=ignore';
+
+            $http({
+                method: 'GET',
+                url: url
+            }).then(function successCallback(response) {
+           
+                vm.currentConfig = response.data; 
+            });
+
+        };
+
         $scope.$on('$destroy', function () {
             $interval.cancel(stop);
         });
+
+
 
         init();
 
