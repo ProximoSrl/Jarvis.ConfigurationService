@@ -3,6 +3,14 @@ param(
     [string] $installationRoot
 )
 
+if(-not(Get-Module -name jarvisUtils)) 
+{
+    Write-Output (Split-Path -Parent -Path $MyInvocation.MyCommand.Definition)
+    $runningDirectory = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+    Write-Output "loading jarvis utils module from $runningDirectory"
+    Import-Module -Name "$runningDirectory\\jarvisUtils"
+}
+
 if(!(Test-Path -Path $deployFileName ))
 {
      Throw "Unable to find package file $deployFileName"
