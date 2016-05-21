@@ -41,7 +41,7 @@ if (Test-Path $installationRoot)
 }
 
 Write-Output "Unzipping setup file"
-Expand-WithShell -zipFile $file.FullName -destinationFolder $installationRoot
+Expand-WithFramework -zipFile $file.FullName -destinationFolder $installationRoot
 
 if ($service -eq $null) 
 {
