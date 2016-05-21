@@ -90,3 +90,19 @@ function Expand-WithShell(
         $shell.Namespace($destinationFolder).copyhere($item)
     }
 }
+
+function Expand-WithFramework(
+    [string] $zipFile,
+    [string] $destinationFolder,
+    [bool] $deleteOld = $true,
+    [bool] $quietMode = $false
+)
+{
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    if ((Test-Path $destinationFolder) -and $deleteOld)
+    {
+          Remove-Item $destinationFolder -Recurse -Force
+    }
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $destinationFolder)
+
+}
