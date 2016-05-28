@@ -54,7 +54,7 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                 actualParam = (JObject)JsonConvert.DeserializeObject(File.ReadAllText(applicationParameterFile));
             }
             var jsonObj = (JObject)JsonConvert.DeserializeObject(content);
-            JsonComposer.ComposeObject(jsonObj, hostName, actualParam);
+            JsonComposer.ComposeObject(actualParam, hostName, jsonObj);
             var stringJson = actualParam.ToString();
             File.WriteAllText(applicationParameterFile, stringJson);
             return new { success = true };
