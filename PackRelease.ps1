@@ -72,7 +72,13 @@ Edit-XmlNodes $xml -xpath "/configuration/appSettings/add[@key='baseConfigDirect
 $xml.save($configFileName)
 
 Write-Host "Cleaning up $DestinationDirHost"
-Get-ChildItem $DestinationDirHost -Include *.xml | foreach ($_) {remove-item $_.fullname}
+Get-ChildItem $DestinationDirHost -Include *.xml | foreach ($_) {
+    if (!$_.fullname.EndsWith("Jarvis.ConfigurationService.Host.XML")) 
+    {
+         remove-item $_.fullname
+    }
+
+}
 
 
 Write-Host "Copying file for client"

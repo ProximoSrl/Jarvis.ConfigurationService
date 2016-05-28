@@ -8,6 +8,8 @@ using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
 using System.IO;
 using System.Linq;
+using Swashbuckle;
+using Swashbuckle.Application;
 
 [assembly: OwinStartup(typeof(Jarvis.ConfigurationService.Host.Support.ConfigurationServiceApplication))]
 
@@ -41,6 +43,19 @@ namespace Jarvis.ConfigurationService.Host.Support
 
             appBuilder.UseWebApi(config);
             config.EnsureInitialized();
+
+            config
+                .EnableSwagger(c =>
+                {
+                    c.SingleApiVersion("v1", "Jarvis Configuration Manager");
+                    c.IncludeXmlComments(GetXmlCommentsPathForControllers());
+                })
+                .EnableSwaggerUi();
+        }
+
+        private string GetXmlCommentsPathForControllers()
+        {
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Jarvis.ConfigurationService.Host.XML");
         }
 
         void ConfigureAdmin(IAppBuilder application)

@@ -18,12 +18,17 @@ namespace Jarvis.ConfigurationService.Host.Controllers
     {
         private static ILog _logger = LogManager.GetLogger(typeof(ConfigController));
 
+        /// <summary>
+        /// Set and completely overwrite parameters for a given application
+        /// </summary>
+        /// <param name="appName">Name of the application.</param>
+        /// <returns></returns>
         [HttpPut]
         [Route("api/parameters/{appName}")]
         public async Task<Object> UpdateParameters(
            String appName )
         {
-            var content = await Request.Content.ReadAsStringAsync   ();
+            var content = await Request.Content.ReadAsStringAsync();
             string applicationParameterFile = GetApplicationParametersFileName(appName);
             var jsonObj = (JObject) JsonConvert.DeserializeObject(content);
             var stringJson = jsonObj.ToString();
