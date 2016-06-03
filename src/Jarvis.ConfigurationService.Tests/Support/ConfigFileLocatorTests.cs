@@ -19,6 +19,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             var composed = JsonComposer.ComposeJsonContent();
             Assert.That(composed, Is.EqualTo(null));
         }
+
         [Test]
         public void verify_basic_composition_of_unrelated_properties()
         {
@@ -29,6 +30,30 @@ namespace Jarvis.ConfigurationService.Tests.Support
 
             Assert.That((String) result["prop"], Is.EqualTo("test"));
             Assert.That((String)result["otherProp"], Is.EqualTo("anotherTest"));
+        }
+
+        [Test]
+        public void verify_priority()
+        {
+            var json1 = "{prop : 'test'}";
+            var json2 = "{prop : 'test1'}";
+
+            var result = JsonComposer.ComposeJsonContent(json1, json2);
+            Assert.That((String)result["prop"], Is.EqualTo("test1"));
+
+            result = JsonComposer.ComposeJsonContent(json2, json1);
+            Assert.That((String)result["prop"], Is.EqualTo("test"));
+        }
+
+        [Test]
+        public void verify_with_empty_object_priority()
+        {
+            var json1 = "{}";
+            var json2 = "{prop : 'test1'}";
+
+            var result = JsonComposer.ComposeJsonContent(json1, json2);
+            Assert.That((String)result["prop"], Is.EqualTo("test1"));
+
         }
 
         [Test]
