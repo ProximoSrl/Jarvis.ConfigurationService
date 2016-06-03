@@ -19,7 +19,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             _client = new WebClient();
         }
 
-        public String DownloadString(String uri, String payloadJson = null)
+        public String DownloadString(String uri, String payloadJson = null, String method = null)
         {
             try
             {
@@ -28,7 +28,10 @@ namespace Jarvis.ConfigurationService.Tests.Support
                 else
                 {
                     _client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                    return _client.UploadString(uri, payloadJson);
+                    if (method == null)
+                        return _client.UploadString(uri, payloadJson);
+
+                    return _client.UploadString(uri, method, payloadJson);
                 }
             }
             catch (WebException ex)

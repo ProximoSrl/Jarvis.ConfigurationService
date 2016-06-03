@@ -143,6 +143,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 //do nothing, everything is done by the replace parameters routine
             }
+        
             if (replaceResult.MissingParams.Count > 0)
             {
                 var missingParametersList = replaceResult.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2);
@@ -153,10 +154,11 @@ namespace Jarvis.ConfigurationService.Host.Support
                         throw new ConfigurationErrorsException("Missing parameters: " +
                             missingParametersList); 
                     case MissingParametersAction.Ignore:
+                        baseConfigObject["jarvis-missing-parameters"] = new JArray( replaceResult.MissingParams);
                         _logger.DebugFormat("Missing Parameter List {0} but client ask to ignore", missingParametersList);
                         break;
                     case MissingParametersAction.Blank:
-
+                        baseConfigObject["jarvis-missing-parameters"] = new JArray(replaceResult.MissingParams);
                         break;
                 }
             }

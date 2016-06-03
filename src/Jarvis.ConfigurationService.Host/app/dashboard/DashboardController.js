@@ -3,9 +3,9 @@
 
     angular.module('admin.dashboard').controller('DashboardController', DashboardController);
 
-    DashboardController.$inject = ['dashboardData', '$interval', '$scope', 'status'];
+    DashboardController.$inject = ['dashboardData', '$interval', '$scope', 'status', '$http'];
 
-    function DashboardController(dashboardData, $interval, $scope, status) {
+    function DashboardController(dashboardData, $interval, $scope, status, $http) {
 
         console.log('Applications are ', status);
    
@@ -42,6 +42,50 @@
             vm.currentApplication = app;
             vm.appDetailsVisible = true;
         }
+
+        vm.currentEditedService;
+        vm.editConfig = function (service) {
+            var url = '/' + vm.currentApplication.name + '/' + service + '.config?missingParametersAction=ignore';
+            vm.currentEditedService = service;
+            $http({
+                method: 'GET',
+                url: url
+            }).then(function successCallback(response) {
+           
+                vm.currentConfig = response.data;
+            });
+
+            var urlParameter = '/api/parameters/' + vm.currentApplication.name;;
+
+            $http({
+                method: 'GET',
+                url: urlParameter
+            }).then(function successCallback(response) {
+
+                vm.currentApplicationParameters = JSON.stringify(response.data, null, 4);
+                vm.currentApplicationParametersOperation = { "operation": "load", "status": "OK" };
+            });
+        };
+
+        vm.saveCurrentParameters = function ()
+        {
+            if (!vm.currentApplication) return;
+            if (!vm.currentApplicationParameters) return;
+            var urlParameter = '/api/parameters/' + vm.currentApplication.name;
+            vm.currentApplicationParametersOperation = { "operation": "save", "status": "pending" };
+            $http({
+                method: 'PUT',
+                url: urlParameter,
+                data : vm.currentApplicationParameters
+            }).then(function successCallback(response) {
+                debugger;
+                vm.currentApplicationParametersOperation = { "operation": "save", "status": response.data.success ? "OK" : "KO" };
+                if (response.data.success)
+                {
+                    vm.editConfig(vm.currentEditedService);
+                }
+            });
+        };
 
         $scope.$on('$destroy', function () {
             $interval.cancel(stop);
