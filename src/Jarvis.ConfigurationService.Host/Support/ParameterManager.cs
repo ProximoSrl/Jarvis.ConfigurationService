@@ -146,9 +146,10 @@ namespace Jarvis.ConfigurationService.Host.Support
             JToken token)
         {
             String value = token.ToString();
+            Boolean objectParameter = value.StartsWith("%{") && value.EndsWith("}%");
             if (Regex.IsMatch(value, "(?<!%)%(?!%).+?(?<!%)%(?!%)"))
             {
-                var newValue = Regex.Replace(
+                String newValue = Regex.Replace(
                     value,
                     @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
                     new MatchEvaluator(m =>
@@ -158,14 +159,23 @@ namespace Jarvis.ConfigurationService.Host.Support
                         if (paramValue == null)
                         {
                             result.MissingParams.Add(parameterName);
-                            return "%" + parameterName + "%";
+                            return objectParameter ? value : "%" + parameterName + "%";
                         }
                         result.HasReplaced = true;
                         return paramValue;
                     }));
-                if (value.StartsWith("%{") && value.EndsWith("}%"))
+                if (objectParameter)
                 {
-                    return (JToken)JsonConvert.DeserializeObject(newValue);
+                    if (newValue == value) return newValue; //object parameter that is missing
+                    try
+                    {
+                        return (JToken)JsonConvert.DeserializeObject(newValue);
+                    }
+                    catch (Exception ex)
+                    {
+                        //parameters has some error, maybe it is malformed, treat as if parameter is missing.
+                        return "Parameter " + value + " is an object parameter and cannot be parsed: " + newValue;
+                    }
                 }
                 else
                 {

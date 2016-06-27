@@ -126,6 +126,9 @@
     <None Include="Client\parameters.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Configuration.Sample\MyAppTest\Default\ServiceMissingParams.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Configuration.Sample\MyAppTest\Default\ServiceMalformed.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
