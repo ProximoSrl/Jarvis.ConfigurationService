@@ -142,6 +142,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }
         }
 
+
         [Test]
         public void verify_exception_with_malformed_json_is_entered()
         {
@@ -582,13 +583,39 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
+        public void missing_object_parameter_with_blank_should_NOT_throw_and_substitute_blank()
+        {
+            var thisClient = new WebClient();
+
+            var result = thisClient.DownloadString(baseUri + "/MyAppTest/ServiceMissingParams.config/Host1?missingParametersAction=blank");
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+            Assert.That((String)jobj["parameter1"], Is.EqualTo("Parameters 1 = "), "missing parameters should be substituted with blank if missingParams=blank");
+            Assert.That(jobj["parameter2"], Is.EqualTo(JValue.CreateNull()), "missing object parameters should be substituted with null if missingParams=blank");
+        }
+
+        [Test]
         public void missing_parameter_with_ignore_should_NOT_throw_and_leave_parameter()
         {
             var thisClient = new WebClient();
 
             var result = thisClient.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/?missingParametersAction=ignore");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
-            Assert.That((String) jobj["missing-parameter-config"], Is.EqualTo("this contains %missing-parameter%"), "missing parameters should be substituted with blanck if missingParams=blank");
+            Assert.That((String) jobj["missing-parameter-config"], Is.EqualTo("this contains %missing-parameter%"), "missing parameters should be left as is if missingParams=ignore");
+        }
+
+        [Test]
+        public void missing_object_parameter_with_ignore_should_NOT_throw_and_leave_parameter()
+        {
+            var thisClient = new WebClient();
+
+            var result = thisClient.DownloadString(baseUri + "/MyAppTest/ServiceMissingParams.config/Host1?missingParametersAction=ignore");
+            Console.WriteLine(result);
+            JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
+
+            JArray missingParams = (JArray)jobj["jarvis-missing-parameters"];
+            Assert.That(missingParams.Select(m => (String)m), Is.EquivalentTo(new[] { "missing1", "missing2" }));
+            Assert.That((String)jobj["parameter1"], Is.EqualTo("Parameters 1 = %missing1%"), "missing parameters should be leave as is missingParams=ignore");
+            Assert.That((String) jobj["parameter2"], Is.EqualTo("%{missing2}%"), "missing object parameters should be left as is if missingParams=ignore");
         }
 
         [Test]
@@ -608,7 +635,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
 
             var result = thisClient.DownloadString(baseUri + "/MyAppParam/servicemalformed.config/Host1?missingParametersAction=ignore");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
-            Assert.That((String)jobj["missing-parameter-config"], Is.EqualTo("this contains %missing-parameter%"), "missing parameters should be substituted with blanck if missingParams=blank");
+            Assert.That((String)jobj["missing-parameter-config"], Is.EqualTo("this contains %missing-parameter%"), "missing parameters should be leave as is if missingParams=ignore");
         }
     }
 }
