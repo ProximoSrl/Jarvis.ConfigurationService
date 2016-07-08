@@ -63,7 +63,11 @@ namespace Jarvis.ConfigurationService.Host
             {
                 Console.Title = "Jarvis Configuration Manager Service";
                 Console.BackgroundColor = ConsoleColor.DarkMagenta;
-                Console.Clear();
+                if (!Console.IsOutputRedirected && !Console.IsErrorRedirected)
+                {
+                    Console.Clear();
+                }
+
                 Banner();
             }
         }
