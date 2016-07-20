@@ -44,8 +44,16 @@ namespace Jarvis.ConfigurationService.Host
 
                 host.RunAsNetworkService();
 
-                host.SetDescription("Jarvis Configuration Service");
-                host.SetDisplayName("Jarvis - Configuration service");
+                if (String.IsNullOrEmpty(overrideServiceName))
+                {
+                    host.SetDescription("Jarvis Configuration Service");
+                    host.SetDisplayName("Jarvis - Configuration service");
+                }
+                else
+                {
+                    host.SetDescription("Jarvis Configuration Service [" + overrideServiceName + "]");
+                    host.SetDisplayName("Jarvis - Configuration service [" + overrideServiceName + "]");
+                }
                 host.SetServiceName(serviceName);
             });
 
