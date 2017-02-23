@@ -1,11 +1,28 @@
-﻿<section class="sidebar">
-
-    <ul class="sidebar-menu">
-        <li class="active">
-            <a ui-sref="dashboard">
-                <i class="fa fa-dashboard"></i> <span>Dashboard</span>
-            </a>
-        </li>
-     
-    </ul>
-</section>
+﻿<div>
+    <style>
+        .open {
+            display: block !important;
+        }
+    </style>
+    <section class="sidebar" id="sidebar">
+        <ul class="sidebar-menu">
+            <li class="treeview" ng-repeat="a in applications" ng-class="{'active': a.name === selectedApplication}" ng-click="selectApp(a.name)">
+                <a href>
+                    <i class="fa fa-dashboard"></i>
+                    <span>{{a.name}}&nbsp;({{a.services.length}})</span>
+                    <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                </a>
+                <ul class="treeview-menu" ng-class="{'open': a.name === selectedApplication}">
+                    <li ng-repeat="s in a.services" ng-class="{'active': s === selectedService}" ng-click="selectedService = s">
+                        <a ui-sref="dashboard({application:a.name, service:s})">
+                            <i class="fa fa-file"></i>
+                            <span class="menu-text">{{s}}</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </section>
+</div>
