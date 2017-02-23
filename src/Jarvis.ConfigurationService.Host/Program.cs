@@ -12,10 +12,17 @@ namespace Jarvis.ConfigurationService.Host
 {
     class Program
     {
+        private static String serviceName = "JarvisConfigurationService";
+
         static int Main(string[] args)
         {
             var exitCode = HostFactory.Run(host =>
             {
+                var overrideServiceName = ConfigurationManager.AppSettings["serviceName"];
+                if (!String.IsNullOrEmpty(overrideServiceName))
+                {
+                    serviceName = overrideServiceName;
+                }
                 SetHeader();
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 String baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -37,9 +44,17 @@ namespace Jarvis.ConfigurationService.Host
 
                 host.RunAsNetworkService();
 
-                host.SetDescription("Jarvis Configuration Service");
-                host.SetDisplayName("Jarvis - Configuration service");
-                host.SetServiceName("JarvisConfigurationService");
+                if (String.IsNullOrEmpty(overrideServiceName))
+                {
+                    host.SetDescription("Jarvis Configuration Service");
+                    host.SetDisplayName("Jarvis - Configuration service");
+                }
+                else
+                {
+                    host.SetDescription("Jarvis Configuration Service [" + overrideServiceName + "]");
+                    host.SetDisplayName("Jarvis - Configuration service [" + overrideServiceName + "]");
+                }
+                host.SetServiceName(serviceName);
             });
 
             return (int)exitCode;
@@ -81,8 +96,8 @@ namespace Jarvis.ConfigurationService.Host
             Console.WriteLine("===================================================================");
             Console.WriteLine("  install                                -> Install service");
             Console.WriteLine("  uninstall                              -> Remove service");
-            Console.WriteLine("  net start JarvisConfigurationService   -> Start Service");
-            Console.WriteLine("  net stop JarvisConfigurationService    -> Stop Service");
+            Console.WriteLine("  net start " + serviceName + "          -> Start Service");
+            Console.WriteLine("  net stop  " + serviceName + "          -> Stop Service");
             Console.WriteLine("===================================================================");
             Console.WriteLine();
             Console.WriteLine();
