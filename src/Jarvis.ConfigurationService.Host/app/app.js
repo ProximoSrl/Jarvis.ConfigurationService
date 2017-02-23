@@ -3,6 +3,7 @@
     angular.module('admin', [
         'ui.router',
         'ui.bootstrap',
+        'admin.services',
         'admin.shared',
         'admin.layout',
         'admin.dashboard',

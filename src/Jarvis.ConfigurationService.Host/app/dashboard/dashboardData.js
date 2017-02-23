@@ -1,7 +1,8 @@
-﻿(function (window, angular, undefined) {
+﻿var servicesModule = angular.module('admin.services', []);
+(function (window, angular, undefined) {
     'use strict';
 
-    angular.module('admin.dashboard').factory('dashboardData', dashboardData);
+    servicesModule.factory('dashboardData', dashboardData);
 
     dashboardData.$inject= ['$http'];
 
