@@ -18,10 +18,9 @@ namespace Jarvis.ConfigurationService.Tests.Support
     [Category("HostOn")]
     public class EditConfigurationControllerTestsWithHost
     {
-        IDisposable _app;
-
-        TestWebClient client;
-        String baseUri = "http://localhost:53642";
+        private IDisposable _app;
+        private TestWebClient client;
+        private readonly String baseUri = "http://localhost:53642";
 
         [TestFixtureSetUp]
         public void FixtureSetup()
@@ -37,7 +36,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
         }
 
         [Test]
-        public void verify_registration_of_new_application()
+        public void Verify_registration_of_new_application()
         {
             var newId = Guid.NewGuid().ToString();
             AddApplication parameter = new AddApplication()
@@ -56,7 +55,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             JObject jobjAppResults = (JObject)JsonConvert.DeserializeObject(applicationResult);
             var applications = ((JArray) jobjAppResults["Applications"]).Select(t => t.Value<String>()).ToList();
 
-            Assert.That(applications.Contains(newId), "Application was not correctly created"); 
+            Assert.That(applications.Contains(newId), "Application was not correctly created");
         }
 
         [Test]
@@ -66,7 +65,7 @@ namespace Jarvis.ConfigurationService.Tests.Support
             JObject jobjAppResults = (JObject)JsonConvert.DeserializeObject(applicationResult);
             var applications = ((JArray)jobjAppResults["Applications"]).Select(t => t.Value<String>()).ToList();
 
-            var existingApp = applications.First();
+            var existingApp = applications[0];
             AddApplication parameter = new AddApplication()
             {
                 ApplicationName = existingApp,
@@ -79,7 +78,6 @@ namespace Jarvis.ConfigurationService.Tests.Support
                 "PUT");
             JObject jobj = (JObject)JsonConvert.DeserializeObject(result);
             Assert.That((Boolean)jobj["success"], Is.EqualTo(false), "Operation should file because application already exists");
-          
         }
 
         [Test]

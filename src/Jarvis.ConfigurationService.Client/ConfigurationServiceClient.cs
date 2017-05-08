@@ -298,15 +298,19 @@ namespace Jarvis.ConfigurationService.Client
             {
                 //parameter substituition.
                 settingDefaultValue = Regex.Replace(
-                            settingDefaultValue,
-                            @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
-                            new MatchEvaluator(m =>
-                            {
-                                var parameterName = "jarvis-parameters." + m.Groups["match"].Value;
-                                return InternalGetSetting(parameterName);
-                            }));
+                    settingDefaultValue,
+                    @"(?<!%)%(?!%)(?<match>.+?)(?<!%)%(?!%)",
+                    new MatchEvaluator(m =>
+                    {
+                        var parameterName = "jarvis-parameters." + m.Groups["match"].Value;
+                        return InternalGetSetting(parameterName);
+                    }));
             }
-            return InternalGetSetting(settingName) ?? settingDefaultValue;
+            var settingValue = InternalGetSetting(settingName);
+            if (String.IsNullOrEmpty(settingValue))
+                return settingDefaultValue;
+
+            return settingValue;
         }
 
         public String GetSetting(string settingName)

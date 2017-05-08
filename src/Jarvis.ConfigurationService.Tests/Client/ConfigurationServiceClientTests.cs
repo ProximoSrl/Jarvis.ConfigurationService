@@ -58,6 +58,14 @@ namespace Jarvis.ConfigurationService.Tests.Client
 
         private IEnvironment stubEnvironment;
 
+        private TestLogger currentTestLogger;
+
+        private ConfigurationServiceClient CreateSut()
+        {
+            currentTestLogger = new TestLogger();
+            return new ConfigurationServiceClient(currentTestLogger.Log, "CQRS_TEST_CONFIGURATION_MANAGER", stubEnvironment);
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -71,18 +79,18 @@ namespace Jarvis.ConfigurationService.Tests.Client
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://localhost");
             ClientConfiguration config = new ClientConfiguration(@"#jarvis-config
 application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
-            stubEnvironment.GetApplicationConfig().ReturnsForAnyArgs(config); 
+            stubEnvironment.GetApplicationConfig().ReturnsForAnyArgs(config);
             stubEnvironment.GetMachineName().ReturnsForAnyArgs("TestMachine");
         }
 
         [Test]
-        public void should_throw_exception_if_no_configuration_file_is_provided()
+        public void Should_throw_Exception_if_no_configuration_file_is_provided()
         {
             Assert.Throws<ConfigurationErrorsException>(() => CreateSut());
         }
 
         [Test]
-        public void exception_for_no_configuration_file_found_should_tell_where_the_file_is_expected()
+        public void Exception_for_no_configuration_file_found_should_tell_where_the_file_is_expected()
         {
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
             try
@@ -94,11 +102,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             {
                 Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/myapp.config"));
             }
-
         }
 
         [Test]
-        public void exception_if_no_valid_json_is_returned()
+        public void Exception_if_no_valid_json_is_returned()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(an_invalid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
@@ -111,11 +118,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             {
                 Assert.That(expectedException.Message, Contains.Substring("json"));
             }
-
         }
 
         [Test]
-        public void verify_correct_exception_handling()
+        public void Verify_correct_Exception_handling()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(x => { throw new ServerConfigurationException("Exception test", "server response: Error reading config file error in line xxxx"); });
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
@@ -128,11 +134,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             {
                 Assert.That(expectedException.Message, Contains.Substring("Server Configuration Exception"));
             }
-
         }
 
         [Test]
-        public void exception_if_settings_not_present_and_no_default_value_specified()
+        public void Exception_if_settings_not_present_and_no_default_value_specified()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             try
@@ -145,11 +150,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             {
                 Assert.That(expectedException.Message, Contains.Substring("not_existing"));
             }
-
         }
 
         [Test]
-        public void exception_if_settings_not_present_and_no_default_value_specified_should_return_config_file_name()
+        public void Exception_if_settings_not_present_and_no_default_value_specified_should_return_config_file_name()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
@@ -163,11 +167,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             {
                 Assert.That(expectedException.Message, Contains.Substring("http://localhost/TESTAPPLICATION/myapp.config"));
             }
-
         }
 
         [Test]
-        public void configuration_manager_is_able_to_accept_testing_configuration_as_action()
+        public void Configuration_manager_is_able_to_accept_testing_configuration_as_action()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\release\");
@@ -180,7 +183,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void configuration_manager_is_able_to_accept_testing_configuration()
+        public void Configuration_manager_is_able_to_accept_testing_configuration()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
@@ -198,11 +201,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
                 Assert.That(expectedException.Message, Contains.Substring("TEST EXCEPTION"));
                 Assert.That(expectedException.Message, Contains.Substring("goodSetting"));
             }
-
         }
 
         [Test]
-        public void configuration_manager_is_able_to_accept_testing_configuration_with_custom_error()
+        public void Configuration_manager_is_able_to_accept_testing_configuration_with_custom_error()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
@@ -217,11 +219,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
                 Assert.That(expectedException.Message, Contains.Substring("error XXX"));
                 Assert.That(expectedException.Message, Contains.Substring("goodSetting"));
             }
-
         }
 
         [Test]
-        public void configuration_manager_does_not_duplicate_error_message_for_invalid_configuration()
+        public void Configuration_manager_does_not_duplicate_error_message_for_invalid_configuration()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\myapp\");
@@ -236,11 +237,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
                     Regex.Matches(expectedException.Message, "http://localhost/TESTAPPLICATION/myapp.config").Count;
                 Assert.That(matchCount, Is.EqualTo(1));
             }
-
         }
 
         [Test]
-        public void error_log_if_settings_not_present_and_no_default_value_specified()
+        public void Error_log_if_settings_not_present_and_no_default_value_specified()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             try
@@ -249,16 +249,15 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
                 sut.GetSetting("not_existing");
                 Assert.Fail("ConfigurationErrorsException is expected");
             }
-            catch (ConfigurationErrorsException expectedException)
+            catch (ConfigurationErrorsException)
             {
                 //we want a log to be generated.
                 Assert.That(currentTestLogger.ErrorCount, Is.GreaterThan(0));
             }
-
         }
 
         [Test]
-        public void verify_correct_url_is_requested()
+        public void Verify_correct_url_is_requested()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myprogram\service1\");
@@ -267,7 +266,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_correct_url_is_requested_when_environment_variable_is_specified()
+        public void Verify_correct_url_is_requested_when_environment_variable_is_specified()
         {
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://configuration.test.com/baseDirectory/");
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
@@ -277,7 +276,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_exception_if_no_environment_is_configured()
+        public void Verify_Exception_if_no_environment_is_configured()
         {
 			var currentPath = Path.Combine ("testpath","myprogram","release");
 			try
@@ -296,7 +295,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_configuration_url_for_developers()
+        public void Verify_configuration_url_for_developers()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\developing\myfolder\TESTAPPLICATION\src\service1\bin\debug");
@@ -317,7 +316,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_configuration_url_for_web_developers()
+        public void Verify_configuration_url_for_web_developers()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
             stubEnvironment.GetCurrentPath().Returns(@"c:\developing\myfolder\myprogram\src\myapplication.web");
@@ -326,7 +325,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_basic_configuration_file_parsing()
+        public void Verify_basic_configuration_file_parsing()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'setting' : 'value' }");
 
@@ -336,7 +335,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_correct_handling_of_default_value()
+        public void Verify_correct_handling_of_default_value()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
 
@@ -346,7 +345,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_parameter_substitution_on_default_value()
+        public void Verify_parameter_substitution_on_default_value()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
 
@@ -356,7 +355,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
         }
 
         [Test]
-        public void verify_suboject_configuration_parsing()
+        public void Verify_suboject_configuration_parsing()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file_with_suboject);
             var sut = CreateSut();
@@ -364,11 +363,10 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
             Assert.That(connection1, Is.EqualTo("valueconn1"));
             var connection2 = sut.GetSetting("connections.conn2", "");
             Assert.That(connection2, Is.EqualTo("valueconn2"));
-
         }
 
         [Test]
-        public void verify_getting_application_name_with_file_name()
+        public void Verify_getting_application_name_with_file_name()
         {
             var baseDir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             var previousDir = new DirectoryInfo(baseDir + "/../../");
@@ -382,7 +380,7 @@ application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
 @"#jarvis-configuration
 application-name : testappname
 base-server-address : http://localhost:55555/");
-            
+
             var sut = new StandardEnvironment();
             var config = sut.GetApplicationConfig();
             Assert.That(config.ApplicationName, Is.EqualTo("testappname"));
@@ -390,7 +388,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_getting_application_name_from_file_name()
+        public void Verify_getting_application_name_from_file_name()
         {
             var baseDir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             var previousDir = new DirectoryInfo(baseDir + "/../../");
@@ -403,14 +401,14 @@ base-server-address : http://localhost:55555/");
             File.WriteAllText(fileName.FullName,
 @"#jarvis-config
 base-server-address : http://localhost:55555/");
-            
+
             var sut = new StandardEnvironment();
             var config = sut.GetApplicationConfig();
             Assert.That(config.ApplicationName, Is.EqualTo("testappname"));
         }
 
         [Test]
-        public void verify_nested_configuration_parsing()
+        public void Verify_nested_configuration_parsing()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file_with_nestedsuboject);
             var sut = CreateSut();
@@ -425,7 +423,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_correct_handling_of_default_value_dotted_settings()
+        public void Verify_correct_handling_of_default_value_dotted_settings()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(a_valid_configuration_file);
 
@@ -437,7 +435,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_complex_object_configuration_settings()
+        public void Verify_complex_object_configuration_settings()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(complex_object_configuration_file);
             var sut = CreateSut();
@@ -447,7 +445,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_complex_object_in_nested_configuration_settings()
+        public void Verify_complex_object_in_nested_configuration_settings()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(complex_object_configuration_file);
 
@@ -458,7 +456,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_array_configuration()
+        public void Verify_array_configuration()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
@@ -468,11 +466,10 @@ base-server-address : http://localhost:55555/");
             Assert.That((String)configuration.ElementAt(0), Is.EqualTo("a"));
             Assert.That((String)configuration.ElementAt(1), Is.EqualTo("b"));
             Assert.That((String)configuration.ElementAt(2), Is.EqualTo("c"));
-
         }
 
         [Test]
-        public void verify_array_configuration_with_usage()
+        public void Verify_array_configuration_with_usage()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
@@ -494,7 +491,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_array_configuration_with_explicit_test()
+        public void Verify_array_configuration_with_explicit_test()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
@@ -517,7 +514,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_array_of_object_configuration()
+        public void Verify_array_of_object_configuration()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(array_configuration_file);
 
@@ -531,9 +528,8 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void verify_support_last_good_configuration()
+        public void Verify_support_last_good_configuration()
         {
-
             //Configuration server does not return anything
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(String.Empty);
 
@@ -545,24 +541,22 @@ base-server-address : http://localhost:55555/");
             var configuration = sut.GetSetting("goodSetting");
             Assert.That(configuration, Is.EqualTo("hello setting"));
             stubEnvironment.Received().GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.LastGoodConfigurationFileName)));
-            var received = stubEnvironment.ReceivedCalls().ToList();
             Assert.That(currentTestLogger.Logs.Any(l => l.Contains("last good configuration is used")), "verify warning of last good configuration is used");
         }
 
         [Test]
-        public void verify_saving_last_good_configuration()
+        public void Verify_saving_last_good_configuration()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
             CreateSut();
             stubEnvironment.Received().SaveFile(
-                Arg.Is<String>(s => s.EndsWith("lastGoodConfiguration.config", StringComparison.OrdinalIgnoreCase)), 
+                Arg.Is<String>(s => s.EndsWith("lastGoodConfiguration.config", StringComparison.OrdinalIgnoreCase)),
                 Arg.Is<String>(s => s.Equals("{ 'Setting' : 'A sample string'}")),
                 Arg.Any<Boolean>());
-           
         }
 
         [Test]
-        public void verify_last_good_configuration_file_blocked_does_not_generate_errors()
+        public void Verify_last_good_configuration_file_blocked_does_not_generate_errors()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
             stubEnvironment.When(s => s.SaveFile(Arg.Any<String>(), Arg.Any<String>(), false))
@@ -571,7 +565,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void can_download_resource_file()
+        public void Can_download_resource_file()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
 
@@ -585,7 +579,7 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void can_download_resource_file_on_disk()
+        public void Can_download_resource_file_on_disk()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
             stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns("log4netconfiguration");
@@ -599,15 +593,14 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void can_monitor_resource_file_on_disk()
+        public void Can_monitor_resource_file_on_disk()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
             String configContent = "resource content";
             stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns(c => configContent);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
             var sut = CreateSut();
-            var changedContent = "";
-            var resource = sut.DownloadResource("log4net.config", monitorForChange: true);
+            sut.DownloadResource("log4net.config", monitorForChange: true);
 
             //now force polling
             configContent = "modified content";
@@ -618,15 +611,14 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void monitoring_is_disabled_by_default()
+        public void Monitoring_is_disabled_by_default()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
             String configContent = "resource content";
             stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns(c => configContent);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
             var sut = CreateSut();
-            var changedContent = "";
-            var resource = sut.DownloadResource("log4net.config");
+            sut.DownloadResource("log4net.config");
 
             //now force polling
             configContent = "modified content";
@@ -637,14 +629,14 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
-        public void monitored_resources_does_not_change_files_if_content_not_changed()
+        public void Monitored_resources_does_not_change_files_if_content_not_changed()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
             String configContent = "resource content";
             stubEnvironment.DownloadFile("http://localhost/TESTAPPLICATION/resources/myapplication/log4net.config/TestMachine").Returns(c => configContent);
             stubEnvironment.GetCurrentPath().Returns(@"c:\testpath\myapplication\");
             var sut = CreateSut();
-            var resource = sut.DownloadResource("log4net.config", monitorForChange : true);
+            sut.DownloadResource("log4net.config", monitorForChange : true);
 
             //now force polling
             sut.CheckForMonitoredResourceChange();
@@ -652,17 +644,5 @@ base-server-address : http://localhost:55555/");
                Arg.Is<String>(s => s.EndsWith("log4net.config")),
                Arg.Is<String>(s => s.Equals(configContent)), false);
         }
-
-
-
-        private TestLogger currentTestLogger;
-
-        private ConfigurationServiceClient CreateSut()
-        {
-            currentTestLogger = new TestLogger();
-            return new ConfigurationServiceClient(currentTestLogger.Log, "CQRS_TEST_CONFIGURATION_MANAGER", stubEnvironment);
-        }
-
-       
     }
 }

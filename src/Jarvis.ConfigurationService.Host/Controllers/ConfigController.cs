@@ -19,22 +19,25 @@ using System.Diagnostics;
 
 namespace Jarvis.ConfigurationService.Host.Controllers
 {
+    /// <summary>
+    /// Controller used to handle configurations.
+    /// </summary>
     [ExceptionHandlingAttribute]
     public class ConfigController : ApiController
     {
-        private static ILog _logger = LogManager.GetLogger(typeof(ConfigController));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(ConfigController));
 
-        private static String version;
+        private static readonly String version;
 
-        private static String fileVersion;
+        private static readonly String fileVersion;
 
-        private static String informationalVersion;
+        private static readonly String informationalVersion;
 
         static ConfigController()
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             version = assembly.GetName().Version.ToString();
-            
+
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
             fileVersion = fvi.FileVersion;
 
@@ -47,6 +50,11 @@ namespace Jarvis.ConfigurationService.Host.Controllers
                 informationalVersion = informationalAttribute.InformationalVersion;
         }
 
+        /// <summary>
+        /// Get the status of the server, it returns all information about how many configuration 
+        /// are stored in the system.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("status")]
         public ServerStatusModel Status()
@@ -70,6 +78,12 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             };
         }
 
+        /// <summary>
+        /// Get configurations for a singole application, this allows to render the 
+        /// menu with a list of configurations/services for a single application.
+        /// </summary>
+        /// <param name="appName"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{appName}/status")]
         public HttpResponseMessage GetConfiguration(String appName)
@@ -90,6 +104,16 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, modules);
         }
 
+        /// <summary>
+        /// Get a configuration for a specific application/moduleName, optionally
+        /// we can specify an hostname to have configuration specific for a specific
+        /// hostname.
+        /// </summary>
+        /// <param name="appName"></param>
+        /// <param name="moduleName"></param>
+        /// <param name="hostName"></param>
+        /// <param name="missingParametersAction"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{appName}/{moduleName}/config.json/{hostName=}")]
         [Route("{appName}/{moduleName}.config/{hostName=}")]
@@ -100,29 +124,41 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             return configuration.Configuration;
         }
 
+        /// <summary>
+        /// This version is in post and accepts as the body the default value for 
+        /// all the parameters of the configuration. This is useful if we have default
+        /// values with the user application, and we do not want to upload the 
+        /// default to the configuration service.
+        /// </summary>
+        /// <param name="def"></param>
+        /// <param name="appName"></param>
+        /// <param name="moduleName"></param>
+        /// <param name="hostName"></param>
+        /// <param name="missingParametersAction"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("{appName}/{moduleName}.config/{hostName=}")]
         public Object GetConfigurationWithDefault(
             [FromBody] GetConfigurationWithDefault def,
-            String appName, 
+            String appName,
             String moduleName,
             String hostName = "",
             MissingParametersAction missingParametersAction = MissingParametersAction.Throw)
         {
             var baseDirectory = FileSystem.Instance.GetBaseDirectory();
-            JObject defaultParameters  =null;
+            JObject defaultParameters = null;
             JObject defaultConfiguration = null;
-            if (def != null) 
+
+            if (def != null)
             {
                 defaultParameters = def.DefaultParameters;
                 defaultConfiguration = def.DefaultConfiguration;
             }
-            ParameterManager.ReplaceResult replaceResult;
 
             var config = ConfigFileLocator.GetConfig(
-                baseDirectory, 
-                appName, 
-                moduleName, 
+                baseDirectory,
+                appName,
+                moduleName,
                 hostName,
                 missingParametersAction,
                 defaultConfiguration,
@@ -130,6 +166,14 @@ namespace Jarvis.ConfigurationService.Host.Controllers
             return config.Configuration;
         }
 
+        /// <summary>
+        /// Get a resource.
+        /// </summary>
+        /// <param name="appName"></param>
+        /// <param name="moduleName"></param>
+        /// <param name="fileName"></param>
+        /// <param name="hostName"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{appName}/resources/{moduleName}/{filename}/{hostName=}")]
         public HttpResponseMessage GetResource(String appName, String moduleName, String fileName, String hostName = "")

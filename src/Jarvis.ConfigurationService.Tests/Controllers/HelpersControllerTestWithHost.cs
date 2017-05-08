@@ -17,11 +17,11 @@ namespace Jarvis.ConfigurationService.Tests.Support
     [Category("HostOn")]
     public class HelpersControllerTestWithHost
     {
-        IDisposable _app;
-        String baseUri = "http://localhost:53642";
+        private IDisposable _app;
+        private readonly String baseUri = "http://localhost:53642";
 
         [TestFixtureSetUp]
-        public void FixtureSetup() 
+        public void FixtureSetup()
         {
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
         }
@@ -39,7 +39,6 @@ namespace Jarvis.ConfigurationService.Tests.Support
             Assert.That(parsed["IV"], Is.Not.Null);
             Assert.That(parsed["Key"], Is.Not.Null);
         }
-
 
         [Test]
         public void Verify_encryption_utils()

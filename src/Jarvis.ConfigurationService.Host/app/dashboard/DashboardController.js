@@ -30,21 +30,30 @@
             $http({
                 method: 'GET',
                 url: url
-            }).then(function successCallback(response) {
-
-                vm.currentConfig = response.data;
-            });
+            }).then(
+                function successCallback(response) {
+                    vm.currentConfig = response.data;
+                },
+                function errorCallback(error) {
+                    vm.currentConfig = error.data
+                }
+            );
 
             var urlParameter = '/api/parameters/' + vm.currentApplication;
 
             $http({
                 method: 'GET',
                 url: urlParameter
-            }).then(function successCallback(response) {
-
-                vm.currentApplicationParameters = JSON.stringify(response.data, null, 4);
-                vm.currentApplicationParametersOperation = { "operation": "load", "status": "OK" };
-            });
+            }).then(
+                function successCallback(response) {
+                    vm.currentApplicationParameters = JSON.stringify(response.data, null, 4);
+                    vm.currentApplicationParametersOperation = { "operation": "load", "status": "OK" };
+                },
+                function errorCallback(error) {
+                    vm.currentApplicationParameters = JSON.stringify(error.data, null, 4);
+                    vm.currentApplicationParametersOperation = { "operation": "load", "status": "Error loading parameter" };
+                }
+            );
         };
         vm.editConfig(vm.currentService);
 

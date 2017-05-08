@@ -35,32 +35,31 @@ namespace Jarvis.ConfigurationService.Host.Support
     /// </summary>
     public static class ConfigFileLocator
     {
-        private static ILog _logger = LogManager.GetLogger(typeof(ConfigFileLocator));
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(ConfigFileLocator));
 
         /// <summary>
-        /// 
+        /// Get config file resulting from the composition of the various base configuration
+        /// files, plus all the parameters.
         /// </summary>
         /// <param name="baseDirectory"></param>
         /// <param name="applicationName"></param>
         /// <param name="serviceName"></param>
         /// <param name="hostName"></param>
+        /// <param name="missingParams">The action to take if a parameters is missing.</param>
         /// <param name="defaultConfiguration">Json configuration sent by the client
         /// that represents base configuration for the application. It has lower priority. It can be null.</param>
         /// <param name="defaultParameters">Json configuration sent by the client
         /// to contain base parameters for the application, it has lower priority. It can be null.</param>
         /// <returns></returns>
-        internal static ComposedConfiguration GetConfig
-            (
-                String baseDirectory,
-                String applicationName,
-                String serviceName,
-                String hostName,
-                MissingParametersAction missingParams,
-                JObject defaultConfiguration = null,
-                JObject defaultParameters = null
-            )
+        internal static ComposedConfiguration GetConfig(
+            String baseDirectory,
+            String applicationName,
+            String serviceName,
+            String hostName,
+            MissingParametersAction missingParams,
+            JObject defaultConfiguration = null,
+            JObject defaultParameters = null)
         {
-
             DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
             var appDirectory = FileSystem.Instance.RedirectDirectory(
                 Path.Combine(baseDir.FullName, applicationName)
@@ -71,7 +70,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             var baseDirLen = Directory.GetParent(appDirectory).FullName.Length;
             String baseConfigFileName = Path.Combine(baseDir.FullName, "base.config");
             String defaultApplicationBaseConfigFileName = Path.Combine(systemDirectory, applicationName, serviceName, (hostName ?? "") + DateTime.Now.ToString("_yyyyMMdd_hhMMss_fff_") + ".config");
-           
+
             String applicationBaseConfigFileName = Path.Combine(appDirectory, "base.config");
             String defaultDirectoryBaseConfigFileName = Path.Combine(appDirectory, "Default", "base.config");
             String serviceConfigFileName = Path.Combine(appDirectory, "Default", serviceName + ".config");
@@ -80,16 +79,16 @@ namespace Jarvis.ConfigurationService.Host.Support
             List<ConfigFileInfo> configFiles = new List<ConfigFileInfo>();
             if (FileSystem.Instance.FileExists(baseConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(baseConfigFileName), baseConfigFileName.Substring(baseDirLen)));
-            
+
             //check default configuration file
-            if (defaultConfiguration != null) 
+            if (defaultConfiguration != null)
             {
                 FileSystem.Instance.WriteFile(defaultApplicationBaseConfigFileName, defaultConfiguration.ToString());
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(defaultApplicationBaseConfigFileName), defaultApplicationBaseConfigFileName.Substring(baseDirLen)));
                 _logger.InfoFormat("Default File used. App {0} service {1} host {2} content {3}",
                     applicationName, serviceName, hostName, defaultConfiguration.ToString());
             }
-            
+
             if (FileSystem.Instance.FileExists(applicationBaseConfigFileName))
                 configFiles.Add(ConfigFileInfo.ForBase(FileSystem.Instance.GetFileContent(applicationBaseConfigFileName), applicationBaseConfigFileName.Substring(baseDirLen)));
             if (FileSystem.Instance.FileExists(defaultDirectoryBaseConfigFileName))
@@ -120,12 +119,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                 serviceName,
                 hostName,
                 defaultDirectoryBaseParametersFileName,
-                defaultConfiguration,
                 defaultParameters);
-            //need to return all parameters.
-
-            baseConfigObject["jarvis-parameters"] = (JObject) JsonConvert.DeserializeObject(
-                JsonConvert.SerializeObject( parameterObject));
 
             //Do the substitution
             ParameterManager.ReplaceResult replaceResult;
@@ -143,7 +137,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 //do nothing, everything is done by the replace parameters routine
             }
-        
+
             if (replaceResult.MissingParams.Count > 0)
             {
                 var missingParametersList = replaceResult.MissingParams.Aggregate((s1, s2) => s1 + ", " + s2);
@@ -152,7 +146,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                 {
                     case MissingParametersAction.Throw:
                         throw new ConfigurationErrorsException("Missing parameters: " +
-                            missingParametersList); 
+                            missingParametersList);
                     case MissingParametersAction.Ignore:
                         baseConfigObject["jarvis-missing-parameters"] = new JArray( replaceResult.MissingParams);
                         _logger.DebugFormat("Missing Parameter List {0} but client ask to ignore", missingParametersList);
@@ -169,7 +163,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 FileSystem.Instance.DeleteFile(defaultApplicationBaseConfigFileName);
             }
-            if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName)) 
+            if (FileSystem.Instance.FileExists(defaultDirectoryBaseParametersFileName))
             {
                 FileSystem.Instance.DeleteFile(defaultDirectoryBaseParametersFileName);
             }
@@ -177,18 +171,25 @@ namespace Jarvis.ConfigurationService.Host.Support
             return new ComposedConfiguration(baseConfigObject, replaceResult);
         }
 
-        public static JObject GetParameterObject
-           (
-               String baseDirectory,
-               String applicationName,
-               String serviceName,
-               String hostName, 
-               String defaultDirectoryBaseParametersFileName,
-               JObject defaultConfiguration = null,
-               JObject defaultParameters = null
-           )
+        /// <summary>
+        /// Get the <see cref="JObject"/> resulting from the composition of all the 
+        /// component of configuration.
+        /// </summary>
+        /// <param name="baseDirectory"></param>
+        /// <param name="applicationName"></param>
+        /// <param name="serviceName"></param>
+        /// <param name="hostName"></param>
+        /// <param name="defaultDirectoryBaseParametersFileName"></param>
+        /// <param name="defaultParameters"></param>
+        /// <returns></returns>
+        public static JObject GetParameterObject(
+            String baseDirectory,
+            String applicationName,
+            String serviceName,
+            String hostName,
+            String defaultDirectoryBaseParametersFileName,
+            JObject defaultParameters = null)
         {
-
             DirectoryInfo baseDir = new DirectoryInfo(baseDirectory);
             var appDirectory = FileSystem.Instance.RedirectDirectory(
                 Path.Combine(baseDir.FullName, applicationName)
@@ -244,25 +245,33 @@ namespace Jarvis.ConfigurationService.Host.Support
             }
 
             //use base parameters 
-            JObject sysParams = new JObject();
-            sysParams.Add("appName", applicationName);
-            sysParams.Add("serviceName", serviceName);
-            sysParams.Add("hostName", hostName);
+            JObject sysParams = new JObject
+            {
+                { "appName", applicationName },
+                { "serviceName", serviceName },
+                { "hostName", hostName }
+            };
             parameterObject.Add("sys", sysParams);
 
             return parameterObject;
         }
 
-        public static String GetResourceFile
-            (
-                String baseDirectory,
-                String applicationName,
-                String serviceName,
-                String hostName,
-                String resourceFileName
-            )
+        /// <summary>
+        /// Get a resource file.
+        /// </summary>
+        /// <param name="baseDirectory"></param>
+        /// <param name="applicationName"></param>
+        /// <param name="serviceName"></param>
+        /// <param name="hostName"></param>
+        /// <param name="resourceFileName"></param>
+        /// <returns></returns>
+        public static String GetResourceFile(
+            String baseDirectory,
+            String applicationName,
+            String serviceName,
+            String hostName,
+            String resourceFileName)
         {
-
             String appDirectory = Path.Combine(baseDirectory, applicationName);
             var redirectedAppDirectory = FileSystem.Instance.RedirectDirectory(appDirectory);
 

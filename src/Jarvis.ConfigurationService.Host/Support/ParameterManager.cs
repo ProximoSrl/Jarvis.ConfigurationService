@@ -20,6 +20,7 @@ namespace Jarvis.ConfigurationService.Host.Support
             {
                 MissingParams = new HashSet<string>();
             }
+
             internal void Merge(ReplaceResult result)
             {
                 HasReplaced = HasReplaced || result.HasReplaced;
@@ -30,10 +31,39 @@ namespace Jarvis.ConfigurationService.Host.Support
             }
         }
 
-        private String _missingParametersToken;
+        private class ParameterValue
+        {
+            public static ParameterValue Create(String value)
+            {
+                return new ParameterValue(false, value);
+            }
+
+            /// <summary>
+            /// The caller could ask to use a specific string for missing parameter, but
+            /// we need to mark that the parameter was really missing.
+            /// </summary>
+            /// <param name="value"></param>
+            /// <returns></returns>
+            public static ParameterValue CreateForMissingValue(String value)
+            {
+                return new ParameterValue(true, value);
+            }
+
+            private ParameterValue(bool isMissing, string value)
+            {
+                IsMissing = isMissing;
+                Value = value;
+            }
+
+            public Boolean IsMissing { get; set; }
+
+            public String Value { get; set; }
+        }
+
+        private readonly String _missingParametersToken;
 
         /// <summary>
-        /// 
+        /// Create the parameter manager object.
         /// </summary>
         /// <param name="missingParametersToken">If a parameter is missing we can
         /// substituite this token to the missing parameter instead of marking the 
@@ -49,18 +79,18 @@ namespace Jarvis.ConfigurationService.Host.Support
         /// <param name="settingName"></param>
         /// <param name="parameterObject"></param>
         /// <returns></returns>
-        internal String GetParameterValue(string settingName, JObject parameterObject)
+        private ParameterValue GetParameterValue(string settingName, JObject parameterObject)
         {
             var path = settingName.Split('.');
             JObject current = parameterObject;
             for (int i = 0; i < path.Length - 1; i++)
             {
-                if (current[path[i]] == null) return _missingParametersToken;
+                if (current[path[i]] == null) return ParameterValue.CreateForMissingValue( _missingParametersToken);
                 current = (JObject)current[path[i]];
             }
             if (current[path.Last()] == null)
-                return _missingParametersToken;
-            return current[path.Last()].ToString();
+                return ParameterValue.CreateForMissingValue(_missingParametersToken);
+            return ParameterValue.Create(current[path.Last()].ToString());
         }
 
         internal ReplaceResult ReplaceParameters(JObject source, JObject parameterObject)
@@ -95,13 +125,13 @@ namespace Jarvis.ConfigurationService.Host.Support
                     {
                         var parameterName = m.Groups["match"].Value.Trim('{', '}');
                         var paramValue = GetParameterValue(parameterName, parameterObject);
-                        if (paramValue == null)
+                        if (paramValue.IsMissing)
                         {
                             result.MissingParams.Add(parameterName);
-                            return "%" + parameterName + "%";
+                            return paramValue.Value ?? "%" + parameterName + "%";
                         }
                         result.HasReplaced = true;
-                        return paramValue;
+                        return paramValue.Value;
                     }));
             if (result.MissingParams.Count > 0)
             {
@@ -116,8 +146,8 @@ namespace Jarvis.ConfigurationService.Host.Support
         }
 
         private void ReplaceParametersInArray(
-            JObject parameterObject, 
-            ReplaceResult result, 
+            JObject parameterObject,
+            ReplaceResult result,
             JArray array)
         {
             for (int i = 0; i < array.Count; i++)
@@ -141,8 +171,8 @@ namespace Jarvis.ConfigurationService.Host.Support
         }
 
         private JToken ManageParametersInJToken(
-            JObject parameterObject, 
-            ReplaceResult result, 
+            JObject parameterObject,
+            ReplaceResult result,
             JToken token)
         {
             String value = token.ToString();
@@ -156,13 +186,13 @@ namespace Jarvis.ConfigurationService.Host.Support
                     {
                         var parameterName = m.Groups["match"].Value.Trim('{', '}');
                         var paramValue = GetParameterValue(parameterName, parameterObject);
-                        if (paramValue == null)
+                        if (paramValue.IsMissing)
                         {
                             result.MissingParams.Add(parameterName);
-                            return objectParameter ? value : "%" + parameterName + "%";
+                            return paramValue.Value ?? (objectParameter ? value : "%" + parameterName + "%");
                         }
                         result.HasReplaced = true;
-                        return paramValue;
+                        return paramValue.Value;
                     }));
                 if (objectParameter)
                 {
@@ -171,7 +201,7 @@ namespace Jarvis.ConfigurationService.Host.Support
                     {
                         return (JToken)JsonConvert.DeserializeObject(newValue);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         //parameters has some error, maybe it is malformed, treat as if parameter is missing.
                         return "Parameter " + value + " is an object parameter and cannot be parsed: " + newValue;

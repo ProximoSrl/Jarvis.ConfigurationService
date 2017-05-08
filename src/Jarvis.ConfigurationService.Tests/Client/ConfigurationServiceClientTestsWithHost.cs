@@ -19,13 +19,12 @@ using Microsoft.Owin.Hosting;
 
 namespace Jarvis.ConfigurationService.Tests.Client
 {
-    [TestFixture] 
+    [TestFixture]
     public class ConfigurationServiceClientTestsWithHost
     {
-        IDisposable _app;
-        TestWebClient client;
-        String baseUri = "http://localhost:53642";
-        ConfigurationServiceClient sut;
+        private IDisposable _app;
+        private readonly String baseUri = "http://localhost:53642";
+        private ConfigurationServiceClient sut;
 
         [TestFixtureSetUp]
         public void FixtureSetup()
@@ -43,20 +42,18 @@ application-name : MyApp1
 base-server-address : http://localhost:53642/");
 
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
-            client = new TestWebClient();
         }
 
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
             _app.Dispose();
-
         }
 
         [SetUp]
-        public void SetUp() {
-
-            
+        public void SetUp()
+        {
+            // Method intentionally left empty.
         }
 
         private void CreateStandardSut()
@@ -67,24 +64,22 @@ base-server-address : http://localhost:53642/");
                 new StandardEnvironment());
         }
 
-     
-
         [Test]
-        public void simple_call_smoke_test() 
+        public void Simple_call_smoke_test()
         {
             CreateStandardSut();
             var result = sut.GetSetting("baseSetting");
             Assert.That(result, Is.EqualTo("hello world"));
-        }      
+        }
     }
 
     [TestFixture]
     public class ConfigurationServiceClientTestsWithHostAndParams
     {
-        IDisposable _app;
-        TestWebClient client;
-        String baseUri = "http://localhost:53642";
-        ConfigurationServiceClient sut;
+        private IDisposable _app;
+        private TestWebClient client;
+        private readonly String baseUri = "http://localhost:53642";
+        private ConfigurationServiceClient sut;
 
         [TestFixtureSetUp]
         public void FixtureSetup()
@@ -109,14 +104,12 @@ base-server-address : http://localhost:53642/");
         public void FixtureTearDown()
         {
             _app.Dispose();
-
         }
 
         [SetUp]
         public void SetUp()
         {
-
-
+            // Method intentionally left empty.
         }
 
         private void CreateSutWithDefault(FileInfo defaultConfig, FileInfo defaultParametersConfig)
@@ -130,7 +123,7 @@ base-server-address : http://localhost:53642/");
         }
 
         [Test]
-        public void call_for_default_smoke_test()
+        public void Call_for_default_smoke_test()
         {
             FileInfo defConf = new FileInfo("Client\\base.config");
             FileInfo defParam = new FileInfo("Client\\parameters.config");
@@ -143,18 +136,17 @@ base-server-address : http://localhost:53642/");
         }
 
         [Test]
-        public void default_parameters_has_lower_precedence()
+        public void Default_parameters_has_lower_precedence()
         {
             FileInfo defConf = new FileInfo("Client\\base.config");
             FileInfo defParam = new FileInfo("Client\\parameters.config");
             CreateSutWithDefault(defConf, defParam);
             var result = sut.GetSetting("overridden");
             Assert.That(result, Is.EqualTo("overriddenValue"));
-
         }
 
         [Test]
-        public void create_new_application()
+        public void Create_new_application()
         {
             FileInfo defConf = new FileInfo("Client\\base.config");
             FileInfo defParam = new FileInfo("Client\\parameters.config");
