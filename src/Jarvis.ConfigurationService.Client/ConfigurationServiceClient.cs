@@ -116,10 +116,10 @@ namespace Jarvis.ConfigurationService.Client
                 {
                     String defaultConfigPayload = "{}";
                     if (standardConfigFile != null && standardConfigFile.Exists)
-                        defaultConfigPayload = _environment.GetFileContent(standardConfigFile.FullName);
+                        defaultConfigPayload = _environment.GetFileContent(standardConfigFile.FullName, false);
                     String defaultParameterPayload = "{}";
                     if (standardParameterFile != null && standardParameterFile.Exists)
-                        defaultParameterPayload = _environment.GetFileContent(standardParameterFile.FullName);
+                        defaultParameterPayload = _environment.GetFileContent(standardParameterFile.FullName, false);
 
                     String payload = String.Format(
 @"{{'defaultConfiguration' : {0},
@@ -145,7 +145,7 @@ namespace Jarvis.ConfigurationService.Client
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
             {
-                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName));
+                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), true);
                 if (!String.IsNullOrEmpty(configurationFullContent))
                 {
                     LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");

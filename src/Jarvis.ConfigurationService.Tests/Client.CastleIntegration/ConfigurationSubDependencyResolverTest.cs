@@ -29,7 +29,7 @@ namespace Jarvis.ConfigurationService.Tests.Client.CastleIntegration
             //valid directory as base test execution path.
             stubEnvironment.GetCurrentPath().Returns(@"c:\develop\blabla\nameofsoftware\src\blabla\bin\debug");
 
-            stubEnvironment.GetFileContent("").ReturnsForAnyArgs(String.Empty);
+            stubEnvironment.GetFileContent("", false).ReturnsForAnyArgs(String.Empty);
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://localhost");
             ClientConfiguration config = new ClientConfiguration(@"#jarvis-config
 application-name : TESTAPPLICATION

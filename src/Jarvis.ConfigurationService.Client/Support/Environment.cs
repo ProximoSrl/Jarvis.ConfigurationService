@@ -40,7 +40,7 @@ namespace Jarvis.ConfigurationService.Client.Support
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        String GetFileContent(String fileName);
+        String GetFileContent(String fileName, Boolean encrypted);
 
         /// <summary>
         /// Retrieve the configuration for the client, looking for a file
@@ -58,14 +58,6 @@ namespace Jarvis.ConfigurationService.Client.Support
         /// <param name="ignoreErrors"></param>
         /// <param name="encrypt">If true encrypt data with current user DPAPI.</param>
         void SaveFile(string fileName, string content, bool ignoreErrors, Boolean encrypt);
-
-        /// <summary>
-        /// Save a file into storage folder, is used to store various data like lastgoodconfiguration.config
-        /// file.
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="encrypted">If true data was saved using current user DPAPI.</param>
-        String LoadFile(string fileName, Boolean encrypted);
 
         /// <summary>
         /// Used to access current path of the application
@@ -144,13 +136,22 @@ namespace Jarvis.ConfigurationService.Client.Support
             }
         }
 
-        public String GetFileContent(String fileName)
+        public String GetFileContent(String fileName, Boolean encrypted)
         {
             if (!File.Exists(fileName))
             {
                 return null;
             }
-            return File.ReadAllText(fileName);
+            if (encrypted)
+            {
+                var encryptedContent = File.ReadAllBytes(fileName);
+                var decrypted = ProtectedData.Unprotect(encryptedContent, GetEntropy(fileName), DataProtectionScope.CurrentUser);
+                return Encoding.UTF8.GetString(decrypted);
+            }
+            else
+            {
+                return File.ReadAllText(fileName);
+            }
         }
 
         public ClientConfiguration GetApplicationConfig()
@@ -192,20 +193,6 @@ namespace Jarvis.ConfigurationService.Client.Support
             catch (IOException)
             {
                 if (!ignoreErrors) throw;
-            }
-        }
-
-        public String LoadFile(String fileName, Boolean encrypted)
-        {
-            if (encrypted)
-            {
-                var encryptedContent = File.ReadAllBytes(fileName);
-                var decrypted = ProtectedData.Unprotect(encryptedContent, GetEntropy(fileName), DataProtectionScope.CurrentUser);
-                return Encoding.UTF8.GetString(decrypted);
-            }
-            else
-            {
-                return File.ReadAllText(fileName);
             }
         }
 
