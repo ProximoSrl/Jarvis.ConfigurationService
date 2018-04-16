@@ -9,11 +9,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Timers;
 
 namespace Jarvis.ConfigurationService.Client
@@ -83,7 +79,6 @@ namespace Jarvis.ConfigurationService.Client
                 missingParametersAction);
         }
 
-
         internal ConfigurationServiceClient
             (
                 Action<String, Boolean, Exception> loggerFunction,
@@ -102,8 +97,8 @@ namespace Jarvis.ConfigurationService.Client
             _resourceToMonitor = new ConcurrentDictionary<String, MonitoredFile>();
             AutoConfigure();
             LoadSettings(
-                defaultConfigFile, 
-                defaultParameterFile, 
+                defaultConfigFile,
+                defaultParameterFile,
                 missingParametersAction ?? ConfigurationManagerMissingParametersAction.Throw);
             _configChangePollerTimer = new Timer(60 * 1000);
             _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
@@ -169,7 +164,11 @@ namespace Jarvis.ConfigurationService.Client
                 {
                     throw new Exception("Configuration is null");
                 }
-                _environment.SaveFile(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), configurationFullContent, true);
+                _environment.SaveFile(
+                    Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName),
+                    configurationFullContent,
+                    true,
+                    encrypt: true);
             }
             catch (Exception ex)
             {
@@ -245,7 +244,7 @@ namespace Jarvis.ConfigurationService.Client
                     _configFileLocation,
                     _missingParametersAction.ToString().ToLower());
             }
-            
+
 
             LogDebug("Loading configuration from " + _configFileLocation);
         }
@@ -434,7 +433,7 @@ namespace Jarvis.ConfigurationService.Client
                     {
                         //configuration is changed, we need to resave the file.
                         res.Value.Content = resourceValue;
-                        _environment.SaveFile(res.Value.LocalFileName, resourceValue, false);
+                        _environment.SaveFile(res.Value.LocalFileName, resourceValue, false, false);
                     }
                 }
             }
@@ -477,7 +476,7 @@ namespace Jarvis.ConfigurationService.Client
                 return false;
             }
             var savedFileName = Path.Combine(_environment.GetCurrentPath(), localResourceFileName ?? resourceName);
-            _environment.SaveFile(savedFileName, valueOfFile, false);
+            _environment.SaveFile(savedFileName, valueOfFile, false, false);
             if (monitorForChange)
             {
                 var monitoredFile = new MonitoredFile()
