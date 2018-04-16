@@ -67,7 +67,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
             stubEnvironment.GetCurrentPath().Returns(@"c:\develop\blabla\nameofsoftware\src\blabla\bin\debug");
 
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(String.Empty);
-            stubEnvironment.GetFileContent("").ReturnsForAnyArgs(String.Empty);
+            stubEnvironment.GetFileContent("", false).ReturnsForAnyArgs(String.Empty);
             stubEnvironment.GetEnvironmentVariable("").ReturnsForAnyArgs("http://localhost");
             ClientConfiguration config = new ClientConfiguration(@"#jarvis-config
 application-name : TESTAPPLICATION", "C:\\temp\\TESTAPPLICATION.config");
@@ -536,14 +536,13 @@ base-server-address : http://localhost:55555/");
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs(String.Empty);
 
             //Configuration will ask for last good configuration file and I return last configuration
-            stubEnvironment.GetFileContent("").ReturnsForAnyArgs(a_valid_configuration_file);
+            stubEnvironment.GetFileContent("", false).ReturnsForAnyArgs(a_valid_configuration_file);
 
             var sut = CreateSut();
 
             var configuration = sut.GetSetting("goodSetting");
             Assert.That(configuration, Is.EqualTo("hello setting"));
-            stubEnvironment.Received().GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.LastGoodConfigurationFileName)));
-            stubEnvironment.ReceivedCalls().ToList();
+            stubEnvironment.Received().GetFileContent(Arg.Is<String>(s => s.EndsWith(ConfigurationServiceClient.LastGoodConfigurationFileName)), true);
             Assert.That(currentTestLogger.Logs.Any(l => l.Contains("last good configuration is used")), "verify warning of last good configuration is used");
         }
 
