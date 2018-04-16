@@ -39,7 +39,7 @@ namespace Jarvis.ConfigurationService.Tests.Client.Support
             var content = File.ReadAllText(fileName);
             Assert.That(content, Is.Not.EqualTo("This is content"));
 
-            content = _sut.LoadFile(fileName, true);
+            content = _sut.GetFileContent(fileName, true);
             Assert.That(content, Is.EqualTo("This is content"));
         }
     }
