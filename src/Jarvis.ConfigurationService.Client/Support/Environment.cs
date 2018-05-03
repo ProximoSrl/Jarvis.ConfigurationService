@@ -206,7 +206,7 @@ namespace Jarvis.ConfigurationService.Client.Support
         /// </summary>
         public String GetCurrentPath()
         {
-            return AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+            return AppDomain.CurrentDomain.BaseDirectory;
         }
 
         public String GetMachineName()
