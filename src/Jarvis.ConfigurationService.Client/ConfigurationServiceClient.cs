@@ -164,11 +164,6 @@ namespace Jarvis.ConfigurationService.Client
                 {
                     throw new Exception("Configuration is null");
                 }
-                _environment.SaveFile(
-                    Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName),
-                    configurationFullContent,
-                    true,
-                    encrypt: true);
             }
             catch (Exception ex)
             {
@@ -178,6 +173,20 @@ namespace Jarvis.ConfigurationService.Client
                     );
                 LogError(errorString, ex);
                 throw new ConfigurationErrorsException(errorString);
+            }
+
+            try
+            {
+                _environment.SaveFile(
+                    Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName),
+                    configurationFullContent,
+                    true,
+                    encrypt: true);
+            }
+            catch (Exception ex)
+            {
+                var errorString = String.Format("Unable to save lastgoodconfiguration: {0}",ex.Message);
+                LogError(errorString, ex);
             }
         }
 
