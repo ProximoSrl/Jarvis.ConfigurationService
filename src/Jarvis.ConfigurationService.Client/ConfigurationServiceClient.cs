@@ -38,15 +38,16 @@ namespace Jarvis.ConfigurationService.Client
         private static ConfigurationServiceClient _instance;
         private JObject _configurationObject;
         private String _configFileLocation;
-        private String _baseServerAddressEnvironmentVariable;
+        private readonly String _baseServerAddressEnvironmentVariable;
         private String _baseConfigurationServer;
         private String _moduleName;
-        private ConfigurationManagerMissingParametersAction? _missingParametersAction;
+        private readonly ConfigurationManagerMissingParametersAction? _missingParametersAction;
         private ClientConfiguration _clientConfiguration;
 
-        private IEnvironment _environment;
+        private readonly IEnvironment _environment;
 
-        private Timer _configChangePollerTimer;
+        private readonly Timer _configChangePollerTimer;
+        private readonly Boolean _encryptConfigFile;
 
         internal Action<String, Boolean, Exception> Logger
         {
@@ -67,7 +68,8 @@ namespace Jarvis.ConfigurationService.Client
                 String baseServerAddressEnvironmentVariable,
                 FileInfo defaultConfigFile = null,
                 FileInfo defaultParameterFile = null,
-                ConfigurationManagerMissingParametersAction? missingParametersAction = null
+                ConfigurationManagerMissingParametersAction? missingParametersAction = null,
+                Boolean encryptConfigFiles = true
             )
         {
             _instance = new ConfigurationServiceClient(
@@ -76,7 +78,8 @@ namespace Jarvis.ConfigurationService.Client
                 new StandardEnvironment(),
                 defaultConfigFile,
                 defaultParameterFile,
-                missingParametersAction);
+                missingParametersAction,
+                encryptConfigFiles);
         }
 
         internal ConfigurationServiceClient
@@ -86,13 +89,14 @@ namespace Jarvis.ConfigurationService.Client
                 IEnvironment environment,
                 FileInfo defaultConfigFile = null,
                 FileInfo defaultParameterFile = null,
-                ConfigurationManagerMissingParametersAction? missingParametersAction = null
-
+                ConfigurationManagerMissingParametersAction? missingParametersAction = null,
+                Boolean encryptConfigFiles = true
             )
         {
             _logger = loggerFunction;
             _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
             _environment = environment;
+            _encryptConfigFile = encryptConfigFiles;
             _missingParametersAction = missingParametersAction;
             _resourceToMonitor = new ConcurrentDictionary<String, MonitoredFile>();
             AutoConfigure();
@@ -145,7 +149,7 @@ namespace Jarvis.ConfigurationService.Client
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
             {
-                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), true);
+                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), _encryptConfigFile);
                 if (!String.IsNullOrEmpty(configurationFullContent))
                 {
                     LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");
@@ -181,7 +185,7 @@ namespace Jarvis.ConfigurationService.Client
                     Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName),
                     configurationFullContent,
                     true,
-                    encrypt: true);
+                    encrypt: _encryptConfigFile);
             }
             catch (Exception ex)
             {
