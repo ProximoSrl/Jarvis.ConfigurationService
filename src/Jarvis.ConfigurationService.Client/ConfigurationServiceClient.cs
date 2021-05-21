@@ -48,6 +48,7 @@ namespace Jarvis.ConfigurationService.Client
 
         private readonly Timer _configChangePollerTimer;
         private readonly Boolean _encryptConfigFile;
+        private readonly bool _saveLastConfigurationOnApplicationFileLocation;
 
         internal Action<String, Boolean, Exception> Logger
         {
@@ -69,7 +70,8 @@ namespace Jarvis.ConfigurationService.Client
                 FileInfo defaultConfigFile = null,
                 FileInfo defaultParameterFile = null,
                 ConfigurationManagerMissingParametersAction? missingParametersAction = null,
-                Boolean encryptConfigFiles = true
+                Boolean encryptConfigFiles = true,
+                Boolean saveLastConfigurationOnApplicationFileLocation = false
             )
         {
             _instance = new ConfigurationServiceClient(
@@ -79,7 +81,8 @@ namespace Jarvis.ConfigurationService.Client
                 defaultConfigFile,
                 defaultParameterFile,
                 missingParametersAction,
-                encryptConfigFiles);
+                encryptConfigFiles,
+                saveLastConfigurationOnApplicationFileLocation);
         }
 
         internal ConfigurationServiceClient
@@ -90,28 +93,28 @@ namespace Jarvis.ConfigurationService.Client
                 FileInfo defaultConfigFile = null,
                 FileInfo defaultParameterFile = null,
                 ConfigurationManagerMissingParametersAction? missingParametersAction = null,
-                Boolean encryptConfigFiles = true
+                Boolean encryptConfigFiles = true,
+                Boolean saveLastConfigurationOnApplicationFileLocation = false
             )
         {
             _logger = loggerFunction;
             _baseServerAddressEnvironmentVariable = baseServerAddressEnvironmentVariable;
             _environment = environment;
             _encryptConfigFile = encryptConfigFiles;
+            _saveLastConfigurationOnApplicationFileLocation = saveLastConfigurationOnApplicationFileLocation;
             _missingParametersAction = missingParametersAction;
             _resourceToMonitor = new ConcurrentDictionary<String, MonitoredFile>();
             AutoConfigure();
             LoadSettings(
                 defaultConfigFile,
-                defaultParameterFile,
-                missingParametersAction ?? ConfigurationManagerMissingParametersAction.Throw);
+                defaultParameterFile);
             _configChangePollerTimer = new Timer(60 * 1000);
             _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
         }
 
         void LoadSettings(
             FileInfo standardConfigFile,
-            FileInfo standardParameterFile,
-            ConfigurationManagerMissingParametersAction missingParametersAction)
+            FileInfo standardParameterFile)
         {
             String configurationFullContent = null;
             try
@@ -149,7 +152,16 @@ namespace Jarvis.ConfigurationService.Client
             //If server did not responded we can use last good configuration
             if (String.IsNullOrEmpty(configurationFullContent))
             {
-                configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), _encryptConfigFile);
+                if (_saveLastConfigurationOnApplicationFileLocation)
+                {
+                    var applicationPath = _clientConfiguration.ApplicationFileLocation;
+                    configurationFullContent = _environment.GetFileContent(Path.Combine(applicationPath, _moduleName + ".config"), _encryptConfigFile);
+                }
+                else
+                {
+                    configurationFullContent = _environment.GetFileContent(Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName), _encryptConfigFile);
+                }
+                   
                 if (!String.IsNullOrEmpty(configurationFullContent))
                 {
                     LogDebug("Configuration server " + ConfigFileLocation + "did not responded, last good configuration is used");
@@ -181,11 +193,23 @@ namespace Jarvis.ConfigurationService.Client
 
             try
             {
-                _environment.SaveFile(
-                    Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName),
-                    configurationFullContent,
-                    true,
-                    encrypt: _encryptConfigFile);
+                if (_saveLastConfigurationOnApplicationFileLocation)
+                {
+                    var appFileLocation = _clientConfiguration.ApplicationFileLocation;
+                    _environment.SaveFile(
+                        Path.Combine(appFileLocation, _moduleName + ".config"),
+                        configurationFullContent,
+                        true,
+                        encrypt: _encryptConfigFile);
+                }
+                else
+                {
+                    _environment.SaveFile(
+                        Path.Combine(_environment.GetCurrentPath(), LastGoodConfigurationFileName),
+                        configurationFullContent,
+                        true,
+                        encrypt: _encryptConfigFile);
+                }
             }
             catch (Exception ex)
             {
@@ -257,7 +281,6 @@ namespace Jarvis.ConfigurationService.Client
                     _configFileLocation,
                     _missingParametersAction.ToString().ToLower());
             }
-
 
             LogDebug("Loading configuration from " + _configFileLocation);
         }
@@ -501,7 +524,6 @@ namespace Jarvis.ConfigurationService.Client
             }
             return true;
         }
-
 
         #endregion
 
