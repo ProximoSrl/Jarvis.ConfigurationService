@@ -36,6 +36,7 @@ namespace Jarvis.ConfigurationService.Client.Support
         internal ClientConfiguration(String configData, String configFileName)
         {
             ApplicationName = Path.GetFileNameWithoutExtension(configFileName);
+            ApplicationFileLocation = Path.GetDirectoryName(configFileName);
             var lines = configData.Split('\n','\r');
             var validLines = lines
                 .Where(s => !String.IsNullOrEmpty(s) && !s.StartsWith("#"))
@@ -66,10 +67,13 @@ namespace Jarvis.ConfigurationService.Client.Support
         }
 
         public String ApplicationName { get; private set; }
+
         /// <summary>
         /// This configuration is used if the address of configuration
         /// service is not specified in the Environment Variable.
         /// </summary>
         public String BaseServerAddress { get; private set; }
+
+        public String ApplicationFileLocation { get; private set; }
     }
 }

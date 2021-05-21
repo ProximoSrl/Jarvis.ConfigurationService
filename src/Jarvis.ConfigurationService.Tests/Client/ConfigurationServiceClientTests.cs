@@ -547,12 +547,43 @@ base-server-address : http://localhost:55555/");
         }
 
         [Test]
+        public void Verify_support_last_good_configuration_in_app_location()
+        {
+            //Configuration server does not return anything
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs(String.Empty);
+
+            //Configuration will ask for last good configuration file and I return last configuration
+            stubEnvironment.GetFileContent("", false).ReturnsForAnyArgs(a_valid_configuration_file);
+
+            var sut = CreateSut(saveLastConfigurationOnApplicationFileLocation: true);
+
+            var configuration = sut.GetSetting("goodSetting");
+            Assert.That(configuration, Is.EqualTo("hello setting"));
+            stubEnvironment.Received().GetFileContent(Arg.Is<String>(s => s.Equals("c:\\temp\\blabla.config", StringComparison.OrdinalIgnoreCase)), true);
+            Assert.That(currentTestLogger.Logs.Any(l => l.Contains("last good configuration is used")), "verify warning of last good configuration is used");
+        }
+
+        [Test]
         public void Verify_saving_last_good_configuration()
         {
             stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
             CreateSut();
             stubEnvironment.Received().SaveFile(
                 Arg.Is<String>(s => s.EndsWith("lastGoodConfiguration.config", StringComparison.OrdinalIgnoreCase)),
+                Arg.Is<String>(s => s.Equals("{ 'Setting' : 'A sample string'}")),
+                Arg.Any<Boolean>(),
+                Arg.Any<Boolean>());
+        }
+
+        [Test]
+        public void Verify_saving_last_good_configuration_in_app_location()
+        {
+            stubEnvironment.DownloadFile("").ReturnsForAnyArgs("{ 'Setting' : 'A sample string'}");
+            CreateSut(saveLastConfigurationOnApplicationFileLocation : true);
+            //With the new save location we change the name of the file to be the same of the application,
+            //also in the location of .application file.
+            stubEnvironment.Received().SaveFile(
+                Arg.Is<String>(s => s.Equals("c:\\temp\\blabla.config", StringComparison.OrdinalIgnoreCase) ),
                 Arg.Is<String>(s => s.Equals("{ 'Setting' : 'A sample string'}")),
                 Arg.Any<Boolean>(),
                 Arg.Any<Boolean>());
@@ -658,10 +689,11 @@ base-server-address : http://localhost:55555/");
 
         private TestLogger currentTestLogger;
 
-        private ConfigurationServiceClient CreateSut()
+        private ConfigurationServiceClient CreateSut(
+            bool saveLastConfigurationOnApplicationFileLocation = false)
         {
             currentTestLogger = new TestLogger();
-            return new ConfigurationServiceClient(currentTestLogger.Log, "CQRS_TEST_CONFIGURATION_MANAGER", stubEnvironment);
+            return new ConfigurationServiceClient(currentTestLogger.Log, "CQRS_TEST_CONFIGURATION_MANAGER", stubEnvironment, saveLastConfigurationOnApplicationFileLocation: saveLastConfigurationOnApplicationFileLocation);
         }
     }
 }
