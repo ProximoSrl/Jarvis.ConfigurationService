@@ -35,9 +35,7 @@ namespace Jarvis.ConfigurationService.Host
 
                 host.Service<ConfigurationServiceBootstrapper>(service =>
                 {
-                    var uri = new Uri(ConfigurationManager.AppSettings["uri"]);
-
-                    service.ConstructUsing(() => new ConfigurationServiceBootstrapper(uri));
+                    service.ConstructUsing(() => new ConfigurationServiceBootstrapper(ConfigurationManager.AppSettings["uri"]));
                     service.WhenStarted(s => s.Start());
                     service.WhenStopped(s => s.Stop());
                 });

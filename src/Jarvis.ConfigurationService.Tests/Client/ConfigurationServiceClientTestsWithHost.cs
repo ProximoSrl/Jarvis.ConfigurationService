@@ -27,7 +27,7 @@ namespace Jarvis.ConfigurationService.Tests.Client
         String baseUri = "http://localhost:53642";
         ConfigurationServiceClient sut;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetup()
         {
             var baseDir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -46,7 +46,7 @@ base-server-address : http://localhost:53642/");
             client = new TestWebClient();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void FixtureTearDown()
         {
             _app.Dispose();
@@ -86,7 +86,7 @@ base-server-address : http://localhost:53642/");
         String baseUri = "http://localhost:53642";
         ConfigurationServiceClient sut;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetup()
         {
             var baseDir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -105,7 +105,7 @@ base-server-address : http://localhost:53642/");
             client = new TestWebClient();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void FixtureTearDown()
         {
             _app.Dispose();
