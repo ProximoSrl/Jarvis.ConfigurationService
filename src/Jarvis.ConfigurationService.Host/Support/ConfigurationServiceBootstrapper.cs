@@ -27,7 +27,6 @@ namespace Jarvis.ConfigurationService.Host.Support
                 _logger.Error("Exception: " + ex.Message, ex); 
                 throw;
             }
-         
         }
 
         public void Stop()
