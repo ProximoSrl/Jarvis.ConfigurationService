@@ -12,7 +12,7 @@
     <tags>Configuration,Jarvis</tags>
 	
 	  <dependencies>
-      <dependency id="Newtonsoft.Json" version="11.0.2" />
+      <dependency id="Newtonsoft.Json" Version="13.0.1"  />
     </dependencies>
   </metadata>
 
