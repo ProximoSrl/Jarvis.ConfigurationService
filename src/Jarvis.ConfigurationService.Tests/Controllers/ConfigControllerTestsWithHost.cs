@@ -23,14 +23,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
         TestWebClient client;
         String baseUri = "http://localhost:53642";
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetup()
         {
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
             client = new TestWebClient();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void FixtureTearDown()
         {
             _app.Dispose();
@@ -54,14 +54,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
             }
             File.WriteAllText(Path.Combine(FileSystem.Instance.GetBaseDirectory(), "myapp3.redirect"), @"c:\temp\myapp3");
             var result = client.DownloadString(baseUri + "/status");
-            Assert.That(result, Is.StringContaining(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppParam"",""MyAppTest"",""OverrideTest"",""myapp3""]"));
+            Assert.That(result.Contains(@"Applications"":[""MyApp1"",""MyApp2"",""MyAppParam"",""MyAppTest"",""OverrideTest"",""myapp3""]"));
         }
 
         [Test]
         public void correct_listing_of_all_services_in_application() 
         {
             var result = client.DownloadString(baseUri + "/MyApp1/status");
-            Assert.That(result, Is.StringContaining(@"[""Service1"",""Service2""]"));
+            Assert.That(result.Contains(@"[""Service1"",""Service2""]"));
         } 
 
         String expected = @"{""connectionStrings"":{""bl"":""mongodb://localhost/bl"",""log"":""mongodb://localhost/log-service1""},""message"":""hello from service 2"",""simple-parameter-setting-root"":""100"",""complex-parameter-setting-root"":""42"",""instruction"":""This is the base configuration file for the entire MyApp1 application"",""workers"":""1"",""simple-parameter-setting"":""100"",""complex-parameter-setting"":""42"",""baseSetting"":""hello world from service 2"",""enableApi"":""false"",""jarvis-parameters"":{""simple-parameter"":100,""complex-parameter"":{""subparam1"":1,""subparam2"":42},""null-param"":"""",""overriddenParam"":""x"",""sys"":{""appName"":""MyApp1"",""serviceName"":""Service2"",""hostName"":null}}}";
@@ -380,16 +380,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
         public void resource_files_supports_parameters()
         {
             var resFile = client.DownloadString(baseUri + "/MyAppParam/resources/Aservice/parametricResource.xml/Host1");
-            Assert.That(resFile, Is.StringContaining(
-@"<node value=""test_11"" />"));
+            Assert.That(resFile.Contains(@"<node value=""test_11"" />"));
         }
 
         [Test]
         public void resource_files_supports_escaping()
         {
             var resFile = client.DownloadString(baseUri + "/MyAppParam/resources/Aservice/parametricResource.xml/Host1");
-            Assert.That(resFile, Is.StringContaining(
-@"this% should be escaped %"));
+            Assert.That(resFile.Contains(@"this% should be escaped %"));
         }
 
         [Test]

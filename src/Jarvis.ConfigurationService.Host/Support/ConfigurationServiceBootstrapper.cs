@@ -6,10 +6,10 @@ namespace Jarvis.ConfigurationService.Host.Support
 {
     internal class ConfigurationServiceBootstrapper
     {
-        readonly Uri _uri;
+        readonly String _uri;
         IDisposable _app;
         private ILog _logger;
-        public ConfigurationServiceBootstrapper(Uri uri)
+        public ConfigurationServiceBootstrapper(String uri)
         {
             _uri = uri;
         }
@@ -19,15 +19,14 @@ namespace Jarvis.ConfigurationService.Host.Support
             try
             {
                 _logger = LogManager.GetLogger(this.GetType());
-                _logger.DebugFormat("Starting on {0}", _uri.AbsoluteUri);
-                _app = WebApp.Start<ConfigurationServiceApplication>(_uri.AbsoluteUri);
+                _logger.DebugFormat("Starting on {0}", _uri);
+                _app = WebApp.Start<ConfigurationServiceApplication>(_uri);
             }
             catch (Exception ex)
             {
                 _logger.Error("Exception: " + ex.Message, ex); 
                 throw;
             }
-         
         }
 
         public void Stop()

@@ -23,14 +23,14 @@ namespace Jarvis.ConfigurationService.Tests.Support
         TestWebClient client;
         String baseUri = "http://localhost:53642";
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetup()
         {
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
             client = new TestWebClient();
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void FixtureTearDown()
         {
             _app.Dispose();

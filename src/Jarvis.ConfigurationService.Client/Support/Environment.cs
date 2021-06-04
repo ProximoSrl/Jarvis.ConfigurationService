@@ -142,6 +142,7 @@ namespace Jarvis.ConfigurationService.Client.Support
             {
                 return null;
             }
+#if NET461_OR_GREATER
             if (encrypted)
             {
                 var encryptedContent = File.ReadAllBytes(fileName);
@@ -152,6 +153,9 @@ namespace Jarvis.ConfigurationService.Client.Support
             {
                 return File.ReadAllText(fileName);
             }
+#else
+            return File.ReadAllText(fileName);
+#endif
         }
 
         public ClientConfiguration GetApplicationConfig()
@@ -179,6 +183,7 @@ namespace Jarvis.ConfigurationService.Client.Support
         {
             try
             {
+#if NET461_OR_GREATER
                 if (encrypt)
                 {
                     var bc = Encoding.UTF8.GetBytes(content);
@@ -189,6 +194,9 @@ namespace Jarvis.ConfigurationService.Client.Support
                 {
                     File.WriteAllText(fileName, content);
                 }
+#else
+                File.WriteAllText(fileName, content);
+#endif
             }
             catch (IOException)
             {
