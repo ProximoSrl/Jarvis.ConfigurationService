@@ -20,13 +20,13 @@ namespace Jarvis.ConfigurationService.Tests.Support
         IDisposable _app;
         String baseUri = "http://localhost:53642";
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetup() 
         {
             _app = WebApp.Start<ConfigurationServiceApplication>(baseUri);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void FixtureTearDown()
         {
             _app.Dispose();

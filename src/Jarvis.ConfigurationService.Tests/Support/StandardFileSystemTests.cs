@@ -1,21 +1,16 @@
 ﻿using Jarvis.ConfigurationService.Host.Support;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Jarvis.ConfigurationService.Tests.Support
 {
     [TestFixture]
     public class StandardFileSystemTests
     {
-
         StandardFileSystem sut;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetup()
         {
             sut = new StandardFileSystem(null);
