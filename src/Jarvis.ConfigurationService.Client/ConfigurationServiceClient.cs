@@ -93,7 +93,12 @@ namespace Jarvis.ConfigurationService.Client
                 throw new FileNotFoundException("Configuration file not found", fileName);
             }
 
-            _instance = new ConfigurationServiceClient(configFile);
+            _instance = new ConfigurationServiceClient(new FileInfo(configFile));
+        }
+
+        public static void AppDomainInitializeWithContent(string fullContent)
+        {
+            _instance = new ConfigurationServiceClient(fullContent);
         }
 
         internal ConfigurationServiceClient
@@ -123,11 +128,16 @@ namespace Jarvis.ConfigurationService.Client
             _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
         }
 
-        public ConfigurationServiceClient(string configFile)
+        public ConfigurationServiceClient(FileInfo configFile)
         {
-            string configurationFullContent = File.ReadAllText(configFile);
-            _configFileLocation = configFile;
+            string configurationFullContent = File.ReadAllText(configFile.FullName);
+            _configFileLocation = configFile.FullName;
             _configurationObject = (JObject)JsonConvert.DeserializeObject(configurationFullContent);
+        }
+
+        public ConfigurationServiceClient(string configFileContent)
+        {
+            _configurationObject = (JObject)JsonConvert.DeserializeObject(configFileContent);
         }
 
         void LoadSettings(
