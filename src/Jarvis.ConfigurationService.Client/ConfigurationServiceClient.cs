@@ -85,6 +85,22 @@ namespace Jarvis.ConfigurationService.Client
                 saveLastConfigurationOnApplicationFileLocation);
         }
 
+        public static void AppDomainInitializer(string fileName)
+        {
+            string configFile = FindStaticConfigurationFile(fileName);
+            if (string.IsNullOrEmpty(configFile))
+            {
+                throw new FileNotFoundException("Configuration file not found", fileName);
+            }
+
+            _instance = new ConfigurationServiceClient(new FileInfo(configFile));
+        }
+
+        public static void AppDomainInitializeWithContent(string fullContent)
+        {
+            _instance = new ConfigurationServiceClient(fullContent);
+        }
+
         internal ConfigurationServiceClient
             (
                 Action<String, Boolean, Exception> loggerFunction,
@@ -110,6 +126,18 @@ namespace Jarvis.ConfigurationService.Client
                 defaultParameterFile);
             _configChangePollerTimer = new Timer(60 * 1000);
             _configChangePollerTimer.Elapsed += PollServerForChangeInConfiguration;
+        }
+
+        public ConfigurationServiceClient(FileInfo configFile)
+        {
+            string configurationFullContent = File.ReadAllText(configFile.FullName);
+            _configFileLocation = configFile.FullName;
+            _configurationObject = (JObject)JsonConvert.DeserializeObject(configurationFullContent);
+        }
+
+        public ConfigurationServiceClient(string configFileContent)
+        {
+            _configurationObject = (JObject)JsonConvert.DeserializeObject(configFileContent);
         }
 
         void LoadSettings(
@@ -538,6 +566,22 @@ namespace Jarvis.ConfigurationService.Client
             var result = _environment.ExecuteRequest(callUri, application, "PUT");
             var resultObject = (JObject)JsonConvert.DeserializeObject(result);
             return resultObject["success"].Value<Boolean>();
+        }
+
+        private static string FindStaticConfigurationFile(string configFileName)
+        {
+            var directoryToCheck = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory).Parent;
+            while (directoryToCheck != null)
+            {
+                string overrideFile = Path.Combine(directoryToCheck.FullName, configFileName);
+                if (File.Exists(overrideFile))
+                {
+                    return overrideFile;
+                }
+                directoryToCheck = directoryToCheck.Parent;
+            }
+
+            return null;
         }
 
         #endregion
